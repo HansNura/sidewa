@@ -13,6 +13,7 @@ use App\Http\Controllers\BackOffice\SystemConfigController;
 use App\Http\Controllers\BackOffice\PendudukController;
 use App\Http\Controllers\BackOffice\KartuKeluargaController;
 use App\Http\Controllers\BackOffice\WilayahController;
+use App\Http\Controllers\BackOffice\KesehatanController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -97,6 +98,13 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 
     // ── Wilayah Administratif ─────────────────────
     Route::resource('wilayah', WilayahController::class)->except(['create', 'edit']);
+
+    // ── Kesehatan & Stunting ──────────────────────
+    Route::get('kesehatan', [KesehatanController::class, 'index'])->name('kesehatan.index');
+    Route::post('kesehatan', [KesehatanController::class, 'store'])->name('kesehatan.store');
+    Route::get('kesehatan/search-balita', [KesehatanController::class, 'searchBalita'])->name('kesehatan.search-balita');
+    Route::get('kesehatan/{penduduk}', [KesehatanController::class, 'show'])->name('kesehatan.show');
+    Route::delete('kesehatan/pengukuran/{pengukuran}', [KesehatanController::class, 'destroy'])->name('kesehatan.destroy');
 });
 
 // Operator Desa

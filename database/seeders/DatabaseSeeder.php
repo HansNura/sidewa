@@ -327,5 +327,8 @@ class DatabaseSeeder extends Seeder
 
         // ─── Wilayah Administratif (Dusun → RW → RT) ─────────────
         $this->call(WilayahSeeder::class);
+
+        // ─── Kesehatan & Stunting (Pengukuran + Intervensi) ──────
+        $this->call(KesehatanSeeder::class);
     }
 }

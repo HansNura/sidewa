@@ -22,7 +22,7 @@ return new class extends Migration
         // Link penduduk to kartu_keluarga via FK
         Schema::table('penduduk', function (Blueprint $table) {
             $table->foreignId('kartu_keluarga_id')->nullable()->after('no_kk')
-                  ->constrained('kartu_keluarga')->nullOnDelete();
+                ->constrained('kartu_keluarga')->nullOnDelete();
         });
     }
 
