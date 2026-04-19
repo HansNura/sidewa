@@ -30,6 +30,14 @@ class Apbdes extends Model
     }
 
     /**
+     * Relasi Histori Realisasi
+     */
+    public function realisasis()
+    {
+        return $this->hasMany(ApbdesRealisasi::class, 'apbdes_id');
+    }
+
+    /**
      * Helper formatting rupiah (contoh: Rp 1.500.000)
      */
     public function getFormatRupiahAttribute()
@@ -48,15 +56,32 @@ class Apbdes extends Model
         $belanja = (clone $baseQuery)->where('tipe_anggaran', 'BELANJA')->sum('pagu_anggaran');
         $pembiayaan = (clone $baseQuery)->where('tipe_anggaran', 'PEMBIAYAAN')->sum('pagu_anggaran');
         
-        // Asumsi Surplus/Defisit murni dari (Pendapatan - Belanja)
+        $pendapatan_realisasi = ApbdesRealisasi::whereHas('apbdes', function($q) use ($tahun) {
+            $q->where('tahun', $tahun)->where('is_published', true)->where('tipe_anggaran', 'PENDAPATAN');
+        })->sum('nominal');
+
+        $belanja_realisasi = ApbdesRealisasi::whereHas('apbdes', function($q) use ($tahun) {
+            $q->where('tahun', $tahun)->where('is_published', true)->where('tipe_anggaran', 'BELANJA');
+        })->sum('nominal');
+        
+        $pembiayaan_realisasi = ApbdesRealisasi::whereHas('apbdes', function($q) use ($tahun) {
+            $q->where('tahun', $tahun)->where('is_published', true)->where('tipe_anggaran', 'PEMBIAYAAN');
+        })->sum('nominal');
+
+        // Asumsi Surplus/Defisit murni dari (Pendapatan target - Belanja target)
         // Kadang di tata kelola (Pendapatan - Belanja + Pembiayaan Netto) tapi kita ambil basic.
         $surplus = $pendapatan - $belanja;
+        $surplus_realisasi = $pendapatan_realisasi - $belanja_realisasi;
 
         return [
             'pendapatan' => $pendapatan,
+            'pendapatan_realisasi' => $pendapatan_realisasi,
             'belanja' => $belanja,
+            'belanja_realisasi' => $belanja_realisasi,
             'pembiayaan' => $pembiayaan,
+            'pembiayaan_realisasi' => $pembiayaan_realisasi,
             'surplus' => $surplus,
+            'surplus_realisasi' => $surplus_realisasi,
             'item_count' => (clone $baseQuery)->count()
         ];
     }

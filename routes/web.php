@@ -24,6 +24,8 @@ use App\Http\Controllers\BackOffice\PresensiPegawaiController;
 use App\Http\Controllers\BackOffice\RekapKehadiranController;
 use App\Http\Controllers\BackOffice\LaporanBukuTamuController;
 use App\Http\Controllers\BackOffice\ApbdesController;
+use App\Http\Controllers\BackOffice\RealisasiAnggaranController;
+use App\Http\Controllers\BackOffice\LaporanKeuanganController;
 
 
 
@@ -189,6 +191,14 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::get('keuangan/apbdes', [ApbdesController::class, 'index'])->name('apbdes.index');
     Route::post('keuangan/apbdes', [ApbdesController::class, 'store'])->name('apbdes.store');
     Route::post('keuangan/apbdes/poster', [ApbdesController::class, 'storePoster'])->name('apbdes.store-poster');
+
+    // ── Realisasi Anggaran ───
+    Route::get('keuangan/realisasi', [RealisasiAnggaranController::class, 'index'])->name('realisasi.index');
+    Route::post('keuangan/realisasi', [RealisasiAnggaranController::class, 'store'])->name('realisasi.store');
+    Route::get('keuangan/realisasi/drawer/{apbdes_id}', [RealisasiAnggaranController::class, 'detailActivity'])->name('realisasi.detail');
+
+    // ── Laporan Keuangan ───
+    Route::get('keuangan/laporan', [LaporanKeuanganController::class, 'index'])->name('laporan.index');
 });
 
 // Operator Desa

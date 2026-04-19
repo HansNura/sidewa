@@ -62,8 +62,9 @@
             'label' => 'Keuangan Desa',
             'icon' => 'fa-solid fa-wallet',
             'items' => [
-                ['label' => 'Manajemen APBDes', 'route' => '#'],
-                ['label' => 'Realisasi Anggaran', 'route' => '#'],
+                ['label' => 'Manajemen APBDes', 'route' => 'admin.apbdes.index'],
+                ['label' => 'Realisasi Anggaran', 'route' => 'admin.realisasi.index'],
+                ['label' => 'Laporan Keuangan', 'route' => 'admin.laporan.index'],
             ],
         ],
         [
