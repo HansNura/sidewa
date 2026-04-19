@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Module;
 use App\Models\Role;
 use App\Models\RoleModulePermission;
+use App\Models\SystemConfig;
 use App\Models\User;
 use App\Models\VillageSetting;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -307,5 +308,15 @@ class DatabaseSeeder extends Seeder
             'nip_kades'     => '19700101 200012 1 001',
             'jabatan_kades' => 'Kepala Desa',
         ]);
+
+        // ─── System Configuration ──────────────────────────────────
+        foreach (SystemConfig::DEFAULTS as $key => $meta) {
+            SystemConfig::create([
+                'group' => $meta['group'],
+                'key'   => $key,
+                'value' => $meta['value'],
+                'type'  => $meta['type'],
+            ]);
+        }
     }
 }

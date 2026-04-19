@@ -9,6 +9,7 @@ use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\BackOffice\UserController;
 use App\Http\Controllers\BackOffice\RoleController;
 use App\Http\Controllers\BackOffice\VillageSettingController;
+use App\Http\Controllers\BackOffice\SystemConfigController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -77,6 +78,10 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     // ── Identitas Desa ─────────────────────────────────
     Route::get('village-settings', [VillageSettingController::class, 'edit'])->name('village-settings.edit');
     Route::put('village-settings', [VillageSettingController::class, 'update'])->name('village-settings.update');
+
+    // ── Konfigurasi Sistem ─────────────────────────────
+    Route::get('system-config', [SystemConfigController::class, 'edit'])->name('system-config.edit');
+    Route::put('system-config', [SystemConfigController::class, 'update'])->name('system-config.update');
 });
 
 // Operator Desa

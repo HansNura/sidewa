@@ -23,7 +23,7 @@
                 ['label' => 'Manajemen User', 'route' => 'admin.users.index'],
                 ['label' => 'Role & Hak Akses', 'route' => 'admin.roles.index'],
                 ['label' => 'Identitas Desa', 'route' => 'admin.village-settings.edit'],
-                ['label' => 'Konfigurasi Sistem', 'route' => '#'],
+                ['label' => 'Konfigurasi Sistem', 'route' => 'admin.system-config.edit'],
             ],
         ],
         [
