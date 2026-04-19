@@ -27,6 +27,7 @@ use App\Http\Controllers\BackOffice\ApbdesController;
 use App\Http\Controllers\BackOffice\RealisasiAnggaranController;
 use App\Http\Controllers\BackOffice\LaporanKeuanganController;
 use App\Http\Controllers\BackOffice\PembangunanController;
+use App\Http\Controllers\BackOffice\PerencanaanController;
 
 
 
@@ -206,6 +207,13 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::post('pembangunan/data', [PembangunanController::class, 'store'])->name('pembangunan.store');
     Route::get('pembangunan/data/drawer/{id}', [PembangunanController::class, 'detail'])->name('pembangunan.detail');
     Route::post('pembangunan/data/{id}/progress', [PembangunanController::class, 'updateProgress'])->name('pembangunan.update-progress');
+
+    // ── Perencanaan Pembangunan ──
+    Route::get('pembangunan/perencanaan', [PerencanaanController::class, 'index'])->name('perencanaan.index');
+    Route::post('pembangunan/perencanaan', [PerencanaanController::class, 'store'])->name('perencanaan.store');
+    Route::get('pembangunan/perencanaan/drawer/{id}', [PerencanaanController::class, 'detail'])->name('perencanaan.detail');
+    Route::post('pembangunan/perencanaan/{id}/sync', [PerencanaanController::class, 'konversiKeProyek'])->name('perencanaan.konversi');
+
 });
 
 // Operator Desa
