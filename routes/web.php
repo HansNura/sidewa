@@ -15,6 +15,7 @@ use App\Http\Controllers\BackOffice\KartuKeluargaController;
 use App\Http\Controllers\BackOffice\WilayahController;
 use App\Http\Controllers\BackOffice\KesehatanController;
 use App\Http\Controllers\BackOffice\BansosController;
+use App\Http\Controllers\BackOffice\PertanahanController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -114,6 +115,13 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::get('bansos/{banso}', [BansosController::class, 'show'])->name('bansos.show');
     Route::patch('bansos/{banso}/status', [BansosController::class, 'updateStatus'])->name('bansos.update-status');
     Route::delete('bansos/{banso}', [BansosController::class, 'destroy'])->name('bansos.destroy');
+
+    // ── Pertanahan Desa ───────────────────────
+    Route::get('pertanahan', [PertanahanController::class, 'index'])->name('pertanahan.index');
+    Route::post('pertanahan', [PertanahanController::class, 'store'])->name('pertanahan.store');
+    Route::get('pertanahan/search-penduduk', [PertanahanController::class, 'searchPenduduk'])->name('pertanahan.search-penduduk');
+    Route::get('pertanahan/{pertanahan}', [PertanahanController::class, 'show'])->name('pertanahan.show');
+    Route::delete('pertanahan/{pertanahan}', [PertanahanController::class, 'destroy'])->name('pertanahan.destroy');
 });
 
 // Operator Desa

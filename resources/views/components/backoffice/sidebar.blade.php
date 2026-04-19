@@ -35,7 +35,7 @@
                 ['label' => 'Wilayah Administratif', 'route' => 'admin.wilayah.index'],
                 ['label' => 'Kesehatan & Stunting', 'route' => 'admin.kesehatan.index'],
                 ['label' => 'Bantuan Sosial', 'route' => 'admin.bansos.index'],
-                ['label' => 'Pertanahan Desa', 'route' => '#'],
+                ['label' => 'Pertanahan Desa', 'route' => 'admin.pertanahan.index'],
             ],
         ],
         [
