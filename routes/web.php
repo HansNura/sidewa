@@ -18,6 +18,8 @@ use App\Http\Controllers\BackOffice\BansosController;
 use App\Http\Controllers\BackOffice\PertanahanController;
 use App\Http\Controllers\BackOffice\LayananSuratController;
 use App\Http\Controllers\BackOffice\TemplateSuratController;
+use App\Http\Controllers\BackOffice\ArsipSuratController;
+use App\Http\Controllers\BackOffice\VerifikasiSuratController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -148,6 +150,19 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::put('template-surat/{template}', [TemplateSuratController::class, 'update'])->name('template-surat.update');
     Route::patch('template-surat/{template}/toggle', [TemplateSuratController::class, 'toggleStatus'])->name('template-surat.toggle');
     Route::delete('template-surat/{template}', [TemplateSuratController::class, 'destroy'])->name('template-surat.destroy');
+
+    // ── Arsip Surat ────────────────────────
+    Route::get('arsip-surat', [ArsipSuratController::class, 'index'])->name('arsip-surat.index');
+    Route::get('arsip-surat/{surat}', [ArsipSuratController::class, 'show'])->name('arsip-surat.show');
+    Route::post('arsip-surat/bulk-destroy', [ArsipSuratController::class, 'bulkDestroy'])->name('arsip-surat.bulk-destroy');
+
+    // ── Verifikasi & TTE Surat ─────────────
+    Route::get('verifikasi-surat', [VerifikasiSuratController::class, 'index'])->name('verifikasi-surat.index');
+    Route::get('verifikasi-surat/{surat}', [VerifikasiSuratController::class, 'show'])->name('verifikasi-surat.show');
+    Route::post('verifikasi-surat/{surat}/approve', [VerifikasiSuratController::class, 'approve'])->name('verifikasi-surat.approve');
+    Route::post('verifikasi-surat/{surat}/reject', [VerifikasiSuratController::class, 'reject'])->name('verifikasi-surat.reject');
+    Route::post('verifikasi-surat/{surat}/revisi', [VerifikasiSuratController::class, 'revisi'])->name('verifikasi-surat.revisi');
+    Route::post('verifikasi-surat/{surat}/verify', [VerifikasiSuratController::class, 'verify'])->name('verifikasi-surat.verify');
 });
 
 // Operator Desa

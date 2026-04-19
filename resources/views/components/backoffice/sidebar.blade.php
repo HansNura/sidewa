@@ -44,9 +44,9 @@
             'items' => [
                 ['label' => 'Dashboard Layanan', 'route' => 'admin.layanan-surat.index'],
                 ['label' => 'Buat Surat Baru', 'route' => 'admin.layanan-surat.create'],
-                ['label' => 'Arsip Surat', 'route' => '#'],
+                ['label' => 'Arsip Surat', 'route' => 'admin.arsip-surat.index'],
                 ['label' => 'Template Surat', 'route' => 'admin.template-surat.index'],
-                ['label' => 'Verifikasi & TTE', 'route' => '#'],
+                ['label' => 'Verifikasi & TTE', 'route' => 'admin.verifikasi-surat.index'],
             ],
         ],
         [

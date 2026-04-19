@@ -133,6 +133,29 @@ class SuratPermohonan extends Model
         return $query->where('status', 'selesai');
     }
 
+    /**
+     * Only archived letters (selesai + ditolak).
+     */
+    public function scopeArsip(Builder $query): Builder
+    {
+        return $query->whereIn('status', ['selesai', 'ditolak']);
+    }
+
+    /**
+     * Search by ticket number or applicant name (for archive).
+     */
+    public function scopeSearchArsip(Builder $query, ?string $search): Builder
+    {
+        if (!$search) return $query;
+        return $query->where(fn (Builder $q) =>
+            $q->where('nomor_tiket', 'like', "%{$search}%")
+              ->orWhereHas('penduduk', fn (Builder $pq) =>
+                  $pq->where('nama', 'like', "%{$search}%")
+                     ->orWhere('nik', 'like', "%{$search}%")
+              )
+        );
+    }
+
     public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', 'draft');
