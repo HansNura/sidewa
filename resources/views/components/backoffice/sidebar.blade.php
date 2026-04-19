@@ -12,15 +12,15 @@
             'label' => 'Dashboard',
             'icon'  => 'fa-solid fa-chart-pie',
             'items' => [
-                ['label' => 'Dashboard Eksekutif', 'route' => 'backoffice.dashboard.eksekutif'],
-                ['label' => 'Dashboard Operasional', 'route' => 'backoffice.dashboard.operasional'],
+                ['label' => 'Dashboard Eksekutif', 'route' => 'admin.dashboard'],
+                ['label' => 'Dashboard Operasional', 'route' => 'operator.dashboard'],
             ],
         ],
         [
             'label' => 'Manajemen Sistem',
             'icon'  => 'fa-solid fa-server',
             'items' => [
-                ['label' => 'Manajemen User', 'route' => '#'],
+                ['label' => 'Manajemen User', 'route' => 'admin.users.index'],
                 ['label' => 'Role & Hak Akses', 'route' => '#'],
                 ['label' => 'Identitas Desa', 'route' => '#'],
                 ['label' => 'Konfigurasi Sistem', 'route' => '#'],

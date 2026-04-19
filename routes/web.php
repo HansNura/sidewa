@@ -6,6 +6,7 @@ use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProfileController;
 use App\Http\Controllers\Frontend\DataController;
 use App\Http\Controllers\Frontend\PageController;
+use App\Http\Controllers\BackOffice\UserController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -43,7 +44,9 @@ Route::get('/informasi/galeri', [PageController::class, 'galeri'])->name('inform
 
 // Generic dashboard redirect → routes user to their role-specific dashboard
 Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
-    $role = auth()->user()->role;
+    /** @var \App\Models\User $user */
+    $user = request()->user();
+    $role = $user->role;
 
     return match ($role) {
         'administrator' => redirect()->route('admin.dashboard'),
@@ -60,6 +63,11 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::get('/dashboard', fn () => view('pages.dashboard.index', [
         'pageTitle' => 'Dashboard Administrator',
     ]))->name('dashboard');
+
+    // ── Manajemen User ──────────────────────────────────────
+    Route::resource('users', UserController::class)->except(['create', 'edit']);
+    Route::post('users/bulk-action', [UserController::class, 'bulkAction'])->name('users.bulk-action');
+    Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 });
 
 // Operator Desa

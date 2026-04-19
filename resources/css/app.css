@@ -76,3 +76,43 @@ select:focus[data-flux-control] {
 @utility text-textdark {
     color: #1f2937;
 }
+
+/* ─── Custom Checkbox (used in back-office tables) ────────────── */
+@layer utilities {
+    .custom-checkbox {
+        appearance: none;
+        background-color: #fff;
+        margin: 0;
+        font: inherit;
+        color: currentColor;
+        width: 1.15em;
+        height: 1.15em;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.25em;
+        display: grid;
+        place-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .custom-checkbox::before {
+        content: "";
+        width: 0.65em;
+        height: 0.65em;
+        transform: scale(0);
+        transition: 120ms transform ease-in-out;
+        box-shadow: inset 1em 1em white;
+        transform-origin: center;
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    }
+
+    .custom-checkbox:checked {
+        background-color: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .custom-checkbox:checked::before {
+        transform: scale(1);
+    }
+}
+
