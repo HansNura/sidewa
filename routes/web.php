@@ -17,6 +17,7 @@ use App\Http\Controllers\BackOffice\KesehatanController;
 use App\Http\Controllers\BackOffice\BansosController;
 use App\Http\Controllers\BackOffice\PertanahanController;
 use App\Http\Controllers\BackOffice\LayananSuratController;
+use App\Http\Controllers\BackOffice\TemplateSuratController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -137,6 +138,16 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 
     Route::patch('layanan-surat/{surat}/status', [LayananSuratController::class, 'updateStatus'])->name('layanan-surat.update-status');
     Route::delete('layanan-surat/{surat}', [LayananSuratController::class, 'destroy'])->name('layanan-surat.destroy');
+
+    // ── Template Surat ──────────────────────
+    Route::get('template-surat', [TemplateSuratController::class, 'index'])->name('template-surat.index');
+    Route::get('template-surat/create', [TemplateSuratController::class, 'create'])->name('template-surat.create');
+    Route::post('template-surat', [TemplateSuratController::class, 'store'])->name('template-surat.store');
+    Route::get('template-surat/{template}', [TemplateSuratController::class, 'show'])->name('template-surat.show');
+    Route::get('template-surat/{template}/edit', [TemplateSuratController::class, 'edit'])->name('template-surat.edit');
+    Route::put('template-surat/{template}', [TemplateSuratController::class, 'update'])->name('template-surat.update');
+    Route::patch('template-surat/{template}/toggle', [TemplateSuratController::class, 'toggleStatus'])->name('template-surat.toggle');
+    Route::delete('template-surat/{template}', [TemplateSuratController::class, 'destroy'])->name('template-surat.destroy');
 });
 
 // Operator Desa
