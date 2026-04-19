@@ -79,9 +79,12 @@
             'label' => 'Konten Website',
             'icon' => 'fa-solid fa-globe',
             'items' => [
-                ['label' => 'Berita & Artikel', 'route' => '#'],
-                ['label' => 'Galeri & Publik', 'route' => '#'],
-                ['label' => 'Produk UMKM', 'route' => '#'],
+                ['label' => 'Berita & Artikel', 'route' => 'admin.artikel.index'],
+                ['label' => 'Halaman Publik', 'route' => 'admin.halaman.index'],
+                ['label' => 'Galeri & Publik', 'route' => 'admin.galeri.index'],
+                ['label' => 'Pengumuman & Agenda', 'route' => 'admin.informasi.index'],
+                ['label' => 'Produk Hukum (JDIH)', 'route' => 'admin.jdih.index'],
+                ['label' => 'Produk UMKM', 'route' => 'admin.umkm.index'],
             ],
         ],
         [

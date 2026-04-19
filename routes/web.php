@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProfileController;
 use App\Http\Controllers\Frontend\DataController;
-use App\Http\Controllers\Frontend\PageController;
+use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\BackOffice\UserController;
 use App\Http\Controllers\BackOffice\RoleController;
 use App\Http\Controllers\BackOffice\VillageSettingController;
@@ -28,6 +28,12 @@ use App\Http\Controllers\BackOffice\RealisasiAnggaranController;
 use App\Http\Controllers\BackOffice\LaporanKeuanganController;
 use App\Http\Controllers\BackOffice\PembangunanController;
 use App\Http\Controllers\BackOffice\PerencanaanController;
+use App\Http\Controllers\BackOffice\GaleriController;
+use App\Http\Controllers\BackOffice\ArtikelController;
+use App\Http\Controllers\BackOffice\PageController as BackOfficePageController;
+use App\Http\Controllers\BackOffice\InformasiController;
+use App\Http\Controllers\BackOffice\UmkmController;
+use App\Http\Controllers\BackOffice\JdihController;
 
 
 
@@ -47,19 +53,19 @@ Route::get('/data/jenis-kelamin', [DataController::class, 'jenisKelamin'])->name
 Route::get('/data/kelompok-umur', [DataController::class, 'kelompokUmur'])->name('data.kelompok-umur');
 
 // Halaman Informasi Umum (PageController)
-Route::get('/transparansi', [PageController::class, 'transparansi'])->name('transparansi');
-Route::get('/layanan', [PageController::class, 'layanan'])->name('layanan');
-Route::get('/layanan/pengaduan', [PageController::class, 'pengaduan'])->name('layanan.pengaduan');
+Route::get('/transparansi', [FrontendPageController::class, 'transparansi'])->name('transparansi');
+Route::get('/layanan', [FrontendPageController::class, 'layanan'])->name('layanan');
+Route::get('/layanan/pengaduan', [FrontendPageController::class, 'pengaduan'])->name('layanan.pengaduan');
 
 // Halaman Lapak Desa
-Route::get('/lapak', [PageController::class, 'lapak'])->name('lapak');
-Route::get('/lapak/{slug}', [PageController::class, 'lapakDetail'])->name('lapak.detail');
+Route::get('/lapak', [FrontendPageController::class, 'lapak'])->name('lapak');
+Route::get('/lapak/{slug}', [FrontendPageController::class, 'lapakDetail'])->name('lapak.detail');
 
-Route::get('/informasi/berita-artikel', [PageController::class, 'beritaArtikel'])->name('informasi.berita-artikel');
-Route::get('/informasi/pengumuman-agenda', [PageController::class, 'pengumumanAgenda'])->name('informasi.pengumuman');
-Route::get('/informasi/produk-hukum', [PageController::class, 'produkHukum'])->name('informasi.hukum');
-Route::get('/informasi/informasi-publik', [PageController::class, 'informasiPublik'])->name('informasi.publik');
-Route::get('/informasi/galeri', [PageController::class, 'galeri'])->name('informasi.galeri');
+Route::get('/informasi/berita-artikel', [FrontendPageController::class, 'beritaArtikel'])->name('informasi.berita-artikel');
+Route::get('/informasi/pengumuman-agenda', [FrontendPageController::class, 'pengumumanAgenda'])->name('informasi.pengumuman');
+Route::get('/informasi/produk-hukum', [FrontendPageController::class, 'produkHukum'])->name('informasi.hukum');
+Route::get('/informasi/informasi-publik', [FrontendPageController::class, 'informasiPublik'])->name('informasi.publik');
+Route::get('/informasi/galeri', [FrontendPageController::class, 'galeri'])->name('informasi.galeri');
 
 // ──────────────────────────────────────────────────────────
 // AUTHENTICATED ROUTES
@@ -213,6 +219,49 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::post('pembangunan/perencanaan', [PerencanaanController::class, 'store'])->name('perencanaan.store');
     Route::get('pembangunan/perencanaan/drawer/{id}', [PerencanaanController::class, 'detail'])->name('perencanaan.detail');
     Route::post('pembangunan/perencanaan/{id}/sync', [PerencanaanController::class, 'konversiKeProyek'])->name('perencanaan.konversi');
+
+    // ── Konten Publikasi / Galeri & Artikel ──
+    Route::get('konten/galeri', [GaleriController::class, 'index'])->name('galeri.index');
+    Route::post('konten/galeri/album', [GaleriController::class, 'storeAlbum'])->name('galeri.album.store');
+    Route::delete('konten/galeri/album/{id}', [GaleriController::class, 'destroyAlbum'])->name('galeri.album.destroy');
+    Route::post('konten/galeri/media', [GaleriController::class, 'storeMedia'])->name('galeri.media.store');
+    Route::get('konten/galeri/media/drawer/{id}', [GaleriController::class, 'detailMedia'])->name('galeri.media.detail');
+    Route::delete('konten/galeri/media/{id}', [GaleriController::class, 'destroyMedia'])->name('galeri.media.destroy');
+
+    Route::get('konten/berita', [ArtikelController::class, 'index'])->name('artikel.index');
+    Route::post('konten/berita/kategori', [ArtikelController::class, 'storeCategory'])->name('artikel.kategori.store');
+    Route::post('konten/berita', [ArtikelController::class, 'store'])->name('artikel.store');
+    Route::post('konten/berita/bulk', [ArtikelController::class, 'bulkAction'])->name('artikel.bulk');
+    Route::get('konten/berita/api/{id}', [ArtikelController::class, 'apiDetail'])->name('artikel.api.detail');
+
+    Route::get('konten/halaman', [BackOfficePageController::class, 'index'])->name('halaman.index');
+    Route::post('konten/halaman', [BackOfficePageController::class, 'store'])->name('halaman.store');
+    Route::post('konten/halaman/bulk', [BackOfficePageController::class, 'bulkAction'])->name('halaman.bulk');
+    Route::get('konten/halaman/move/{id}/{direction}', [BackOfficePageController::class, 'moveOrder'])->name('halaman.move');
+    Route::get('konten/halaman/api/{id}', [BackOfficePageController::class, 'apiDetail'])->name('halaman.api.detail');
+
+    Route::get('konten/informasi', [InformasiController::class, 'index'])->name('informasi.index');
+    Route::post('konten/informasi', [InformasiController::class, 'store'])->name('informasi.store');
+    Route::post('konten/informasi/bulk', [InformasiController::class, 'bulkAction'])->name('informasi.bulk');
+    Route::get('konten/informasi/api/{id}', [InformasiController::class, 'apiDetail'])->name('informasi.api.detail');
+
+    // ── Manajemen Produk UMKM ──
+    Route::get('konten/umkm', [UmkmController::class, 'index'])->name('umkm.index');
+    Route::post('konten/umkm/produk', [UmkmController::class, 'storeProduct'])->name('umkm.storeProduct');
+    Route::post('konten/umkm/produk/destroy', [UmkmController::class, 'destroyProduct'])->name('umkm.destroyProduct');
+    Route::get('konten/umkm/api/{id}', [UmkmController::class, 'apiDetailProduct'])->name('umkm.api.detail');
+    Route::post('konten/umkm/kategori', [UmkmController::class, 'storeCategory'])->name('umkm.storeCategory');
+    Route::post('konten/umkm/kategori/{id}/destroy', [UmkmController::class, 'destroyCategory'])->name('umkm.destroyCategory');
+
+    // ── Manajemen JDIH (Produk Hukum) ──
+    Route::get('konten/jdih', [JdihController::class, 'index'])->name('jdih.index');
+    Route::post('konten/jdih/dokumen', [JdihController::class, 'storeDocument'])->name('jdih.storeDocument');
+    Route::post('konten/jdih/dokumen/destroy', [JdihController::class, 'destroyDocument'])->name('jdih.destroyDocument');
+    Route::get('konten/jdih/api/{id}', [JdihController::class, 'apiDetailDocument'])->name('jdih.api.detail');
+    Route::post('konten/jdih/kategori', [JdihController::class, 'storeCategory'])->name('jdih.storeCategory');
+    Route::post('konten/jdih/kategori/{id}/destroy', [JdihController::class, 'destroyCategory'])->name('jdih.destroyCategory');
+
+
 
 });
 
