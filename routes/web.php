@@ -21,6 +21,10 @@ use App\Http\Controllers\BackOffice\TemplateSuratController;
 use App\Http\Controllers\BackOffice\ArsipSuratController;
 use App\Http\Controllers\BackOffice\VerifikasiSuratController;
 use App\Http\Controllers\BackOffice\PresensiPegawaiController;
+use App\Http\Controllers\BackOffice\RekapKehadiranController;
+use App\Http\Controllers\BackOffice\LaporanBukuTamuController;
+use App\Http\Controllers\BackOffice\ApbdesController;
+
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -170,6 +174,21 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::get('presensi/monitoring', [PresensiPegawaiController::class, 'index'])->name('presensi.monitoring');
     Route::post('presensi/koreksi-manual', [PresensiPegawaiController::class, 'storeManual'])->name('presensi.store-manual');
     Route::get('presensi/{user}/info', [PresensiPegawaiController::class, 'showInfo'])->name('presensi.show-info');
+    
+    // ── Rekap Kehadiran Pegawei ────────────
+    Route::get('presensi/rekap', [RekapKehadiranController::class, 'index'])->name('presensi.rekap');
+    Route::get('presensi/rekap/{user}/info', [RekapKehadiranController::class, 'showEmployee'])->name('presensi.rekap.show-info');
+    Route::post('presensi/rekap/export', [RekapKehadiranController::class, 'export'])->name('presensi.rekap.export');
+
+    // ── Laporan Buku Tamu ────────────
+    Route::get('buku-tamu', [LaporanBukuTamuController::class, 'index'])->name('buku-tamu.index');
+    Route::get('buku-tamu/{bukuTamu}/detail', [LaporanBukuTamuController::class, 'show'])->name('buku-tamu.show');
+    Route::post('buku-tamu/export', [LaporanBukuTamuController::class, 'export'])->name('buku-tamu.export');
+
+    // ── Manajemen Keuangan (APBDes) ───
+    Route::get('keuangan/apbdes', [ApbdesController::class, 'index'])->name('apbdes.index');
+    Route::post('keuangan/apbdes', [ApbdesController::class, 'store'])->name('apbdes.store');
+    Route::post('keuangan/apbdes/poster', [ApbdesController::class, 'storePoster'])->name('apbdes.store-poster');
 });
 
 // Operator Desa

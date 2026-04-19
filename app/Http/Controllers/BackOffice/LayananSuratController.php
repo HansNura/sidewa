@@ -34,10 +34,15 @@ class LayananSuratController extends Controller
         $overdueCount    = SuratPermohonan::overdue()->count();
 
         // Average processing time (for completed letters)
+        $isSqlite = \DB::getDriverName() === 'sqlite';
+        $avgExpression = $isSqlite
+            ? 'AVG((julianday(tanggal_selesai) - julianday(tanggal_pengajuan)) * 24)'
+            : 'AVG(TIMESTAMPDIFF(HOUR, tanggal_pengajuan, tanggal_selesai))';
+
         $avgJam = SuratPermohonan::filterPeriode($periode)
             ->selesai()
             ->whereNotNull('tanggal_selesai')
-            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, tanggal_pengajuan, tanggal_selesai)) as avg_hours')
+            ->selectRaw($avgExpression . ' as avg_hours')
             ->value('avg_hours');
         $avgJam = $avgJam ? round($avgJam, 1) : 0;
 
@@ -50,11 +55,13 @@ class LayananSuratController extends Controller
         ];
 
         // ─── Active Queue ────────────────────────────────────────
+        $priorityOrder = "CASE prioritas WHEN 'tinggi' THEN 1 WHEN 'normal' THEN 2 ELSE 3 END";
+        
         $antrian = SuratPermohonan::with('penduduk')
             ->aktif()
             ->filterJenis($jenis)
             ->filterStatus($status)
-            ->orderByRaw("FIELD(prioritas, 'tinggi', 'normal')")
+            ->orderByRaw($priorityOrder)
             ->orderBy('tanggal_pengajuan', 'asc')
             ->limit(10)
             ->get();

@@ -80,7 +80,8 @@ class KesehatanController extends Controller
         ];
 
         // Intervention programs
-        $intervensi = IntervensiStunting::orderByRaw("FIELD(status, 'berjalan', 'terjadwal', 'selesai')")
+        $statusOrder = "CASE status WHEN 'berjalan' THEN 1 WHEN 'terjadwal' THEN 2 WHEN 'selesai' THEN 3 ELSE 4 END";
+        $intervensi = IntervensiStunting::orderByRaw($statusOrder)
             ->limit(5)
             ->get();
 

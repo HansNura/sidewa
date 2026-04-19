@@ -30,6 +30,7 @@ class TemplateSuratController extends Controller
         return view('pages.backoffice.template-surat.index', [
             'pageTitle'  => 'Template Surat',
             'templates'  => $templates,
+            'village'    => VillageSetting::instance(),
             'kategoris'  => TemplateSurat::KATEGORI_LABELS,
             'search'     => $request->input('search'),
             'selKategori' => $request->input('kategori'),

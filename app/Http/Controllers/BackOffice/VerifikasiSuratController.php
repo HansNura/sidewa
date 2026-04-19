@@ -35,7 +35,8 @@ class VerifikasiSuratController extends Controller
         }
 
         // Prioritize menunggu_tte first, then by date
-        $queue = $query->orderByRaw("FIELD(status, 'menunggu_tte', 'verifikasi')")
+        $statusOrder = "CASE status WHEN 'menunggu_tte' THEN 1 WHEN 'verifikasi' THEN 2 ELSE 3 END";
+        $queue = $query->orderByRaw($statusOrder)
             ->orderByDesc('tanggal_pengajuan')
             ->paginate(20)
             ->withQueryString();

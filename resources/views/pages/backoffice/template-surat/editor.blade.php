@@ -11,12 +11,15 @@
         saveMessage: '',
 
         // ── Form State ──────────────────────────────────
+        @php
+            $defaultBody = 'Yang bertanda tangan di bawah ini ' . ($village->jabatan_kades ?? 'Kepala Desa') . ' ' . ($village->nama_desa ?? '') . ', Kecamatan ' . ($village->kecamatan ?? '') . ', Kabupaten ' . ($village->kabupaten ?? '') . ', menerangkan dengan sebenarnya bahwa:\n\nNama: {{nama_pemohon}}\nNIK: {{nik_pemohon}}\n\nAdalah benar warga kami yang berdomisili di alamat tersebut.';
+        @endphp
         formData: {
             nama: '{{ $template->nama ?? '' }}',
             kode: '{{ $template->kode ?? '' }}',
             kategori: '{{ $template->kategori ?? 'keterangan' }}',
             deskripsi: '{{ $template->deskripsi ?? '' }}',
-            body_template: {{ Js::from($template->body_template ?? 'Yang bertanda tangan di bawah ini ' . ($village->jabatan_kades ?? 'Kepala Desa') . ' ' . ($village->nama_desa ?? '') . ', Kecamatan ' . ($village->kecamatan ?? '') . ', Kabupaten ' . ($village->kabupaten ?? '') . ', menerangkan dengan sebenarnya bahwa:\n\nNama: {{nama_pemohon}}\nNIK: {{nik_pemohon}}\n\nAdalah benar warga kami yang berdomisili di alamat tersebut.') }},
+            body_template: {{ Js::from($template->body_template ?? $defaultBody) }},
             is_active: {{ ($template->is_active ?? true) ? 'true' : 'false' }},
             layout_settings: {{ Js::from($template ? $template->resolvedLayout() : ['show_kop' => true, 'show_ttd' => true, 'show_qr' => true, 'margin_top' => 3, 'margin_bottom' => 3, 'margin_left' => 3, 'margin_right' => 2.5]) }},
         },
@@ -51,7 +54,7 @@
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                .replace(/\{\{(\w+)\}\}/g, '<span class=\'bg-yellow-200 px-1 border border-yellow-400 border-dashed rounded font-mono text-xs\'>{{$1}}</span>')
+                .replace(/\{\{(\w+)\}\}/g, '<span class=\'bg-yellow-200 px-1 border border-yellow-400 border-dashed rounded font-mono text-xs\'>@{{$1}}</span>')
                 .replace(/\n/g, '<br>');
         },
 
@@ -309,7 +312,7 @@
                     style="min-height: 600px;"
                     placeholder="Ketik isi template surat di sini...
 
-Gunakan {{nama_pemohon}}, {{nik_pemohon}}, dll. untuk placeholder yang akan diisi otomatis."></textarea>
+Gunakan @{{nama_pemohon}}, @{{nik_pemohon}}, dll. untuk placeholder yang akan diisi otomatis."></textarea>
             </div>
         </div>
 

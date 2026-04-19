@@ -54,7 +54,8 @@ class KartuKeluargaController extends Controller
     public function show(KartuKeluarga $kartuKeluarga): JsonResponse
     {
         $kartuKeluarga->load(['anggota' => function ($q) {
-            $q->orderByRaw("FIELD(status_hubungan, 'Kepala Keluarga', 'Istri', 'Anak', 'Famili Lain')");
+            $sortOrder = "CASE status_hubungan WHEN 'Kepala Keluarga' THEN 1 WHEN 'Istri' THEN 2 WHEN 'Anak' THEN 3 WHEN 'Famili Lain' THEN 4 ELSE 5 END";
+            $q->orderByRaw($sortOrder);
         }]);
 
         return response()->json([

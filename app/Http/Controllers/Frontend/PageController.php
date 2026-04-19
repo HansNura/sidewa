@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Models\Apbdes;
+use App\Models\ApbdesPoster;
+
 class PageController extends Controller
 {
     /**
@@ -15,68 +18,64 @@ class PageController extends Controller
         $pageTitle = "Transparansi APBDes";
         $pageSubtitle = "Wujud nyata keterbukaan informasi publik. Kami menyajikan rincian Anggaran Pendapatan dan Belanja Desa secara jujur, akuntabel, dan transparan.";
 
-        // Data APBDes (Idealnya dari database, dibuat array statis sesuai HTML untuk sekarang)
+        // Mengambil Tahun Anggaran Berjalan (Tahun ini atau data terbaru yang memiliki flag is_published)
+        $tahunBerjalan = Apbdes::where('is_published', true)->max('tahun') ?? date('Y');
+
+        // Mendapatkan Config Poster & Dokumen
+        $posterCurrent = ApbdesPoster::where('tahun', $tahunBerjalan)->first();
+
+        // Data APBDes Ringkasan
+        $summary = Apbdes::getSummary($tahunBerjalan);
+        
         $apbdesRingkasan = [
-            'pendapatan_target' => 1850500000,
-            'pendapatan_realisasi' => 1850500000,
-            'belanja_target' => 1790000000,
-            'belanja_realisasi' => 1718400000,
-            'pembiayaan_netto' => 15000000, // Penerimaan - Pengeluaran
-            'silpa' => 75500000
+            'pendapatan_target' => $summary['pendapatan'],
+            'pendapatan_realisasi' => $summary['pendapatan'], // Karena ini APBDes awal, asumsikan target = realisasi mockup
+            'belanja_target' => $summary['belanja'],
+            'belanja_realisasi' => $summary['belanja'], // Sama seperti atas
+            'pembiayaan_netto' => $summary['pembiayaan'],
+            'silpa' => $summary['surplus']
         ];
 
-        $rincianPendapatan = [
-            ['uraian' => 'Pendapatan Asli Desa (PADes)', 'anggaran' => 150000000],
-            ['uraian' => 'Dana Desa (DD)', 'anggaran' => 950500000],
-            ['uraian' => 'Alokasi Dana Desa (ADD)', 'anggaran' => 450000000],
-            ['uraian' => 'Bagi Hasil Pajak & Retribusi', 'anggaran' => 85000000],
-            ['uraian' => 'Bantuan Keuangan Provinsi', 'anggaran' => 215000000],
-        ];
+        // Fetch rincian item berdasarkan tipe
+        $baseQuery = Apbdes::where('tahun', $tahunBerjalan)->where('is_published', true);
 
-        $rincianBelanja = [
-            ['bidang' => 'Penyelenggaraan Pemerintahan', 'anggaran' => 580000000],
-            ['bidang' => 'Pelaksanaan Pembangunan', 'anggaran' => 850000000],
-            ['bidang' => 'Pembinaan Kemasyarakatan', 'anggaran' => 120000000],
-            ['bidang' => 'Pemberdayaan Masyarakat', 'anggaran' => 165000000],
-            ['bidang' => 'Penanggulangan Bencana/Darurat', 'anggaran' => 75000000],
-        ];
+        // Ambil array format untuk Blade public
+        $rincianPendapatan = (clone $baseQuery)->where('tipe_anggaran', 'PENDAPATAN')
+            ->get()->map(fn($item) => ['uraian' => $item->nama_kegiatan, 'anggaran' => $item->pagu_anggaran])->toArray();
+        
+        $rincianBelanja = (clone $baseQuery)->where('tipe_anggaran', 'BELANJA')
+            ->whereRaw('LENGTH(kode_rekening) <= 3') // Misal: 1, 2, 3 (Bidang) atau max length agar tidak terlalu rincian detail turun ke front-page
+            ->get()->map(fn($item) => ['bidang' => $item->nama_kegiatan, 'anggaran' => $item->pagu_anggaran])->toArray();
 
+        // Pembiayaan
+        $pembiayaanItems = (clone $baseQuery)->where('tipe_anggaran', 'PEMBIAYAAN')->get();
         $rincianPembiayaan = [
-            'penerimaan' => [
-                ['uraian' => 'SiLPA Tahun Sebelumnya', 'anggaran' => 65000000]
-            ],
-            'pengeluaran' => [
-                ['uraian' => 'Penyertaan Modal Desa (BUMDes)', 'anggaran' => 50000000]
-            ]
+            'penerimaan' => $pembiayaanItems->map(fn($item) => ['uraian' => $item->nama_kegiatan, 'anggaran' => $item->pagu_anggaran])->toArray(),
+            'pengeluaran' => []
         ];
 
-        $arsipTransparansi = [
-            [
-                'tahun' => 2023,
-                'status' => 'Selesai',
-                'pendapatan' => 1750000000,
-                'belanja' => 1685000000,
-                'silpa' => 65000000
-            ],
-            [
-                'tahun' => 2022,
-                'status' => 'Selesai',
-                'pendapatan' => 1620000000,
-                'belanja' => 1590000000,
-                'silpa' => 30000000
-            ],
-            [
-                'tahun' => 2021,
-                'status' => 'Selesai',
-                'pendapatan' => 1550000000,
-                'belanja' => 1545000000,
-                'silpa' => 5000000
-            ]
-        ];
+        // Arsip & Riwayat (Loop over past years to build list of SiLPA)
+        $pastYears = Apbdes::select('tahun')->distinct()->where('tahun', '<', $tahunBerjalan)->orderBy('tahun', 'desc')->get();
+        $arsipTransparansi = [];
+        foreach ($pastYears as $pyear) {
+            $sumPast = Apbdes::getSummary($pyear->tahun);
+            // Ignore if empty
+            if($sumPast['item_count'] > 0) {
+                $arsipTransparansi[] = [
+                    'tahun' => $pyear->tahun,
+                    'status' => 'Selesai',
+                    'pendapatan' => $sumPast['pendapatan'],
+                    'belanja' => $sumPast['belanja'],
+                    'silpa' => $sumPast['surplus']
+                ];
+            }
+        }
 
         return view('pages.frontend.transparansi', compact(
             'pageTitle',
             'pageSubtitle',
+            'tahunBerjalan',
+            'posterCurrent',
             'apbdesRingkasan',
             'rincianPendapatan',
             'rincianBelanja',

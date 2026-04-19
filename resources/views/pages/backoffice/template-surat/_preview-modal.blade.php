@@ -48,7 +48,7 @@
 
                 {{-- Body with highlighted placeholders --}}
                 <div class="text-justify leading-relaxed whitespace-pre-wrap"
-                     x-html="(previewData?.body_template || '').replace(/\{\{(\w+)\}\}/g, '<span class=\'bg-yellow-100 px-1 border border-yellow-300 border-dashed rounded text-xs font-mono\'>{{$1}}</span>')">
+                     x-html="(previewData?.body_template || '').replace(/\{\{(\w+)\}\}/g, '<span class=\'bg-yellow-100 px-1 border border-yellow-300 border-dashed rounded text-xs font-mono\'>@{{$1}}</span>')">
                 </div>
 
                 {{-- Info Bar --}}
