@@ -26,6 +26,7 @@ use App\Http\Controllers\BackOffice\LaporanBukuTamuController;
 use App\Http\Controllers\BackOffice\ApbdesController;
 use App\Http\Controllers\BackOffice\RealisasiAnggaranController;
 use App\Http\Controllers\BackOffice\LaporanKeuanganController;
+use App\Http\Controllers\BackOffice\PembangunanController;
 
 
 
@@ -199,6 +200,12 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 
     // ── Laporan Keuangan ───
     Route::get('keuangan/laporan', [LaporanKeuanganController::class, 'index'])->name('laporan.index');
+
+    // ── Manajemen Pembangunan ──
+    Route::get('pembangunan/data', [PembangunanController::class, 'index'])->name('pembangunan.index');
+    Route::post('pembangunan/data', [PembangunanController::class, 'store'])->name('pembangunan.store');
+    Route::get('pembangunan/data/drawer/{id}', [PembangunanController::class, 'detail'])->name('pembangunan.detail');
+    Route::post('pembangunan/data/{id}/progress', [PembangunanController::class, 'updateProgress'])->name('pembangunan.update-progress');
 });
 
 // Operator Desa

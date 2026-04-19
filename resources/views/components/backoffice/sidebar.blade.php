@@ -71,7 +71,7 @@
             'label' => 'Pembangunan Desa',
             'icon' => 'fa-solid fa-person-digging',
             'items' => [
-                ['label' => 'Data Pembangunan', 'route' => '#'],
+                ['label' => 'Data Pembangunan', 'route' => 'admin.pembangunan.index'],
                 ['label' => 'Data Perencanaan', 'route' => '#'],
             ],
         ],

@@ -38,6 +38,14 @@ class Apbdes extends Model
     }
 
     /**
+     * Relasi Data Pembangunan Fisik
+     */
+    public function pembangunan()
+    {
+        return $this->hasOne(Pembangunan::class, 'apbdes_id');
+    }
+
+    /**
      * Helper formatting rupiah (contoh: Rp 1.500.000)
      */
     public function getFormatRupiahAttribute()
