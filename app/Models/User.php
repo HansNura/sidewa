@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nik', 'is_active', 'last_login_at', 'last_login_ip'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nik', 'nip', 'jabatan', 'is_active', 'last_login_at', 'last_login_ip'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -101,6 +101,11 @@ class User extends Authenticatable
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class)->latest();
+    }
+
+    public function presensi(): HasMany
+    {
+        return $this->hasMany(PresensiPegawai::class, 'user_id')->orderBy('tanggal', 'desc');
     }
 
     // ─── Role Helpers ───────────────────────────────────────────────

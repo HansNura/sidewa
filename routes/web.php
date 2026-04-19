@@ -20,6 +20,8 @@ use App\Http\Controllers\BackOffice\LayananSuratController;
 use App\Http\Controllers\BackOffice\TemplateSuratController;
 use App\Http\Controllers\BackOffice\ArsipSuratController;
 use App\Http\Controllers\BackOffice\VerifikasiSuratController;
+use App\Http\Controllers\BackOffice\PresensiPegawaiController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -163,6 +165,11 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::post('verifikasi-surat/{surat}/reject', [VerifikasiSuratController::class, 'reject'])->name('verifikasi-surat.reject');
     Route::post('verifikasi-surat/{surat}/revisi', [VerifikasiSuratController::class, 'revisi'])->name('verifikasi-surat.revisi');
     Route::post('verifikasi-surat/{surat}/verify', [VerifikasiSuratController::class, 'verify'])->name('verifikasi-surat.verify');
+
+    // ── Presensi Pegawai ───────────────────
+    Route::get('presensi/monitoring', [PresensiPegawaiController::class, 'index'])->name('presensi.monitoring');
+    Route::post('presensi/koreksi-manual', [PresensiPegawaiController::class, 'storeManual'])->name('presensi.store-manual');
+    Route::get('presensi/{user}/info', [PresensiPegawaiController::class, 'showInfo'])->name('presensi.show-info');
 });
 
 // Operator Desa

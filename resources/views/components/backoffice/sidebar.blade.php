@@ -58,6 +58,15 @@
             ],
         ],
         [
+            'label' => 'Presensi & Tamu',
+            'icon'  => 'fa-solid fa-fingerprint',
+            'items' => [
+                ['label' => 'Monitoring Presensi', 'route' => 'admin.presensi.monitoring'],
+                ['label' => 'Validasi Kiosk', 'route' => '#'],
+                ['label' => 'Buku Tamu', 'route' => '#'],
+            ],
+        ],
+        [
             'label' => 'Keuangan Desa',
             'icon'  => 'fa-solid fa-wallet',
             'items' => [
