@@ -336,5 +336,8 @@ class DatabaseSeeder extends Seeder
 
         // ─── Pertanahan Desa (Lahan + GeoJSON) ───────────────────
         $this->call(PertanahanSeeder::class);
+
+        // ─── Layanan Surat (Permohonan + Status) ─────────────────
+        $this->call(LayananSuratSeeder::class);
     }
 }

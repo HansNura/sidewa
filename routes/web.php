@@ -16,6 +16,7 @@ use App\Http\Controllers\BackOffice\WilayahController;
 use App\Http\Controllers\BackOffice\KesehatanController;
 use App\Http\Controllers\BackOffice\BansosController;
 use App\Http\Controllers\BackOffice\PertanahanController;
+use App\Http\Controllers\BackOffice\LayananSuratController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -122,6 +123,20 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::get('pertanahan/search-penduduk', [PertanahanController::class, 'searchPenduduk'])->name('pertanahan.search-penduduk');
     Route::get('pertanahan/{pertanahan}', [PertanahanController::class, 'show'])->name('pertanahan.show');
     Route::delete('pertanahan/{pertanahan}', [PertanahanController::class, 'destroy'])->name('pertanahan.destroy');
+
+    // ── Layanan Surat ────────────────────────
+    Route::get('layanan-surat', [LayananSuratController::class, 'index'])->name('layanan-surat.index');
+    Route::post('layanan-surat', [LayananSuratController::class, 'store'])->name('layanan-surat.store');
+    Route::get('layanan-surat/search-penduduk', [LayananSuratController::class, 'searchPenduduk'])->name('layanan-surat.search-penduduk');
+
+    // Wizard Buat Surat Baru (sebelum route parametric agar tidak konflik)
+    Route::get('layanan-surat/buat', [LayananSuratController::class, 'create'])->name('layanan-surat.create');
+    Route::post('layanan-surat/buat', [LayananSuratController::class, 'storeWizard'])->name('layanan-surat.store-wizard');
+    Route::get('layanan-surat/drafts', [LayananSuratController::class, 'drafts'])->name('layanan-surat.drafts');
+    Route::get('layanan-surat/{surat}/edit-wizard', [LayananSuratController::class, 'editWizard'])->name('layanan-surat.edit-wizard');
+
+    Route::patch('layanan-surat/{surat}/status', [LayananSuratController::class, 'updateStatus'])->name('layanan-surat.update-status');
+    Route::delete('layanan-surat/{surat}', [LayananSuratController::class, 'destroy'])->name('layanan-surat.destroy');
 });
 
 // Operator Desa

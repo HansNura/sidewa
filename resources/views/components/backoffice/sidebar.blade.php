@@ -42,8 +42,8 @@
             'label' => 'Layanan Administrasi',
             'icon'  => 'fa-solid fa-envelope-open-text',
             'items' => [
-                ['label' => 'Dashboard Layanan', 'route' => '#'],
-                ['label' => 'Buat Surat Baru', 'route' => '#'],
+                ['label' => 'Dashboard Layanan', 'route' => 'admin.layanan-surat.index'],
+                ['label' => 'Buat Surat Baru', 'route' => 'admin.layanan-surat.create'],
                 ['label' => 'Arsip Surat', 'route' => '#'],
                 ['label' => 'Verifikasi & TTE', 'route' => '#'],
             ],
