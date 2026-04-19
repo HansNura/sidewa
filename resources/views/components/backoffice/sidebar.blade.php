@@ -31,8 +31,8 @@
             'icon'  => 'fa-solid fa-users',
             'items' => [
                 ['label' => 'Data Penduduk', 'route' => 'admin.penduduk.index'],
-                ['label' => 'Data Keluarga (KK)', 'route' => '#'],
-                ['label' => 'Wilayah Administratif', 'route' => '#'],
+                ['label' => 'Data Keluarga (KK)', 'route' => 'admin.kartu-keluarga.index'],
+                ['label' => 'Wilayah Administratif', 'route' => 'admin.wilayah.index'],
                 ['label' => 'Kesehatan & Stunting', 'route' => '#'],
                 ['label' => 'Bantuan Sosial', 'route' => '#'],
                 ['label' => 'Pertanahan Desa', 'route' => '#'],

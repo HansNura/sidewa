@@ -11,6 +11,8 @@ use App\Http\Controllers\BackOffice\RoleController;
 use App\Http\Controllers\BackOffice\VillageSettingController;
 use App\Http\Controllers\BackOffice\SystemConfigController;
 use App\Http\Controllers\BackOffice\PendudukController;
+use App\Http\Controllers\BackOffice\KartuKeluargaController;
+use App\Http\Controllers\BackOffice\WilayahController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -86,6 +88,15 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 
     // ── Data Penduduk ─────────────────────────────────
     Route::resource('penduduk', PendudukController::class)->except(['create', 'edit']);
+
+    // ── Kartu Keluarga ───────────────────────────────
+    Route::resource('kartu-keluarga', KartuKeluargaController::class)->only(['index', 'show', 'store', 'destroy']);
+    Route::post('kartu-keluarga/{kartu_keluarga}/add-member', [KartuKeluargaController::class, 'addMember'])->name('kartu-keluarga.add-member');
+    Route::delete('kartu-keluarga/{kartu_keluarga}/remove-member/{penduduk}', [KartuKeluargaController::class, 'removeMember'])->name('kartu-keluarga.remove-member');
+    Route::get('kartu-keluarga-search-penduduk', [KartuKeluargaController::class, 'searchPenduduk'])->name('kartu-keluarga.search-penduduk');
+
+    // ── Wilayah Administratif ─────────────────────
+    Route::resource('wilayah', WilayahController::class)->except(['create', 'edit']);
 });
 
 // Operator Desa

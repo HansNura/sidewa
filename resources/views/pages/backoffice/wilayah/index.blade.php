@@ -1,0 +1,151 @@
+@extends('layouts.backoffice')
+
+@section('title', 'Wilayah Administratif - Panel Administrasi')
+
+@push('styles')
+<style>
+    .tree-line {
+        position: absolute; left: 11px; top: 24px; bottom: 0;
+        width: 2px; background-color: #e2e8f0; z-index: 0;
+    }
+    .tree-item-line {
+        position: absolute; left: -13px; top: 15px;
+        width: 12px; height: 2px; background-color: #e2e8f0;
+    }
+</style>
+@endpush
+
+@section('content')
+
+<div x-data="{
+        addModalOpen: {{ $errors->any() ? 'true' : 'false' }},
+        detailDrawerOpen: false,
+        detail: null,
+        formType: '{{ old('tipe', 'dusun') }}',
+
+        async openDetail(id) {
+            try {
+                const res = await fetch(`{{ url('admin/wilayah') }}/${id}`);
+                if (!res.ok) throw new Error('Failed');
+                this.detail = await res.json();
+                this.detailDrawerOpen = true;
+            } catch (e) {
+                console.error('Failed to load wilayah detail:', e);
+            }
+        }
+     }"
+     class="space-y-6">
+
+    {{-- Flash Messages --}}
+    @if (session('success'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="bg-green-50 border border-green-200 text-green-800 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i>
+            <div class="flex-1"><p class="text-sm font-semibold">{{ session('success') }}</p></div>
+            <button @click="show = false" class="text-green-400 hover:text-green-600 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+                <p class="text-sm font-bold">Terdapat kesalahan:</p>
+            </div>
+            <ul class="list-disc list-inside text-sm space-y-1 ml-6">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Page Header --}}
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Wilayah Administratif</h1>
+            <p class="text-sm text-gray-500 mt-1">Kelola hierarki batas wilayah desa (Dusun, RW, RT) beserta pemetaannya.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <button @click="addModalOpen = true"
+                class="bg-green-700 hover:bg-green-800 text-white shadow-md rounded-xl px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-plus"></i>
+                <span>Tambah Wilayah Baru</span>
+            </button>
+        </div>
+    </section>
+
+    {{-- Grid: Tree View & Map --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        @include('pages.backoffice.wilayah._tree')
+        @include('pages.backoffice.wilayah._map')
+    </div>
+
+    {{-- Data Table --}}
+    @include('pages.backoffice.wilayah._table')
+
+    {{-- Modals & Drawers --}}
+    @include('pages.backoffice.wilayah._form-modal')
+    @include('pages.backoffice.wilayah._detail-drawer')
+
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof L === 'undefined') return;
+
+    var map = L.map('mapWilayah', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([-7.1726, 108.1963], 14);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Load GeoJSON features from backend
+    var features = @json($mapFeatures);
+    var colors = { dusun: '#2563eb', rw: '#16a34a', rt: '#d97706' };
+    var fills  = { dusun: '#60a5fa', rw: '#4ade80', rt: '#fbbf24' };
+
+    features.forEach(function(f) {
+        if (f.geojson && f.geojson.coordinates) {
+            try {
+                var layer = L.geoJSON(f.geojson, {
+                    style: {
+                        color: colors[f.tipe] || '#666',
+                        fillColor: fills[f.tipe] || '#999',
+                        fillOpacity: 0.35,
+                        weight: 2
+                    }
+                }).addTo(map);
+                layer.bindPopup('<b>' + f.label + '</b>');
+            } catch(e) {
+                console.warn('Invalid GeoJSON for', f.label, e);
+            }
+        }
+    });
+
+    // Fallback: if no features, show dummy polygons
+    if (features.length === 0) {
+        var kalerCoords = [[-7.170, 108.190], [-7.165, 108.198], [-7.172, 108.200], [-7.175, 108.195]];
+        var kidulCoords = [[-7.175, 108.195], [-7.172, 108.200], [-7.180, 108.205], [-7.185, 108.195]];
+        var tengahCoords = [[-7.168, 108.183], [-7.165, 108.190], [-7.170, 108.192], [-7.173, 108.186]];
+
+        L.polygon(kalerCoords, { color: '#2563eb', fillColor: '#60a5fa', fillOpacity: 0.4, weight: 2 })
+            .addTo(map).bindPopup('<b>Dusun Kaler</b>');
+        L.polygon(kidulCoords, { color: '#16a34a', fillColor: '#4ade80', fillOpacity: 0.4, weight: 2 })
+            .addTo(map).bindPopup('<b>Dusun Kidul</b>');
+        L.polygon(tengahCoords, { color: '#d97706', fillColor: '#fbbf24', fillOpacity: 0.4, weight: 2 })
+            .addTo(map).bindPopup('<b>Dusun Tengah</b>');
+    }
+});
+</script>
+@endpush
+
+@endsection

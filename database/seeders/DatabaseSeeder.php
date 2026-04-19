@@ -321,5 +321,11 @@ class DatabaseSeeder extends Seeder
 
         // ─── Penduduk (Sample Data) ────────────────────────────────
         $this->call(PendudukSeeder::class);
+
+        // ─── Kartu Keluarga (Links penduduk → KK) ─────────────────
+        $this->call(KartuKeluargaSeeder::class);
+
+        // ─── Wilayah Administratif (Dusun → RW → RT) ─────────────
+        $this->call(WilayahSeeder::class);
     }
 }

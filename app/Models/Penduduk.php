@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Penduduk extends Model
 {
@@ -19,6 +20,7 @@ class Penduduk extends Model
         'agama',
         'golongan_darah',
         'no_kk',
+        'kartu_keluarga_id',
         'status_hubungan',
         'status_perkawinan',
         'nama_ayah',
@@ -37,6 +39,13 @@ class Penduduk extends Model
         return [
             'tanggal_lahir' => 'date',
         ];
+    }
+
+    // ─── Relationships ─────────────────────────────────────
+
+    public function kartuKeluarga(): BelongsTo
+    {
+        return $this->belongsTo(KartuKeluarga::class);
     }
 
     // ─── Accessors ─────────────────────────────────────────────
