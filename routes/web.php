@@ -10,6 +10,7 @@ use App\Http\Controllers\BackOffice\UserController;
 use App\Http\Controllers\BackOffice\RoleController;
 use App\Http\Controllers\BackOffice\VillageSettingController;
 use App\Http\Controllers\BackOffice\SystemConfigController;
+use App\Http\Controllers\BackOffice\PendudukController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -82,6 +83,9 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     // ── Konfigurasi Sistem ─────────────────────────────
     Route::get('system-config', [SystemConfigController::class, 'edit'])->name('system-config.edit');
     Route::put('system-config', [SystemConfigController::class, 'update'])->name('system-config.update');
+
+    // ── Data Penduduk ─────────────────────────────────
+    Route::resource('penduduk', PendudukController::class)->except(['create', 'edit']);
 });
 
 // Operator Desa

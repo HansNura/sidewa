@@ -318,5 +318,8 @@ class DatabaseSeeder extends Seeder
                 'type'  => $meta['type'],
             ]);
         }
+
+        // ─── Penduduk (Sample Data) ────────────────────────────────
+        $this->call(PendudukSeeder::class);
     }
 }

@@ -30,7 +30,7 @@
             'label' => 'Data Kependudukan',
             'icon'  => 'fa-solid fa-users',
             'items' => [
-                ['label' => 'Data Penduduk', 'route' => '#'],
+                ['label' => 'Data Penduduk', 'route' => 'admin.penduduk.index'],
                 ['label' => 'Data Keluarga (KK)', 'route' => '#'],
                 ['label' => 'Wilayah Administratif', 'route' => '#'],
                 ['label' => 'Kesehatan & Stunting', 'route' => '#'],
