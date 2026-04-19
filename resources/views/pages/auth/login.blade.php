@@ -18,9 +18,6 @@
         {{-- Form Section --}}
         <section class="p-8">
 
-            {{-- Role Selector --}}
-            @include('components.auth.role-selector')
-
             {{-- Session Status / Error Messages --}}
             @if (session('status'))
                 <div class="mb-4 text-sm text-green-600 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-center">
@@ -42,9 +39,12 @@
             <form action="{{ route('login') }}" method="POST" id="loginForm">
                 @csrf
 
+                {{-- Role Selector (inside form so hidden input submits) --}}
+                @include('components.auth.role-selector')
+
                 {{-- Input Username / NIK --}}
                 <div class="mb-5">
-                    <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="login" class="block text-sm font-semibold text-gray-700 mb-2">
                         Username atau NIK
                     </label>
                     <div class="relative">
@@ -53,12 +53,12 @@
                         </div>
                         <input
                             type="text"
-                            id="username"
-                            name="email"
-                            value="{{ old('email') }}"
+                            id="login"
+                            name="login"
+                            value="{{ old('login') }}"
                             class="input-focus-ring w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm
                                    rounded-xl focus:border-green-500 block p-3.5 pl-11 transition-all outline-none"
-                            placeholder="Masukkan username/NIK"
+                            placeholder="Masukkan email atau NIK"
                             required
                             autofocus
                         />
@@ -113,7 +113,7 @@
                             Ingat saya
                         </label>
                     </div>
-                    <a href="#"
+                    <a href="{{ route('password.request') }}"
                        class="text-sm font-semibold text-green-600 hover:text-green-800 hover:underline transition-colors">
                         Lupa sandi?
                     </a>

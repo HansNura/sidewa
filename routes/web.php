@@ -37,8 +37,73 @@ Route::get('/informasi/produk-hukum', [PageController::class, 'produkHukum'])->n
 Route::get('/informasi/informasi-publik', [PageController::class, 'informasiPublik'])->name('informasi.publik');
 Route::get('/informasi/galeri', [PageController::class, 'galeri'])->name('informasi.galeri');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+// ──────────────────────────────────────────────────────────
+// AUTHENTICATED ROUTES
+// ──────────────────────────────────────────────────────────
+
+// Generic dashboard redirect → routes user to their role-specific dashboard
+Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
+    $role = auth()->user()->role;
+
+    return match ($role) {
+        'administrator' => redirect()->route('admin.dashboard'),
+        'operator'      => redirect()->route('operator.dashboard'),
+        'kades'         => redirect()->route('kades.dashboard'),
+        'perangkat'     => redirect()->route('perangkat.dashboard'),
+        'resepsionis'   => redirect()->route('resepsionis.dashboard'),
+        default         => redirect()->route('home'),
+    };
+})->name('dashboard');
+
+// Administrator
+Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
+        'pageTitle' => 'Dashboard Administrator',
+    ]))->name('dashboard');
+});
+
+// Operator Desa
+Route::middleware(['auth', 'verified', 'role:operator'])->prefix('operator')->name('operator.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
+        'pageTitle' => 'Dashboard Operator Desa',
+    ]))->name('dashboard');
+});
+
+// Kepala Desa
+Route::middleware(['auth', 'verified', 'role:kades'])->prefix('kades')->name('kades.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
+        'pageTitle' => 'Dashboard Kepala Desa',
+    ]))->name('dashboard');
+});
+
+// Perangkat Desa
+Route::middleware(['auth', 'verified', 'role:perangkat'])->prefix('perangkat')->name('perangkat.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
+        'pageTitle' => 'Dashboard Perangkat Desa',
+    ]))->name('dashboard');
+});
+
+// Resepsionis
+Route::middleware(['auth', 'verified', 'role:resepsionis'])->prefix('resepsionis')->name('resepsionis.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
+        'pageTitle' => 'Dashboard Resepsionis',
+    ]))->name('dashboard');
+});
+// ──────────────────────────────────────────────────────────
+// LAYANAN MANDIRI WARGA (Separate auth guard: 'warga')
+// ──────────────────────────────────────────────────────────
+
+use App\Http\Controllers\Frontend\WargaAuthController;
+use App\Http\Controllers\Frontend\WargaDashboardController;
+
+// Login warga (public)
+Route::get('/layanan/mandiri/login', [WargaAuthController::class, 'showLogin'])->name('layanan.mandiri.login');
+Route::post('/layanan/mandiri/login', [WargaAuthController::class, 'authenticate'])->name('layanan.mandiri.authenticate');
+
+// Protected warga area
+Route::middleware(['auth:warga'])->prefix('layanan/mandiri')->name('warga.')->group(function () {
+    Route::get('/dashboard', [WargaDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
 });
 
 require __DIR__.'/settings.php';

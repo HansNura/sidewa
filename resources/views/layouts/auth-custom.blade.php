@@ -9,6 +9,9 @@
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
@@ -26,7 +29,7 @@
             box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
         }
 
-        @@keyframes blob {
+        @keyframes blob {
             0%   { transform: translate(0px, 0px) scale(1); }
             33%  { transform: translate(30px, -50px) scale(1.1); }
             66%  { transform: translate(-20px, 20px) scale(0.9); }
