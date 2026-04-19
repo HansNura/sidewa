@@ -21,8 +21,8 @@
             'icon'  => 'fa-solid fa-server',
             'items' => [
                 ['label' => 'Manajemen User', 'route' => 'admin.users.index'],
-                ['label' => 'Role & Hak Akses', 'route' => '#'],
-                ['label' => 'Identitas Desa', 'route' => '#'],
+                ['label' => 'Role & Hak Akses', 'route' => 'admin.roles.index'],
+                ['label' => 'Identitas Desa', 'route' => 'admin.village-settings.edit'],
                 ['label' => 'Konfigurasi Sistem', 'route' => '#'],
             ],
         ],

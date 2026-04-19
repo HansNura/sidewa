@@ -114,5 +114,52 @@ select:focus[data-flux-control] {
     .custom-checkbox:checked::before {
         transform: scale(1);
     }
-}
 
+    /* ─── Matrix Checkbox (permission table) ──────────────────── */
+    .matrix-checkbox {
+        appearance: none;
+        background-color: #fff;
+        margin: 0;
+        font: inherit;
+        color: currentColor;
+        width: 1em;
+        height: 1em;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.2em;
+        display: grid;
+        place-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .matrix-checkbox::before {
+        content: "";
+        width: 0.55em;
+        height: 0.55em;
+        transform: scale(0);
+        transition: 120ms transform ease-in-out;
+        box-shadow: inset 1em 1em white;
+        transform-origin: center;
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    }
+
+    .matrix-checkbox:checked {
+        background-color: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .matrix-checkbox:checked::before {
+        transform: scale(1);
+    }
+
+    .matrix-checkbox:disabled {
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+    }
+
+    .matrix-checkbox:disabled:checked {
+        background-color: #94a3b8;
+        border-color: #94a3b8;
+    }
+}

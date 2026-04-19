@@ -7,6 +7,8 @@ use App\Http\Controllers\Frontend\ProfileController;
 use App\Http\Controllers\Frontend\DataController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\BackOffice\UserController;
+use App\Http\Controllers\BackOffice\RoleController;
+use App\Http\Controllers\BackOffice\VillageSettingController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -68,6 +70,13 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::resource('users', UserController::class)->except(['create', 'edit']);
     Route::post('users/bulk-action', [UserController::class, 'bulkAction'])->name('users.bulk-action');
     Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+
+    // ── Manajemen Role & Hak Akses ──────────────────────────
+    Route::resource('roles', RoleController::class)->except(['create', 'edit']);
+
+    // ── Identitas Desa ─────────────────────────────────
+    Route::get('village-settings', [VillageSettingController::class, 'edit'])->name('village-settings.edit');
+    Route::put('village-settings', [VillageSettingController::class, 'update'])->name('village-settings.update');
 });
 
 // Operator Desa

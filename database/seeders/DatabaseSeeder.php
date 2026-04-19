@@ -3,7 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\ActivityLog;
+use App\Models\Module;
+use App\Models\Role;
+use App\Models\RoleModulePermission;
 use App\Models\User;
+use App\Models\VillageSetting;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -184,5 +188,124 @@ class DatabaseSeeder extends Seeder
 
         // ─── Test Warga (citizens) ─────────────────────────────────
         $this->call(WargaSeeder::class);
+
+        // ─── Roles Metadata ────────────────────────────────────────
+        $roleAdmin = Role::create([
+            'slug'         => 'administrator',
+            'display_name' => 'Administrator',
+            'description'  => 'Memiliki akses penuh ke seluruh fitur dan pengaturan sistem (Super User).',
+            'icon'         => 'fa-solid fa-user-shield',
+            'color'        => 'blue',
+            'is_system'    => true,
+        ]);
+
+        $roleKades = Role::create([
+            'slug'         => 'kades',
+            'display_name' => 'Kepala Desa',
+            'description'  => 'Hak akses eksekutif untuk melihat laporan, dashboard, dan TTE Surat.',
+            'icon'         => 'fa-solid fa-user-tie',
+            'color'        => 'emerald',
+            'is_system'    => false,
+        ]);
+
+        $roleOperator = Role::create([
+            'slug'         => 'operator',
+            'display_name' => 'Operator / Kasi',
+            'description'  => 'Akses operasional harian seperti cetak surat, input penduduk, dan buku tamu.',
+            'icon'         => 'fa-solid fa-desktop',
+            'color'        => 'amber',
+            'is_system'    => false,
+        ]);
+
+        $rolePerangkat = Role::create([
+            'slug'         => 'perangkat',
+            'display_name' => 'Perangkat Desa',
+            'description'  => 'Akses terbatas untuk perangkat desa sesuai tugas pokok dan fungsi.',
+            'icon'         => 'fa-solid fa-id-badge',
+            'color'        => 'teal',
+            'is_system'    => false,
+        ]);
+
+        $roleResepsionis = Role::create([
+            'slug'         => 'resepsionis',
+            'display_name' => 'Resepsionis',
+            'description'  => 'Akses untuk pencatatan tamu dan presensi.',
+            'icon'         => 'fa-solid fa-bell-concierge',
+            'color'        => 'pink',
+            'is_system'    => false,
+        ]);
+
+        // ─── System Modules ────────────────────────────────────────
+        $modPenduduk = Module::create([
+            'name' => 'Data Kependudukan', 'slug' => 'data-kependudukan',
+            'icon' => 'fa-solid fa-users', 'sort_order' => 1,
+        ]);
+
+        $modSurat = Module::create([
+            'name' => 'Layanan Surat', 'slug' => 'layanan-surat',
+            'icon' => 'fa-solid fa-envelope-open-text', 'sort_order' => 2,
+        ]);
+
+        $modPresensi = Module::create([
+            'name' => 'Presensi & Buku Tamu', 'slug' => 'presensi-buku-tamu',
+            'icon' => 'fa-solid fa-fingerprint', 'sort_order' => 3,
+        ]);
+
+        $modKeuangan = Module::create([
+            'name' => 'Keuangan APBDes', 'slug' => 'keuangan-apbdes',
+            'icon' => 'fa-solid fa-wallet', 'sort_order' => 4,
+        ]);
+
+        $modKonten = Module::create([
+            'name' => 'Konten Publik (Web)', 'slug' => 'konten-publik',
+            'icon' => 'fa-solid fa-globe', 'sort_order' => 5,
+        ]);
+
+        $modSystem = Module::create([
+            'name' => 'Konfigurasi Sistem', 'slug' => 'konfigurasi-sistem',
+            'icon' => 'fa-solid fa-server', 'sort_order' => 6, 'is_sensitive' => true,
+        ]);
+
+        // ─── Default Permissions ────────────────────────────────────
+        // Admin: full access everywhere
+        foreach ([$modPenduduk, $modSurat, $modPresensi, $modKeuangan, $modKonten, $modSystem] as $mod) {
+            RoleModulePermission::create([
+                'role_id' => $roleAdmin->id, 'module_id' => $mod->id,
+                'can_view' => true, 'can_create' => true, 'can_edit' => true, 'can_delete' => true,
+            ]);
+        }
+
+        // Operator: VCED on penduduk & surat (no delete), VCE on presensi, V on konten
+        RoleModulePermission::create(['role_id' => $roleOperator->id, 'module_id' => $modPenduduk->id, 'can_view' => true, 'can_create' => true, 'can_edit' => true, 'can_delete' => false]);
+        RoleModulePermission::create(['role_id' => $roleOperator->id, 'module_id' => $modSurat->id, 'can_view' => true, 'can_create' => true, 'can_edit' => true, 'can_delete' => false]);
+        RoleModulePermission::create(['role_id' => $roleOperator->id, 'module_id' => $modPresensi->id, 'can_view' => true, 'can_create' => true, 'can_edit' => false, 'can_delete' => false]);
+        RoleModulePermission::create(['role_id' => $roleOperator->id, 'module_id' => $modKonten->id, 'can_view' => true, 'can_create' => false, 'can_edit' => false, 'can_delete' => false]);
+
+        // Kades: V on penduduk & keuangan, V+E(TTE) on surat
+        RoleModulePermission::create(['role_id' => $roleKades->id, 'module_id' => $modPenduduk->id, 'can_view' => true, 'can_create' => false, 'can_edit' => false, 'can_delete' => false]);
+        RoleModulePermission::create(['role_id' => $roleKades->id, 'module_id' => $modSurat->id, 'can_view' => true, 'can_create' => false, 'can_edit' => true, 'can_delete' => false]);
+        RoleModulePermission::create(['role_id' => $roleKades->id, 'module_id' => $modKeuangan->id, 'can_view' => true, 'can_create' => false, 'can_edit' => false, 'can_delete' => false]);
+
+        // Perangkat: V on penduduk
+        RoleModulePermission::create(['role_id' => $rolePerangkat->id, 'module_id' => $modPenduduk->id, 'can_view' => true, 'can_create' => false, 'can_edit' => false, 'can_delete' => false]);
+
+        // Resepsionis: VC on presensi
+        RoleModulePermission::create(['role_id' => $roleResepsionis->id, 'module_id' => $modPresensi->id, 'can_view' => true, 'can_create' => true, 'can_edit' => false, 'can_delete' => false]);
+
+        // ─── Village Settings ──────────────────────────────────────
+        VillageSetting::create([
+            'nama_desa'     => 'Sindangmukti',
+            'kecamatan'     => 'Mangunjaya',
+            'kabupaten'     => 'Pangandaran',
+            'provinsi'      => 'Jawa Barat',
+            'kode_pos'      => '46353',
+            'alamat'        => 'Jl. Desa Sindangmukti',
+            'email'         => 'pemdes@sindangmukti.desa.id',
+            'telepon'       => '0265-654321',
+            'website'       => 'www.sindangmukti.desa.id',
+            'nama_kades'    => 'Bpk. Tateng',
+            'nip_kades'     => '19700101 200012 1 001',
+            'jabatan_kades' => 'Kepala Desa',
+        ]);
     }
 }
