@@ -14,6 +14,7 @@ use App\Http\Controllers\BackOffice\PendudukController;
 use App\Http\Controllers\BackOffice\KartuKeluargaController;
 use App\Http\Controllers\BackOffice\WilayahController;
 use App\Http\Controllers\BackOffice\KesehatanController;
+use App\Http\Controllers\BackOffice\BansosController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/profil/identitas', [ProfileController::class, 'identitas'])->name('profil.identitas');
@@ -105,6 +106,14 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::get('kesehatan/search-balita', [KesehatanController::class, 'searchBalita'])->name('kesehatan.search-balita');
     Route::get('kesehatan/{penduduk}', [KesehatanController::class, 'show'])->name('kesehatan.show');
     Route::delete('kesehatan/pengukuran/{pengukuran}', [KesehatanController::class, 'destroy'])->name('kesehatan.destroy');
+
+    // ── Bantuan Sosial ──────────────────────────
+    Route::get('bansos', [BansosController::class, 'index'])->name('bansos.index');
+    Route::post('bansos', [BansosController::class, 'store'])->name('bansos.store');
+    Route::get('bansos/search-penduduk', [BansosController::class, 'searchPenduduk'])->name('bansos.search-penduduk');
+    Route::get('bansos/{banso}', [BansosController::class, 'show'])->name('bansos.show');
+    Route::patch('bansos/{banso}/status', [BansosController::class, 'updateStatus'])->name('bansos.update-status');
+    Route::delete('bansos/{banso}', [BansosController::class, 'destroy'])->name('bansos.destroy');
 });
 
 // Operator Desa

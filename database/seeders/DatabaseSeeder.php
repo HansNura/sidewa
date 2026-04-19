@@ -330,5 +330,8 @@ class DatabaseSeeder extends Seeder
 
         // ─── Kesehatan & Stunting (Pengukuran + Intervensi) ──────
         $this->call(KesehatanSeeder::class);
+
+        // ─── Bantuan Sosial (Program + Penerima) ─────────────────
+        $this->call(BansosSeeder::class);
     }
 }

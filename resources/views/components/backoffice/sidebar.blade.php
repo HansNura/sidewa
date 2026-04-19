@@ -34,7 +34,7 @@
                 ['label' => 'Data Keluarga (KK)', 'route' => 'admin.kartu-keluarga.index'],
                 ['label' => 'Wilayah Administratif', 'route' => 'admin.wilayah.index'],
                 ['label' => 'Kesehatan & Stunting', 'route' => 'admin.kesehatan.index'],
-                ['label' => 'Bantuan Sosial', 'route' => '#'],
+                ['label' => 'Bantuan Sosial', 'route' => 'admin.bansos.index'],
                 ['label' => 'Pertanahan Desa', 'route' => '#'],
             ],
         ],
