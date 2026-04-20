@@ -34,6 +34,10 @@ use App\Http\Controllers\BackOffice\PageController as BackOfficePageController;
 use App\Http\Controllers\BackOffice\InformasiController;
 use App\Http\Controllers\BackOffice\UmkmController;
 use App\Http\Controllers\BackOffice\JdihController;
+use App\Http\Controllers\BackOffice\StatistikController;
+use App\Http\Controllers\BackOffice\PresensiController;
+use App\Http\Controllers\BackOffice\DataExchangeController;
+use App\Http\Controllers\BackOffice\ApiIntegrationController;
 
 
 
@@ -261,8 +265,25 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::post('konten/jdih/kategori', [JdihController::class, 'storeCategory'])->name('jdih.storeCategory');
     Route::post('konten/jdih/kategori/{id}/destroy', [JdihController::class, 'destroyCategory'])->name('jdih.destroyCategory');
 
+    // ── Laporan & Integrasi ──
+    Route::get('laporan/statistik', [StatistikController::class, 'index'])->name('statistik.index');
+    Route::get('laporan/presensi', [PresensiController::class, 'index'])->name('presensi.index');
 
+    // ── Pertukaran Data (Export/Import) ──
+    Route::prefix('data-exchange')->name('data-exchange.')->group(function () {
+        Route::get('/', [DataExchangeController::class, 'index'])->name('index');
+        Route::post('/export', [DataExchangeController::class, 'export'])->name('export');
+        Route::post('/import', [DataExchangeController::class, 'importExecute'])->name('import');
+        Route::get('/template', [DataExchangeController::class, 'downloadTemplate'])->name('template');
+    });
 
+    // ── Integrasi API ──
+    Route::prefix('api-integration')->name('api.')->group(function () {
+        Route::get('/', [ApiIntegrationController::class, 'index'])->name('index');
+        Route::post('/generate', [ApiIntegrationController::class, 'generateKey'])->name('generate');
+        Route::post('/revoke/{id}', [ApiIntegrationController::class, 'revokeKey'])->name('revoke');
+        Route::post('/sync', [ApiIntegrationController::class, 'syncData'])->name('sync');
+    });
 });
 
 // Operator Desa

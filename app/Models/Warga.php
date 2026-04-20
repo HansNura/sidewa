@@ -34,6 +34,9 @@ class Warga extends Authenticatable
         'rt',
         'rw',
         'dusun',
+        'pendidikan_terakhir',
+        'kesejahteraan',
+        'is_stunting',
         'pin',
         'is_active',
         'last_login_at',
@@ -60,6 +63,7 @@ class Warga extends Authenticatable
             'tanggal_lahir' => 'date',
             'pin'           => 'hashed',
             'is_active'     => 'boolean',
+            'is_stunting'   => 'boolean',
             'last_login_at' => 'datetime',
         ];
     }

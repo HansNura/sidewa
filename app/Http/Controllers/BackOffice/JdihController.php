@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\JdihCategory;
 use App\Models\JdihDocument;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -24,10 +25,10 @@ class JdihController extends Controller
         $totalDicabut = JdihDocument::where('status', 'dicabut')->count();
 
         // Count for specific categories based on names, just visual indicators on dashboard:
-        $countPerdes = JdihDocument::whereHas('category', function($q) {
+        $countPerdes = JdihDocument::whereHas('category', function ($q) {
             $q->where('slug', 'like', '%peraturan-desa%')->orWhere('name', 'like', '%Peraturan Desa%');
         })->count();
-        $countSk = JdihDocument::whereHas('category', function($q) {
+        $countSk = JdihDocument::whereHas('category', function ($q) {
             $q->where('slug', 'like', '%sk-kepala-desa%')->orWhere('name', 'like', '%SK%');
         })->count();
         // ====================
@@ -41,9 +42,9 @@ class JdihController extends Controller
         $query = JdihDocument::with(['category', 'uploader'])->orderBy('established_date', 'desc');
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('document_number', 'like', '%' . $request->search . '%');
+                    ->orWhere('document_number', 'like', '%' . $request->search . '%');
             });
         }
         if ($request->filled('category')) {
@@ -60,7 +61,9 @@ class JdihController extends Controller
         $categoriesList = JdihCategory::all();
 
         // Get unique years for the filter dropdown
-        $yearsList = JdihDocument::selectRaw('YEAR(established_date) as year')->distinct()->orderBy('year', 'desc')->pluck('year');
+        $driver = DB::getDriverName();
+        $yearSelect = $driver === 'sqlite' ? "strftime('%Y', established_date)" : "YEAR(established_date)";
+        $yearsList = JdihDocument::selectRaw("$yearSelect as year")->distinct()->orderBy('year', 'desc')->pluck('year');
 
         return view('pages.backoffice.jdih.index', compact('tab', 'documents', 'categoriesList', 'yearsList', 'totalDocs', 'totalBerlaku', 'totalDicabut', 'countPerdes', 'countSk'));
     }
@@ -83,8 +86,12 @@ class JdihController extends Controller
         $document = $request->filled('id') ? JdihDocument::findOrFail($request->id) : new JdihDocument();
 
         $document->fill($request->only([
-            'category_id', 'title', 'document_number', 'established_date', 
-            'status', 'description'
+            'category_id',
+            'title',
+            'document_number',
+            'established_date',
+            'status',
+            'description'
         ]));
 
         if (!$request->filled('id')) {
@@ -118,7 +125,7 @@ class JdihController extends Controller
     {
         $request->validate(['selected_ids' => 'required|string']);
         $ids = explode(',', $request->selected_ids);
-        
+
         $documents = JdihDocument::whereIn('id', $ids)->get();
 
         foreach ($documents as $doc) {
@@ -127,7 +134,7 @@ class JdihController extends Controller
             }
             $doc->delete();
         }
-        
+
         return back()->with('success', count($ids) . ' dokumen berhasil dihapus permanen.');
     }
 
@@ -148,7 +155,7 @@ class JdihController extends Controller
         ]);
 
         $category = $request->filled('id') ? JdihCategory::findOrFail($request->id) : new JdihCategory();
-        
+
         $category->name = $request->name;
         $category->description = $request->description;
 
@@ -164,10 +171,10 @@ class JdihController extends Controller
     public function destroyCategory($id)
     {
         $category = JdihCategory::findOrFail($id);
-        
+
         // Manual trap to throw beautiful error (since DB matches restrict policy)
         $docCount = $category->documents()->count();
-        
+
         if ($docCount > 0) {
             return back()->withErrors(['category' => 'Kategori "' . $category->name . '" tidak dapat dihapus karena masih digabungkan dengan ' . $docCount . ' dokumen aktif. Harap ubah kategori dokumen tersebut terlebih dahulu.']);
         }

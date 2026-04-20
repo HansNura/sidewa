@@ -91,8 +91,10 @@
             'label' => 'Laporan & Integrasi',
             'icon' => 'fa-solid fa-file-lines',
             'items' => [
-                ['label' => 'Laporan Statistik', 'route' => '#'],
-                ['label' => 'Export / Import Data', 'route' => '#'],
+                ['label' => 'Laporan Statistik', 'route' => 'admin.statistik.index'],
+                ['label' => 'Laporan Presensi', 'route' => 'admin.presensi.index'],
+                ['label' => 'Export / Import Data', 'route' => 'admin.data-exchange.index'],
+                ['label' => 'Integrasi API', 'route' => 'admin.api.index'],
             ],
         ],
     ];
