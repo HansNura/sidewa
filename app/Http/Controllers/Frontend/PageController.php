@@ -13,13 +13,18 @@ class PageController extends Controller
     /**
      * Tampilkan halaman Transparansi APBDes
      */
-    public function transparansi()
+    public function transparansi(Request $request)
     {
         $pageTitle = "Transparansi APBDes";
         $pageSubtitle = "Wujud nyata keterbukaan informasi publik. Kami menyajikan rincian Anggaran Pendapatan dan Belanja Desa secara jujur, akuntabel, dan transparan.";
 
-        // Mengambil Tahun Anggaran Berjalan (Tahun ini atau data terbaru yang memiliki flag is_published)
-        $tahunBerjalan = Apbdes::where('is_published', true)->max('tahun') ?? date('Y');
+        // Daftar tahun yang tersedia di database
+        $availableYears = Apbdes::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun')->toArray();
+
+        // Tahun aktif: dari query param ?tahun= atau tahun terbaru yang published
+        $tahunBerjalan = $request->query('tahun')
+            ?? (Apbdes::where('is_published', true)->max('tahun') ?? date('Y'));
+        $tahunBerjalan = (int) $tahunBerjalan;
 
         // Mendapatkan Config Poster & Dokumen
         $posterCurrent = ApbdesPoster::where('tahun', $tahunBerjalan)->first();
@@ -29,9 +34,9 @@ class PageController extends Controller
         
         $apbdesRingkasan = [
             'pendapatan_target' => $summary['pendapatan'],
-            'pendapatan_realisasi' => $summary['pendapatan'], // Karena ini APBDes awal, asumsikan target = realisasi mockup
+            'pendapatan_realisasi' => $summary['pendapatan'],
             'belanja_target' => $summary['belanja'],
-            'belanja_realisasi' => $summary['belanja'], // Sama seperti atas
+            'belanja_realisasi' => $summary['belanja'],
             'pembiayaan_netto' => $summary['pembiayaan'],
             'silpa' => $summary['surplus']
         ];
@@ -39,12 +44,13 @@ class PageController extends Controller
         // Fetch rincian item berdasarkan tipe
         $baseQuery = Apbdes::where('tahun', $tahunBerjalan)->where('is_published', true);
 
-        // Ambil array format untuk Blade public
+        // Pendapatan
         $rincianPendapatan = (clone $baseQuery)->where('tipe_anggaran', 'PENDAPATAN')
             ->get()->map(fn($item) => ['uraian' => $item->nama_kegiatan, 'anggaran' => $item->pagu_anggaran])->toArray();
         
+        // Belanja (bidang level)
         $rincianBelanja = (clone $baseQuery)->where('tipe_anggaran', 'BELANJA')
-            ->whereRaw('LENGTH(kode_rekening) <= 3') // Misal: 1, 2, 3 (Bidang) atau max length agar tidak terlalu rincian detail turun ke front-page
+            ->whereRaw('LENGTH(kode_rekening) <= 3')
             ->get()->map(fn($item) => ['bidang' => $item->nama_kegiatan, 'anggaran' => $item->pagu_anggaran])->toArray();
 
         // Pembiayaan
@@ -54,15 +60,14 @@ class PageController extends Controller
             'pengeluaran' => []
         ];
 
-        // Arsip & Riwayat (Loop over past years to build list of SiLPA)
-        $pastYears = Apbdes::select('tahun')->distinct()->where('tahun', '<', $tahunBerjalan)->orderBy('tahun', 'desc')->get();
+        // Arsip & Riwayat (past years excluding current)
         $arsipTransparansi = [];
-        foreach ($pastYears as $pyear) {
-            $sumPast = Apbdes::getSummary($pyear->tahun);
-            // Ignore if empty
-            if($sumPast['item_count'] > 0) {
+        foreach ($availableYears as $year) {
+            if ($year == $tahunBerjalan) continue;
+            $sumPast = Apbdes::getSummary($year);
+            if ($sumPast['item_count'] > 0) {
                 $arsipTransparansi[] = [
-                    'tahun' => $pyear->tahun,
+                    'tahun' => $year,
                     'status' => 'Selesai',
                     'pendapatan' => $sumPast['pendapatan'],
                     'belanja' => $sumPast['belanja'],
@@ -75,6 +80,7 @@ class PageController extends Controller
             'pageTitle',
             'pageSubtitle',
             'tahunBerjalan',
+            'availableYears',
             'posterCurrent',
             'apbdesRingkasan',
             'rincianPendapatan',
@@ -85,68 +91,76 @@ class PageController extends Controller
     }
 
     /**
-     * Tampilkan halaman Berita & Artikel
+     * Tampilkan halaman Berita & Artikel — full DB-driven.
      */
-    public function beritaArtikel()
+    public function beritaArtikel(Request $request)
     {
         $pageTitle = "Berita & Artikel Desa";
         $pageSubtitle = "Dapatkan informasi terbaru seputar kegiatan, pembangunan, pemberdayaan masyarakat, dan pengumuman resmi Desa Sindangmukti.";
 
-        $sorotanUtama = [
-            'kategori' => 'Pemerintahan',
-            'tanggal' => '24 Okt 2024',
-            'judul' => 'Musyawarah Rencana Pembangunan (Musrenbang) Desa Sindangmukti Tahun 2025',
-            'ringkasan' => 'Pemerintah Desa Sindangmukti menggelar Musrenbang untuk menyusun Rencana Kerja Pemerintah Desa (RKPDes) tahun 2025. Acara ini dihadiri oleh tokoh masyarakat, RT/RW, dan perwakilan BPD untuk memastikan aspirasi warga tersalurkan secara maksimal.',
-            'penulis' => 'Admin Desa',
-            'gambar' => 'https://images.unsplash.com/photo-1596395819057-e37f55a8516d?auto=format&fit=crop&q=80&w=1200'
-        ];
+        // ── Kategori untuk filter pills ──
+        $categories = \App\Models\ArticleCategory::orderBy('nama_kategori')->get();
 
-        $daftarArtikel = [
-            [
-                'kategori' => 'Pertanian',
-                'tanggal' => '20 Okt 2024',
-                'judul' => 'Panen Raya Jagung Hibrida Tembus Target, Petani Semringah',
-                'ringkasan' => 'Kelompok Tani Mekar Jaya Desa Sindangmukti melaksanakan panen raya jagung hibrida binaan desa dengan hasil yang memuaskan dan melebihi target tahun lalu.',
-                'gambar' => 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?auto=format&fit=crop&q=80&w=800'
-            ],
-            [
-                'kategori' => 'Bantuan Sosial',
-                'tanggal' => '18 Okt 2024',
-                'judul' => 'Penyaluran BLT Dana Desa Tahap III Berjalan Lancar',
-                'ringkasan' => 'Pemerintahan Desa Sindangmukti telah sukses menyalurkan Bantuan Langsung Tunai (BLT) Dana Desa Tahap III kepada 85 Keluarga Penerima Manfaat.',
-                'gambar' => 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=800'
-            ],
-            [
-                'kategori' => 'Kesehatan',
-                'tanggal' => '15 Okt 2024',
-                'judul' => 'Posyandu Remaja & Edukasi Pencegahan Stunting Dini',
-                'ringkasan' => 'Kader Posyandu bekerjasama dengan Puskesmas setempat mengadakan penyuluhan gizi bagi remaja putri untuk mencegah resiko stunting di masa depan.',
-                'gambar' => 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=800'
-            ],
-            [
-                'kategori' => 'Pembangunan',
-                'tanggal' => '10 Okt 2024',
-                'judul' => 'Pengaspalan Jalan Dusun II Sepanjang 1,2 KM Telah Rampung',
-                'ringkasan' => 'Proyek pengaspalan jalan poros Dusun II yang bersumber dari Dana Desa tahun ini telah selesai 100%, akses perekonomian warga kini lebih mudah.',
-                'gambar' => 'https://images.unsplash.com/photo-1621644782084-245781a812da?auto=format&fit=crop&q=80&w=800'
-            ],
-            [
-                'kategori' => 'Pemberdayaan',
-                'tanggal' => '05 Okt 2024',
-                'judul' => 'Pelatihan Digital Marketing Bagi Pelaku UMKM Kerajinan Bambu',
-                'ringkasan' => 'BUMDes memfasilitasi puluhan pengrajin bambu lokal untuk go-digital melalui pelatihan pemasaran online guna menjangkau pasar nasional.',
-                'gambar' => 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800'
-            ],
-            [
-                'kategori' => 'Kegiatan',
-                'tanggal' => '01 Okt 2024',
-                'judul' => 'Budaya Gotong Royong Membersihkan Saluran Irigasi Jelang Musim Hujan',
-                'ringkasan' => 'Warga Desa Sindangmukti serentak melakukan kerja bakti membersihkan irigasi persawahan untuk mengantisipasi banjir di musim penghujan.',
-                'gambar' => 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=800'
-            ],
-        ];
+        // ── Sorotan utama: artikel published terbaru ──
+        $sorotanUtama = \App\Models\Article::published()
+            ->with(['category', 'user'])
+            ->orderByDesc('published_at')
+            ->first();
 
-        return view('pages.frontend.informasi.berita-artikel', compact('pageTitle', 'pageSubtitle', 'sorotanUtama', 'daftarArtikel'));
+        // ── Query utama (exclude featured) ──
+        $query = \App\Models\Article::published()->with(['category', 'user']);
+
+        if ($sorotanUtama) {
+            $query->where('id', '!=', $sorotanUtama->id);
+        }
+
+        // Filter by category
+        $activeCategory = $request->query('kategori');
+        if ($activeCategory && $activeCategory !== 'semua') {
+            $query->whereHas('category', fn($q) => $q->where('slug', $activeCategory));
+        }
+
+        // Search
+        $search = $request->query('q');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('ringkasan', 'like', "%{$search}%")
+                  ->orWhere('konten_html', 'like', "%{$search}%");
+            });
+        }
+
+        // Pagination (6 per page)
+        $daftarArtikel = $query->orderByDesc('published_at')->paginate(6)->withQueryString();
+
+        return view('pages.frontend.informasi.berita-artikel', compact(
+            'pageTitle', 'pageSubtitle', 'categories', 'activeCategory',
+            'search', 'sorotanUtama', 'daftarArtikel'
+        ));
+    }
+
+    /**
+     * Tampilkan detail artikel Berita Desa.
+     */
+    public function beritaDetail($slug)
+    {
+        $article = \App\Models\Article::where('slug', $slug)
+            ->published()
+            ->with(['category', 'user'])
+            ->firstOrFail();
+
+        // Increment view count
+        $article->increment('view_count');
+
+        // Related articles (same category, max 3, exclude current)
+        $related = \App\Models\Article::published()
+            ->where('id', '!=', $article->id)
+            ->where('kategori_id', $article->kategori_id)
+            ->orderByDesc('published_at')
+            ->limit(3)
+            ->get();
+
+        return view('pages.frontend.informasi.berita-detail', compact('article', 'related'));
     }
 
     /**

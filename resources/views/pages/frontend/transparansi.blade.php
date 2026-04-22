@@ -44,7 +44,7 @@
                 class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-200 pb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Laporan Anggaran: <span class="text-green-600">Tahun
-                            {{ request('tahun', 2024) }}</span></h2>
+                            {{ $tahunBerjalan }}</span></h2>
                     <p class="text-sm text-gray-500">Berikut adalah rincian realisasi keuangan desa untuk tahun berjalan.
                     </p>
                 </div>
@@ -59,9 +59,9 @@
                     <select id="tahunAnggaran"
                         class="bg-transparent border-none focus:ring-0 text-gray-800 font-bold cursor-pointer outline-none w-32"
                         onchange="window.location.href='?tahun='+this.value">
-                        <option value="2024" {{ request('tahun', 2024) == '2024' ? 'selected' : '' }}>Tahun 2024</option>
-                        <option value="2023" {{ request('tahun') == '2023' ? 'selected' : '' }}>Tahun 2023</option>
-                        <option value="2022" {{ request('tahun') == '2022' ? 'selected' : '' }}>Tahun 2022</option>
+                        @foreach($availableYears as $year)
+                            <option value="{{ $year }}" {{ $tahunBerjalan == $year ? 'selected' : '' }}>Tahun {{ $year }}</option>
+                        @endforeach
                     </select>
                 </div>
             </section>
@@ -74,81 +74,59 @@
                         class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:-translate-y-1 hover:shadow-lg transition-all">
                         <div class="flex justify-between items-start mb-2">
                             <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pendapatan</p>
-                            <svg class="w-8 h-8 text-blue-500 bg-blue-50 p-1.5 rounded-full" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                            </svg>
+                            <i class="fa-solid fa-arrow-down text-blue-500 bg-blue-50 p-2 rounded-full"></i>
                         </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Rp
+                            {{ number_format($apbdesRingkasan['pendapatan_realisasi'] / 1000000, 1, ',', '.') }} Jt</h3>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                            @php $pendapatanPct = $apbdesRingkasan['pendapatan_target'] > 0 ? ($apbdesRingkasan['pendapatan_realisasi'] / $apbdesRingkasan['pendapatan_target']) * 100 : 0; @endphp
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: {{ min(100, $pendapatanPct) }}%"></div>
+                        </div>
+                        <p class="text-xs text-blue-600 font-medium">Realisasi {{ number_format($pendapatanPct, 0) }}% dari Anggaran</p>
+                    </article>
+
+                    <!-- Card Belanja -->
+                    <article
+                        class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500 hover:-translate-y-1 hover:shadow-lg transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Belanja</p>
+                            <i class="fa-solid fa-cart-shopping text-red-500 bg-red-50 p-2 rounded-full"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Rp
+                            {{ number_format($apbdesRingkasan['belanja_realisasi'] / 1000000, 1, ',', '.') }} Jt</h3>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                            @php $belanjaPct = $apbdesRingkasan['belanja_target'] > 0 ? ($apbdesRingkasan['belanja_realisasi'] / $apbdesRingkasan['belanja_target']) * 100 : 0; @endphp
+                            <div class="bg-red-500 h-2 rounded-full" style="width: {{ min(100, $belanjaPct) }}%"></div>
+                        </div>
+                        <p class="text-xs text-red-600 font-medium">Realisasi {{ number_format($belanjaPct, 0) }}% dari Rp
+                            {{ number_format($apbdesRingkasan['belanja_target'] / 1000000, 0, ',', '.') }} Jt</p>
+                    </article>
+
+                    <!-- Card Pembiayaan Netto -->
+                    <article
+                        class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:-translate-y-1 hover:shadow-lg transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pembiayaan Netto</p>
+                            <i class="fa-solid fa-building-columns text-purple-500 bg-purple-50 p-2 rounded-full"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-2 mb-1">Rp
+                            {{ number_format($apbdesRingkasan['pembiayaan_netto'], 0, ',', '.') }}</h3>
+                        <p class="text-xs text-gray-500">Penerimaan - Pengeluaran</p>
+                    </article>
+
+                    <!-- Card Surplus / Defisit (SiLPA) -->
+                    <article
+                        class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 hover:-translate-y-1 hover:shadow-lg transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">SiLPA / Surplus</p>
+                            <i class="fa-solid fa-piggy-bank text-green-500 bg-green-50 p-2 rounded-full"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-green-600 mt-2 mb-1">Rp
+                            {{ number_format($apbdesRingkasan['silpa'], 0, ',', '.') }}</h3>
+                        <p class="text-xs text-gray-500">Sisa Lebih Perhitungan Anggaran</p>
+                    </article>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-2">Rp
-                    {{ number_format($apbdesRingkasan['pendapatan_realisasi'] / 1000000, 1, ',', '.') }} Jt</h3>
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
-                    @php $pendapatanPct = $apbdesRingkasan['pendapatan_target'] > 0 ? ($apbdesRingkasan['pendapatan_realisasi'] / $apbdesRingkasan['pendapatan_target']) * 100 : 0; @endphp
-                    <div class="bg-blue-500 h-2 rounded-full" style="width: {{ min(100, $pendapatanPct) }}%"></div>
-                </div>
-                <p class="text-xs text-blue-600 font-medium">Realisasi {{ number_format($pendapatanPct, 0) }}% dari
-                    Anggaran</p>
-                </article>
-
-                <!-- Card Belanja -->
-                <article
-                    class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500 hover:-translate-y-1 hover:shadow-lg transition-all">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Belanja</p>
-                        <svg class="w-8 h-8 text-red-500 bg-red-50 p-1.5 rounded-full" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 5.4c-.1.4-.45.6-.85.6H4m14-6v6A2 2 0 0116 21H8a2 2 0 01-2-2v-6">
-                            </path>
-                        </svg>
-                    </div>
-        </div>
-        <h3 class="text-2xl font-bold text-gray-800 mb-2">Rp
-            {{ number_format($apbdesRingkasan['belanja_realisasi'] / 1000000, 1, ',', '.') }} Jt</h3>
-        <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
-            @php $belanjaPct = $apbdesRingkasan['belanja_target'] > 0 ? ($apbdesRingkasan['belanja_realisasi'] / $apbdesRingkasan['belanja_target']) * 100 : 0; @endphp
-            <div class="bg-red-500 h-2 rounded-full" style="width: {{ min(100, $belanjaPct) }}%"></div>
-        </div>
-        <p class="text-xs text-red-600 font-medium">Realisasi {{ number_format($belanjaPct, 0) }}% dari Rp
-            {{ number_format($apbdesRingkasan['belanja_target'] / 1000000, 0, ',', '.') }} Jt</p>
-        </article>
-
-        <!-- Card Pembiayaan Netto -->
-        <article
-            class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:-translate-y-1 hover:shadow-lg transition-all">
-            <div class="flex justify-between items-start mb-2">
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pembiayaan Netto</p>
-                <svg class="w-8 h-8 text-purple-500 bg-purple-50 p-1.5 rounded-full" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                    </path>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mt-2 mb-1">Rp
-                {{ number_format($apbdesRingkasan['pembiayaan_netto'], 0, ',', '.') }}</h3>
-            <p class="text-xs text-gray-500">Penerimaan - Pengeluaran</p>
-        </article>
-
-        <!-- Card Surplus / Defisit (SiLPA) -->
-        <article
-            class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 hover:-translate-y-1 hover:shadow-lg transition-all">
-            <div class="flex justify-between items-start mb-2">
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">SiLPA / Surplus</p>
-                <svg class="w-8 h-8 text-green-500 bg-green-50 p-1.5 rounded-full" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                    </path>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-green-600 mt-2 mb-1">Rp
-                {{ number_format($apbdesRingkasan['silpa'], 0, ',', '.') }}</h3>
-            <p class="text-xs text-gray-500">Sisa Lebih Perhitungan Anggaran</p>
-        </article>
-        </div>
-        </section>
+            </section>
 
         <!-- SECTION 4: GRAFIK APBDES (VISUALISASI KEUANGAN) -->
         <section class="mb-14">
@@ -160,7 +138,7 @@
                         </path>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800">Visualisasi Keuangan {{ request('tahun', 2024) }}</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Visualisasi Keuangan {{ $tahunBerjalan }}</h2>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Chart Anggaran vs Realisasi (Bar Chart) -->
@@ -246,6 +224,60 @@
                                 <td class="px-5 py-4 text-sm font-bold text-gray-800">JUMLAH BELANJA</td>
                                 <td class="px-5 py-4 text-sm font-bold text-red-700 text-right">
                                     {{ number_format($apbdesRingkasan['belanja_target'], 0, ',', '.') }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Breakdown Pembiayaan Desa -->
+            <section class="lg:col-span-2">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Breakdown Pembiayaan Desa</h3>
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Uraian Pembiayaan</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Anggaran (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            @if(count($rincianPembiayaan['penerimaan']) > 0)
+                                <tr class="bg-gray-50/80">
+                                    <td colspan="2" class="px-6 py-2 text-xs font-bold text-gray-500">
+                                        <i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Penerimaan Pembiayaan
+                                    </td>
+                                </tr>
+                                @foreach($rincianPembiayaan['penerimaan'] as $item)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-3 text-sm pl-12 text-gray-700">{{ $item['uraian'] }}</td>
+                                        <td class="px-6 py-3 text-sm font-medium text-gray-900 text-right">{{ number_format($item['anggaran'], 0, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                            @if(count($rincianPembiayaan['pengeluaran']) > 0)
+                                <tr class="bg-gray-50/80">
+                                    <td colspan="2" class="px-6 py-2 text-xs font-bold text-gray-500 border-t border-gray-200">
+                                        <i class="fa-solid fa-minus-circle text-red-500 mr-2"></i>Pengeluaran Pembiayaan
+                                    </td>
+                                </tr>
+                                @foreach($rincianPembiayaan['pengeluaran'] as $item)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-3 text-sm pl-12 text-gray-700">{{ $item['uraian'] }}</td>
+                                        <td class="px-6 py-3 text-sm font-medium text-gray-900 text-right">{{ number_format($item['anggaran'], 0, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                            @if(count($rincianPembiayaan['penerimaan']) === 0 && count($rincianPembiayaan['pengeluaran']) === 0)
+                                <tr>
+                                    <td colspan="2" class="px-6 py-4 text-sm text-gray-500 text-center italic">Belum ada data pembiayaan untuk tahun ini.</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                        <tfoot class="bg-purple-50 border-t-2 border-purple-200">
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-800">PEMBIAYAAN NETTO</td>
+                                <td class="px-6 py-4 text-sm font-bold text-purple-700 text-right">{{ number_format($apbdesRingkasan['pembiayaan_netto'], 0, ',', '.') }}</td>
                             </tr>
                         </tfoot>
                     </table>

@@ -26,6 +26,16 @@ class Article extends Model
         'published_at' => 'datetime',
     ];
 
+    // ── Scopes ──
+
+    public function scopePublished($query)
+    {
+        return $query->whereIn('status', ['published', 'publish'])
+                     ->where('published_at', '<=', now());
+    }
+
+    // ── Relationships ──
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -41,8 +51,35 @@ class Article extends Model
         return $this->belongsToMany(Tag::class, 'article_tag');
     }
 
+    // ── Accessors ──
+
     public function getThumbnailUrlAttribute()
     {
-        return $this->cover_image ? asset('storage/' . $this->cover_image) : asset('assets/img/berita/berita1.jpg');
+        return $this->cover_image
+            ? asset('storage/' . $this->cover_image)
+            : asset('assets/img/berita/berita1.jpg');
+    }
+
+    public function getAuthorNameAttribute()
+    {
+        return $this->user?->name ?? 'Admin Desa';
+    }
+
+    public function getCategoryNameAttribute()
+    {
+        return $this->category?->nama_kategori ?? 'Umum';
+    }
+
+    public function getFormattedDateAttribute()
+    {
+        return $this->published_at
+            ? $this->published_at->translatedFormat('d M Y')
+            : $this->created_at->translatedFormat('d M Y');
+    }
+
+    public function getExcerptAttribute()
+    {
+        if ($this->ringkasan) return $this->ringkasan;
+        return \Str::limit(strip_tags($this->konten_html), 160);
     }
 }

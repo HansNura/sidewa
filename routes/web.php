@@ -68,6 +68,7 @@ Route::get('/lapak', [FrontendPageController::class, 'lapak'])->name('lapak');
 Route::get('/lapak/{slug}', [FrontendPageController::class, 'lapakDetail'])->name('lapak.detail');
 
 Route::get('/informasi/berita-artikel', [FrontendPageController::class, 'beritaArtikel'])->name('informasi.berita-artikel');
+Route::get('/informasi/berita-artikel/{slug}', [FrontendPageController::class, 'beritaDetail'])->name('informasi.berita-detail');
 Route::get('/informasi/pengumuman-agenda', [FrontendPageController::class, 'pengumumanAgenda'])->name('informasi.pengumuman');
 Route::get('/informasi/produk-hukum', [FrontendPageController::class, 'produkHukum'])->name('informasi.hukum');
 Route::get('/informasi/informasi-publik', [FrontendPageController::class, 'informasiPublik'])->name('informasi.publik');
