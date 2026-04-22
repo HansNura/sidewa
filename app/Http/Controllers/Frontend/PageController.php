@@ -164,66 +164,63 @@ class PageController extends Controller
     }
 
     /**
-     * Tampilkan halaman Pengumuman & Agenda
+     * Tampilkan halaman Pengumuman & Agenda — full DB-driven.
      */
-    public function pengumumanAgenda()
+    public function pengumumanAgenda(Request $request)
     {
         $pageTitle = "Pengumuman & Agenda";
         $pageSubtitle = "Pusat informasi resmi terkini dan jadwal kegiatan mendatang di lingkungan Pemerintahan Desa Sindangmukti.";
 
-        $pengumumanPenting = [
-            'tanggal' => '24 Okt 2024',
-            'judul' => 'Pemadaman Listrik Bergilir & Perbaikan Jaringan Air Bersih di Dusun I dan II',
-            'ringkasan' => 'Sehubungan dengan adanya perbaikan gardu induk PLN dan pipanisasi saluran air bersih desa, akan dilakukan pemadaman listrik sementara dan penghentian aliran air pada hari Sabtu, 28 Oktober 2024 mulai pukul 08.00 - 15.00 WIB. Dimohon warga mempersiapkan cadangan air.'
-        ];
+        // ── Filter bulan & tahun ──
+        $bulan = (int) $request->query('bulan', now()->month);
+        $tahun = (int) $request->query('tahun', now()->year);
 
-        $daftarAgenda = [
-            [
-                'hari_tanggal' => '10',
-                'bulan' => 'Okt',
-                'tema_warna' => 'green',
-                'judul' => 'Penyuluhan Stunting & Posyandu Serentak',
-                'waktu' => '08.00 - Selesai',
-                'lokasi' => 'Balai Desa Sindangmukti',
-                'ringkasan' => 'Kegiatan rutin bulanan bagi balita dan ibu hamil yang akan dipantau langsung oleh tim medis dari Puskesmas kecamatan. Wajib membawa buku KIA.',
-                'detail' => [
-                    'tanggal_full' => 'Kamis, 10 Oktober 2024',
-                    'peta_link' => '#',
-                    'kontak' => 'Ibu Siti Aminah (Bidan Desa) - 0812 3456 7890',
-                    'deskripsi' => 'Pemerintah Desa Sindangmukti bekerja sama dengan Puskesmas Kecamatan mengundang seluruh ibu hamil dan orang tua yang memiliki anak usia balita (0-5 tahun) untuk hadir dalam kegiatan Posyandu Serentak dan Penyuluhan Pencegahan Stunting.',
-                    'poin' => [
-                        'Penimbangan berat badan dan pengukuran tinggi badan anak.',
-                        'Pemberian makanan tambahan (PMT) bergizi.',
-                        'Imunisasi dasar lengkap (bagi yang belum).',
-                        'Penyuluhan gizi bagi ibu hamil dan menyusui.'
-                    ],
-                    'catatan' => 'Harap membawa Buku KIA (Kesehatan Ibu dan Anak) sebagai syarat pendaftaran.',
-                    'gambar' => 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=800'
-                ]
-            ],
-            [
-                'hari_tanggal' => '15',
-                'bulan' => 'Okt',
-                'tema_warna' => 'amber',
-                'judul' => 'Rapat Koordinasi BPD & Perangkat Desa (Musdes)',
-                'waktu' => '19.30 - 22.00',
-                'lokasi' => 'Ruang Rapat Kantor Desa',
-                'ringkasan' => 'Pembahasan evaluasi rancangan Anggaran Pendapatan dan Belanja Desa (APBDes) Perubahan untuk kuartal akhir tahun 2024 bersama anggota BPD.',
-                'detail' => null
-            ],
-            [
-                'hari_tanggal' => '25',
-                'bulan' => 'Okt',
-                'tema_warna' => 'blue',
-                'judul' => 'Kerja Bakti Massal Normalisasi Saluran Irigasi',
-                'waktu' => '07.00 - 11.00',
-                'lokasi' => 'Sepanjang Jalur Irigasi Dusun II',
-                'ringkasan' => 'Diimbau kepada seluruh warga Dusun II laki-laki untuk membawa peralatan seperti cangkul dan sabit guna membersihkan rumput dan lumpur di saluran air.',
-                'detail' => null
-            ]
-        ];
+        // ── Pengumuman penting terbaru (is_important = true, published, not expired) ──
+        $pengumumanPenting = \App\Models\InformasiPublik::active()
+            ->pengumuman()
+            ->where('is_important', true)
+            ->where(function ($q) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '>=', now());
+            })
+            ->orderByDesc('start_date')
+            ->first();
 
-        return view('pages.frontend.informasi.pengumuman-agenda', compact('pageTitle', 'pageSubtitle', 'pengumumanPenting', 'daftarAgenda'));
+        // ── Daftar agenda bulan yang dipilih ──
+        $daftarAgenda = \App\Models\InformasiPublik::active()
+            ->agenda()
+            ->whereMonth('start_date', $bulan)
+            ->whereYear('start_date', $tahun)
+            ->orderBy('start_date')
+            ->paginate(10)
+            ->withQueryString();
+
+        // ── Data kalender: tanggal-tanggal yang punya event ──
+        $calendarEvents = \App\Models\InformasiPublik::active()
+            ->whereMonth('start_date', $bulan)
+            ->whereYear('start_date', $tahun)
+            ->get()
+            ->map(fn($item) => [
+                'day'  => (int) $item->start_date->format('d'),
+                'type' => $item->type,
+                'title' => $item->title,
+            ]);
+
+        // ── Tahun yang tersedia untuk dropdown filter ──
+        $availableYears = \App\Models\InformasiPublik::whereNotNull('start_date')
+            ->pluck('start_date')
+            ->map(fn($d) => \Carbon\Carbon::parse($d)->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([now()->year]);
+        }
+
+        return view('pages.frontend.informasi.pengumuman-agenda', compact(
+            'pageTitle', 'pageSubtitle', 'pengumumanPenting', 'daftarAgenda',
+            'calendarEvents', 'bulan', 'tahun', 'availableYears'
+        ));
     }
 
     /**
