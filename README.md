@@ -1,4 +1,4 @@
-# 🏘️ SIDEWA — Sistem Informasi Desa Sindangmukti
+# 🏘️ SIDEWA — Sistem Informasi Desa Warga
 
 > Platform digital terintegrasi untuk tata kelola administrasi, pelayanan publik, dan transparansi informasi Desa Sindangmukti, Kecamatan Mangunjaya, Kabupaten Pangandaran, Jawa Barat.
 
