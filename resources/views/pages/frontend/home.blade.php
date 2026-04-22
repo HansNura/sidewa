@@ -183,24 +183,24 @@
         <div class="grid items-center max-w-6xl gap-12 px-6 mx-auto md:grid-cols-2">
             <!-- FOTO KEPALA DESA -->
             <div class="relative">
-                <img src="{{ asset('assets/img/people.png') }}" alt="Kepala Desa Sindangmukti"
+                <img src="{{ asset('assets/img/people.png') }}" alt="Kepala Desa {{ $village->nama_desa }}"
                     class="object-cover w-full" />
                 <div
                     class="absolute -bottom-4 -right-4 bg-[#2E7D32] text-white px-4 py-2 rounded-tl-lg rounded-br-2xl shadow-md text-sm">
-                    Kepala Desa Sindangmukti
+                    {{ $village->jabatan_kades ?? 'Kepala Desa' }} {{ $village->nama_desa }}
                 </div>
             </div>
 
             <!-- TEKS SAMBUTAN -->
             <div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-4">
-                    Sambutan Kepala Desa
+                    Sambutan {{ $village->jabatan_kades ?? 'Kepala Desa' }}
                 </h2>
                 <p class="mb-6 leading-relaxed text-gray-700">
-                    Assalamu’alaikum warahmatullahi wabarakatuh. Puji
+                    Assalamu'alaikum warahmatullahi wabarakatuh. Puji
                     syukur kita panjatkan ke hadirat Allah SWT, karena
                     atas rahmat dan karunia-Nya website resmi
-                    <strong>Desa Sindangmukti</strong> ini dapat terwujud
+                    <strong>Desa {{ $village->nama_desa }}</strong> ini dapat terwujud
                     sebagai sarana informasi, komunikasi, dan
                     transparansi bagi seluruh masyarakat.
                 </p>
@@ -216,10 +216,10 @@
                 <!-- Tanda tangan -->
                 <div class="mt-8">
                     <p class="text-lg font-semibold text-gray-800">
-                        Nama Kepala Desa
+                        {{ $village->nama_kades ?? 'Kepala Desa' }}
                     </p>
                     <p class="text-sm text-gray-500">
-                        Kepala Desa Sindangmukti
+                        {{ $village->jabatan_kades ?? 'Kepala Desa' }} {{ $village->nama_desa }}
                     </p>
                 </div>
             </div>
@@ -246,7 +246,7 @@
     </section>
 
     <!-- STRUKTUR ORGANISASI BPD -->
-    <section id="bpd" class="bg-[#white] py-24">
+    <section id="bpd" class="bg-white py-24">
         <div class="max-w-6xl px-6 mx-auto text-center">
             <h2 class="text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-4">
                 Struktur Organisasi BPD Desa Sindangmukti
@@ -291,21 +291,21 @@
             <div class="grid gap-8 mb-16 sm:grid-cols-2 md:grid-cols-3">
                 <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
                     <h3 class="text-2xl font-bold text-[#2E7D32]">
-                        1,245
+                        {{ number_format($totalKK) }}
                     </h3>
                     <p class="text-gray-600">Jumlah Kepala Keluarga</p>
                 </div>
                 <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
                     <h3 class="text-2xl font-bold text-[#2E7D32]">
-                        3,912
+                        {{ number_format($pendudukStats['total']) }}
                     </h3>
                     <p class="text-gray-600">Total Penduduk</p>
                 </div>
                 <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
                     <h3 class="text-2xl font-bold text-[#2E7D32]">
-                        12
+                        {{ $totalRtRw }}
                     </h3>
-                    <p class="text-gray-600">Jumlah RT & RW</p>
+                    <p class="text-gray-600">Jumlah Wilayah</p>
                 </div>
             </div>
 
@@ -335,7 +335,7 @@
             <div class="mb-16 text-center">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-3">
                     Transparansi APBDes Tahun
-                    <span id="apbdes-tahun">...</span>
+                    <span>{{ $tahunApbdes }}</span>
                 </h2>
                 <p class="max-w-2xl mx-auto text-gray-700">
                     Data Anggaran Pendapatan dan Belanja Desa Sindangmukti.
@@ -352,11 +352,11 @@
                             <h4 class="mb-2 text-lg font-semibold text-green-700">
                                 Pendapatan
                             </h4>
-                            <p id="pendapatan-anggaran" class="text-sm text-gray-600">
-                                Anggaran: Rp 0
+                            <p class="text-sm text-gray-600">
+                                Anggaran: Rp {{ number_format($apbdesSummary['pendapatan'], 0, ',', '.') }}
                             </p>
-                            <p id="pendapatan-realisasi" class="mb-4 text-sm text-gray-600">
-                                Realisasi: Rp 0
+                            <p class="mb-4 text-sm text-gray-600">
+                                Realisasi: Rp {{ number_format($apbdesSummary['pendapatan_realisasi'], 0, ',', '.') }}
                             </p>
                         </div>
                         <div class="p-3 bg-green-100 rounded-full">
@@ -368,10 +368,10 @@
                         </div>
                     </div>
                     <div class="h-3 overflow-hidden bg-gray-200 rounded-full">
-                        <div id="pendapatan-bar" class="h-3 bg-[#2E7D32]" style="width: 0%"></div>
+                        <div class="h-3 bg-[#2E7D32] transition-all duration-700" style="width: {{ min($pendapatanPersen, 100) }}%"></div>
                     </div>
-                    <p id="pendapatan-persen" class="mt-1 text-xs text-right text-gray-500">
-                        0% terealisasi
+                    <p class="mt-1 text-xs text-right text-gray-500">
+                        {{ $pendapatanPersen }}% terealisasi
                     </p>
                 </div>
 
@@ -382,11 +382,11 @@
                             <h4 class="mb-2 text-lg font-semibold text-red-700">
                                 Belanja
                             </h4>
-                            <p id="belanja-anggaran" class="text-sm text-gray-600">
-                                Anggaran: Rp 0
+                            <p class="text-sm text-gray-600">
+                                Anggaran: Rp {{ number_format($apbdesSummary['belanja'], 0, ',', '.') }}
                             </p>
-                            <p id="belanja-realisasi" class="mb-4 text-sm text-gray-600">
-                                Realisasi: Rp 0
+                            <p class="mb-4 text-sm text-gray-600">
+                                Realisasi: Rp {{ number_format($apbdesSummary['belanja_realisasi'], 0, ',', '.') }}
                             </p>
                         </div>
                         <div class="p-3 bg-red-100 rounded-full">
@@ -398,10 +398,10 @@
                         </div>
                     </div>
                     <div class="h-3 overflow-hidden bg-gray-200 rounded-full">
-                        <div id="belanja-bar" class="h-3 bg-red-600" style="width: 0%"></div>
+                        <div class="h-3 bg-red-600 transition-all duration-700" style="width: {{ min($belanjaPersen, 100) }}%"></div>
                     </div>
-                    <p id="belanja-persen" class="mt-1 text-xs text-right text-gray-500">
-                        0% terealisasi
+                    <p class="mt-1 text-xs text-right text-gray-500">
+                        {{ $belanjaPersen }}% terealisasi
                     </p>
                 </div>
 
@@ -412,11 +412,11 @@
                             <h4 class="mb-2 text-lg font-semibold text-blue-700">
                                 Pembiayaan
                             </h4>
-                            <p id="pembiayaan-anggaran" class="text-sm text-gray-600">
-                                Anggaran: Rp 0
+                            <p class="text-sm text-gray-600">
+                                Anggaran: Rp {{ number_format($apbdesSummary['pembiayaan'], 0, ',', '.') }}
                             </p>
-                            <p id="pembiayaan-realisasi" class="mb-4 text-sm text-gray-600">
-                                Realisasi: Rp 0
+                            <p class="mb-4 text-sm text-gray-600">
+                                Realisasi: Rp {{ number_format($apbdesSummary['pembiayaan_realisasi'], 0, ',', '.') }}
                             </p>
                         </div>
                         <div class="p-3 bg-blue-100 rounded-full">
@@ -469,61 +469,7 @@
 
     <section id="berita" class="py-24 bg-[#F9FAFB]">
         <div class="px-6 mx-auto max-w-7xl" x-data="{
-            berita: [{
-                    id: 1,
-                    imgSrc: 'assets/img/berita/berita1.jpg',
-                    tanggal: '21 Okt 2025',
-                    judul: 'Desa Cerdas, Desa Berdaulat: Saatnya Mengelola Data Sendiri',
-                    admin: 'Edi Setiawan',
-                    views: '3.514',
-                    url: 'berita-detail.html'
-                },
-                {
-                    id: 2,
-                    imgSrc: 'assets/img/berita/berita1.jpg',
-                    tanggal: '18 Okt 2025',
-                    judul: 'Desa di Era Medsos dan Efek Domino Kepercayaan',
-                    admin: 'Edi Setiawan',
-                    views: '3.354',
-                    url: 'berita-detail.html'
-                },
-                {
-                    id: 3,
-                    imgSrc: 'assets/img/berita/berita1.jpg',
-                    tanggal: '17 Okt 2025',
-                    judul: 'Posbankum Desa: Melindungi Warga dengan Kearifan Lokal',
-                    admin: 'Edi Setiawan',
-                    views: '1.904',
-                    url: 'berita-detail.html'
-                },
-                {
-                    id: 4,
-                    imgSrc: 'assets/img/berita/berita1.jpg',
-                    tanggal: '15 Okt 2025',
-                    judul: 'Gotong Royong Bersihkan Saluran Irigasi Menjelang Musim Hujan',
-                    admin: 'Asep',
-                    views: '980',
-                    url: 'berita-detail.html'
-                },
-                {
-                    id: 5,
-                    imgSrc: 'assets/img/berita/berita1.jpg',
-                    tanggal: '12 Okt 2025',
-                    judul: 'Pelatihan UMKM: Ibu-Ibu Desa Sindangmukti Belajar Pemasaran Digital',
-                    admin: 'Edi Setiawan',
-                    views: '1.203',
-                    url: 'berita-detail.html'
-                },
-                {
-                    id: 6,
-                    imgSrc: 'assets/img/berita/berita1.jpg',
-                    tanggal: '10 Okt 2025',
-                    judul: 'Pembangunan Posyandu Baru Telah Selesai 100%',
-                    admin: 'Asep',
-                    views: '850',
-                    url: 'berita-detail.html'
-                }
-            ],
+            berita: {{ Js::from($articles) }},
             currentPage: 1,
             itemsPerPage: 3,
             get totalPages() {
@@ -628,26 +574,16 @@
         <div class="px-6 mx-auto max-w-7xl" x-data="{
             search: '',
             category: 'Semua',
-            categories: [],
-            produkList: [
-                { id: 1, foto: 'https://placehold.co/600x400/2E7D32/white?text=Produk+1', nama: 'Madu Odeng Asli', harga: 200000, kategori: 'Obat dan Herbal', pelapak: 'SITI ROHIMAH' },
-                { id: 2, foto: 'https://placehold.co/600x400/2E7D32/white?text=Produk+2', nama: 'Laundry', harga: 3500, kategori: 'Jasa', pelapak: 'SUSI SUCILAWATI' },
-                { id: 3, foto: 'https://placehold.co/600x400/2E7D32/white?text=Produk+3', nama: 'Cobek Kayu', harga: 8500, kategori: 'Toko Online', pelapak: 'CEPI CIPTA' },
-                { id: 4, foto: 'https://placehold.co/600x400/2E7D32/white?text=Produk+4', nama: 'RIFAN\'S SNACK & COOKIES', harga: 1000, kategori: 'Foods and Drinks', pelapak: 'NANI SURYANI' },
-            ],
-        
-            init() {
-                const allCategories = this.produkList.map(p => p.kategori);
-                this.categories = ['Semua', ...new Set(allCategories)];
-            },
-        
+            categories: ['Semua', ...{{ Js::from($productCategories) }}],
+            produkList: {{ Js::from($products) }},
+
             get filteredProduk() {
                 return this.produkList.filter(p =>
                     (this.category === 'Semua' || p.kategori === this.category) &&
                     (this.search === '' || p.nama.toLowerCase().includes(this.search.toLowerCase()))
                 );
             },
-        
+
             formatHarga(angka) {
                 return new Intl.NumberFormat('id-ID', {
                     style: 'currency',
@@ -655,7 +591,7 @@
                     minimumFractionDigits: 0
                 }).format(angka);
             }
-        }" x-init="init()">
+        }">
             <!-- JUDUL -->
             <div class="mb-12 text-center">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-3">
@@ -743,12 +679,7 @@
         categories: [],
         modalOpen: false,
         modalImage: null,
-        albums: [
-            { id: 1, title: 'Penyaluran BLT Dana Desa TA. 2024', category: 'pembangunan', img: 'https://placehold.co/600x600/2E7D32/white?text=Galeri+1' },
-            { id: 2, title: 'PKK Desa Jelang HKP 2021', category: 'sosial', img: 'https://placehold.co/600x600/FBC02D/white?text=Galeri+2' },
-            { id: 3, title: 'TPT Jln Lapang Volley Sukasari', category: 'pembangunan', img: 'https://placehold.co/600x600/2E7D32/white?text=Galeri+3' },
-            { id: 4, title: 'Normalisasi Saluran Cikapundung 21-11-2021', category: 'pembangunan', img: 'https://placehold.co/600x600/2E7D32/white?text=Galeri+4' },
-        ],
+        albums: {{ Js::from($albums) }},
     
         // IMPROVEMENT 1: Membuat kategori filter dinamis
         init() {
@@ -857,34 +788,88 @@
 
 @push('scripts')
     <script>
-        // Dummy Data for charts
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof Chart !== 'undefined') {
+                // ── Gender Pie Chart ────────────────
                 const ctxGender = document.getElementById('genderChart');
                 if (ctxGender) {
                     new Chart(ctxGender, {
                         type: 'pie',
                         data: {
-                            labels: ['Laki-laki', 'Perempuan'],
+                            labels: {!! json_encode($genderData['labels']) !!},
                             datasets: [{
-                                data: [1950, 1962],
+                                data: {!! json_encode($genderData['data']) !!},
                                 backgroundColor: ['#0288D1', '#FBC02D']
                             }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
                         }
                     });
                 }
 
+                // ── Pekerjaan Bar Chart ────────────────
                 const ctxPekerjaan = document.getElementById('pekerjaanChart');
                 if (ctxPekerjaan) {
                     new Chart(ctxPekerjaan, {
                         type: 'bar',
                         data: {
-                            labels: ['Petani', 'Wiraswasta', 'PNS', 'Buruh', 'Lainnya'],
+                            labels: {!! json_encode($pekerjaanChart['labels']) !!},
                             datasets: [{
-                                label: 'Jumlah Pekerjaan',
-                                data: [1200, 450, 80, 500, 300],
+                                label: 'Jumlah Penduduk',
+                                data: {!! json_encode($pekerjaanChart['data']) !!},
                                 backgroundColor: '#2E7D32'
                             }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // ── APBDes Income Chart ────────────────
+                const ctxIncome = document.getElementById('incomeChart');
+                if (ctxIncome) {
+                    new Chart(ctxIncome, {
+                        type: 'bar',
+                        data: {
+                            labels: {!! json_encode($incomeChartData['labels']) !!},
+                            datasets: [
+                                { label: 'Anggaran', data: {!! json_encode($incomeChartData['anggaran']) !!}, backgroundColor: '#2E7D32' },
+                                { label: 'Realisasi', data: {!! json_encode($incomeChartData['realisasi']) !!}, backgroundColor: '#81C784' }
+                            ]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            plugins: { legend: { position: 'bottom' } },
+                            scales: {
+                                x: { ticks: { callback: v => 'Rp ' + (v/1000000).toFixed(0) + ' Jt' } }
+                            }
+                        }
+                    });
+                }
+
+                // ── APBDes Expense Chart ────────────────
+                const ctxExpense = document.getElementById('expenseChart');
+                if (ctxExpense) {
+                    new Chart(ctxExpense, {
+                        type: 'bar',
+                        data: {
+                            labels: {!! json_encode($expenseChartData['labels']) !!},
+                            datasets: [
+                                { label: 'Anggaran', data: {!! json_encode($expenseChartData['anggaran']) !!}, backgroundColor: '#D32F2F' },
+                                { label: 'Realisasi', data: {!! json_encode($expenseChartData['realisasi']) !!}, backgroundColor: '#EF9A9A' }
+                            ]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            plugins: { legend: { position: 'bottom' } },
+                            scales: {
+                                x: { ticks: { callback: v => 'Rp ' + (v/1000000).toFixed(0) + ' Jt' } }
+                            }
                         }
                     });
                 }

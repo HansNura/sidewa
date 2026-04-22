@@ -43,6 +43,6 @@ class Article extends Model
 
     public function getThumbnailUrlAttribute()
     {
-        return $this->cover_image ? asset('storage/' . $this->cover_image) : 'https://placehold.co/800x400/e2e8f0/94a3b8?text=No+Image';
+        return $this->cover_image ? asset('storage/' . $this->cover_image) : asset('assets/img/berita/berita1.jpg');
     }
 }

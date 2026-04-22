@@ -498,172 +498,93 @@ class PageController extends Controller
     }
 
     /**
-     * Tampilkan antarmuka Lapak Desa
+     * Tampilkan antarmuka Lapak Desa (Index) — full DB-driven.
      */
-    public function lapak()
+    public function lapak(Request $request)
     {
-        $pageTitle = "Lapak Desa Sindangmukti";
+        $pageTitle    = "Lapak Desa Sindangmukti";
         $pageSubtitle = "Dukung perekonomian lokal dengan berbelanja produk unggulan hasil karya warga dan UMKM Desa Sindangmukti. Langsung dari pembuatnya!";
 
-        $kategoriLapak = [
-            ['label' => 'Makanan', 'icon' => 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 5.4c-.1.4-.45.6-.85.6H4m14-6v6A2 2 0 0116 21H8a2 2 0 01-2-2v-6'], // actually using simple string is fine but let's just make categories simple
-        ];
-        // For lapak index, I will simplify and directly pass standard categories array
-        $categories = [
-            ['name' => 'Semua', 'icon' => '', 'active' => true],
-            ['name' => 'Makanan', 'icon' => '<path stroke-linecap="..." d="..." />'], // Wait, I will just use text or simple icons in blade
-        ];
+        // ── Kategori untuk filter tabs ──
+        $categories = \App\Models\ProductCategory::orderBy('name')->get();
 
-        // Daftar produk mock
-        $daftarProduk = [
-            [
-                'slug' => 'keripik-pisang-kepok',
-                'nama' => 'Keripik Pisang Kepok Manis Gurih (250gr)',
-                'kategori' => 'Makanan',
-                'harga' => 'Rp 15.000',
-                'toko' => 'UMKM Mekar Jaya',
-                'terverifikasi' => true,
-                'gambar' => 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'bakul-nasi-anyaman-bambu',
-                'nama' => 'Bakul Nasi Anyaman Bambu Tradisional',
-                'kategori' => 'Kerajinan',
-                'harga' => 'Rp 45.000',
-                'toko' => 'Pengrajin Dusun II',
-                'terverifikasi' => true,
-                'gambar' => 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'madu-hutan-liar-murni',
-                'nama' => 'Madu Hutan Liar Murni Sukakerta (500ml)',
-                'kategori' => 'Kesehatan',
-                'harga' => 'Rp 85.000',
-                'toko' => 'Kelompok Tani Lebah',
-                'terverifikasi' => false,
-                'gambar' => 'https://images.unsplash.com/photo-1587049352847-4d4b137fabe9?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'kopi-bubuk-robusta',
-                'nama' => 'Kopi Bubuk Robusta Asli Petani Lokal',
-                'kategori' => 'Minuman',
-                'harga' => 'Rp 25.000',
-                'toko' => 'Kopi Mang Ujang',
-                'terverifikasi' => true,
-                'gambar' => 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'kain-batik-tulis',
-                'nama' => 'Kain Batik Tulis Motif Khas Pedesaan',
-                'kategori' => 'Fashion',
-                'harga' => 'Rp 150.000',
-                'toko' => 'Sanggar Batik Ibu',
-                'terverifikasi' => false,
-                'gambar' => 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'bibit-tanaman-buah',
-                'nama' => 'Bibit Tanaman Buah Alpukat Miki Unggul',
-                'kategori' => 'Pertanian',
-                'harga' => 'Rp 35.000',
-                'toko' => 'Koperasi Tani Sejahtera',
-                'terverifikasi' => true,
-                'gambar' => 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'sambal-bawang-pedas',
-                'nama' => 'Sambal Bawang Pedas Botol Kaca (150gr)',
-                'kategori' => 'Makanan',
-                'harga' => 'Rp 22.000',
-                'toko' => 'Dapur Ibu Titi',
-                'terverifikasi' => false,
-                'gambar' => 'https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'rengginang-ketan-asli',
-                'nama' => 'Rengginang Ketan Asli Renyah Isi 20 Pcs',
-                'kategori' => 'Makanan',
-                'harga' => 'Rp 18.000',
-                'toko' => 'UMKM Suka Rasa',
-                'terverifikasi' => true,
-                'gambar' => 'https://images.unsplash.com/photo-1544681280-d25a782adc9b?auto=format&fit=crop&q=80&w=600'
-            ]
-        ];
+        // ── Query utama ──
+        $query = \App\Models\Product::active()->with('category');
 
-        return view('pages.frontend.lapak.index', compact('pageTitle', 'pageSubtitle', 'daftarProduk'));
+        // Filter by category
+        $activeCategory = $request->query('kategori');
+        if ($activeCategory && $activeCategory !== 'semua') {
+            $query->whereHas('category', fn($q) => $q->where('slug', $activeCategory));
+        }
+
+        // Search
+        $search = $request->query('q');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('seller_name', 'like', "%{$search}%")
+                  ->orWhere('description_html', 'like', "%{$search}%");
+            });
+        }
+
+        // Sort
+        $sort = $request->query('sort', 'terbaru');
+        $query = match ($sort) {
+            'harga_rendah' => $query->orderBy('price', 'asc'),
+            'harga_tinggi' => $query->orderBy('price', 'desc'),
+            'nama'         => $query->orderBy('name', 'asc'),
+            default        => $query->orderByDesc('created_at'), // terbaru
+        };
+
+        // Paginate (8 per page)
+        $products = $query->paginate(8)->withQueryString();
+
+        // Stats
+        $totalProducts = \App\Models\Product::active()->count();
+
+        return view('pages.frontend.lapak.index', compact(
+            'pageTitle',
+            'pageSubtitle',
+            'categories',
+            'products',
+            'activeCategory',
+            'search',
+            'sort',
+            'totalProducts',
+        ));
     }
 
     /**
-     * Tampilkan detail Lapak Desa
+     * Tampilkan detail Produk Lapak Desa — full DB-driven.
      */
     public function lapakDetail($slug)
     {
-        // Dalam implementasi nyata, $slug digunakan untuk query ke Database (Produk::where('slug', $slug)->firstOrFail())
-        
-        $produk = [
-            'slug' => 'keripik-pisang-kepok',
-            'nama' => 'Keripik Pisang Kepok Manis Gurih (250gr)',
-            'kategori' => 'Makanan & Camilan',
-            'harga' => 'Rp 15.000',
-            'rating' => 4.9,
-            'ulasan_count' => 42,
-            'stok' => 'Tersedia (50+ pcs)',
-            'berat' => '250 Gram / Bungkus',
-            'ketahanan' => '3 Bulan (Suhu Ruang)',
-            'pengiriman' => 'Dari Desa Sindangmukti',
-            'deskripsi_singkat' => 'Keripik pisang khas Sindangmukti yang terbuat dari pisang kepok pilihan hasil panen kebun sendiri. Diiris tipis, digoreng renyah dengan minyak berkualitas, dan dibalut bumbu manis gurih tanpa bahan pengawet buatan.',
-            'toko' => [
-                'nama' => 'UMKM Mekar Jaya',
-                'terverifikasi' => true,
-                'lokasi' => 'Dusun I RT 02 / RW 01',
-                'bergabung' => 'Januari 2023',
-                'total_produk' => 8,
-                'kurir' => 'JNE, Ambil Sendiri'
-            ],
-            'gambar_utama' => 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&q=80&w=800',
-            'galeri' => [
-                'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1599598425947-3300262174fc?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&q=80&w=800'
-            ]
-        ];
+        $product = \App\Models\Product::where('slug', $slug)
+            ->where('status', 'aktif')
+            ->with('category')
+            ->firstOrFail();
 
-        // Terkait (Ambil 4 produk acak)
-        $terkait = [
-            [
-                'slug' => 'rengginang-ketan-asli',
-                'nama' => 'Rengginang Ketan Asli Renyah Isi 20 Pcs',
-                'kategori' => 'Makanan',
-                'harga' => 'Rp 18.000',
-                'toko' => 'UMKM Suka Rasa',
-                'gambar' => 'https://images.unsplash.com/photo-1544681280-d25a782adc9b?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'sambal-bawang-pedas',
-                'nama' => 'Sambal Bawang Pedas Botol Kaca (150gr)',
-                'kategori' => 'Makanan',
-                'harga' => 'Rp 22.000',
-                'toko' => 'Dapur Ibu Titi',
-                'gambar' => 'https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'kopi-bubuk-robusta',
-                'nama' => 'Kopi Bubuk Robusta Asli Petani Lokal',
-                'kategori' => 'Minuman',
-                'harga' => 'Rp 25.000',
-                'toko' => 'Kopi Mang Ujang',
-                'gambar' => 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80&w=600'
-            ],
-            [
-                'slug' => 'madu-hutan-liar-murni',
-                'nama' => 'Madu Hutan Liar Murni Sukakerta (500ml)',
-                'kategori' => 'Kesehatan',
-                'harga' => 'Rp 85.000',
-                'toko' => 'Kelompok Tani Lebah',
-                'gambar' => 'https://images.unsplash.com/photo-1587049352847-4d4b137fabe9?auto=format&fit=crop&q=80&w=600'
-            ]
-        ];
+        // Produk terkait (kategori sama, max 4, exclude current)
+        $related = \App\Models\Product::active()
+            ->where('id', '!=', $product->id)
+            ->where('category_id', $product->category_id)
+            ->limit(4)
+            ->get();
 
-        return view('pages.frontend.lapak.detail', compact('produk', 'terkait'));
+        // Jika related kurang dari 4, tambahkan produk random
+        if ($related->count() < 4) {
+            $moreNeeded = 4 - $related->count();
+            $excludeIds = $related->pluck('id')->push($product->id)->toArray();
+
+            $extras = \App\Models\Product::active()
+                ->whereNotIn('id', $excludeIds)
+                ->inRandomOrder()
+                ->limit($moreNeeded)
+                ->get();
+
+            $related = $related->concat($extras);
+        }
+
+        return view('pages.frontend.lapak.detail', compact('product', 'related'));
     }
 }

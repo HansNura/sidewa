@@ -22,18 +22,74 @@ class Product extends Model
         'status',
     ];
 
+    // ─── Relations ────────────────────────────────────────────
+
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
     }
+
+    // ─── Scopes ───────────────────────────────────────────────
 
     public function scopeActive($query)
     {
         return $query->where('status', 'aktif');
     }
 
-    // Mutator for Whatsapp formatting
-    // Ensure all saved phone numbers have 628 format
+    // ─── Accessors ────────────────────────────────────────────
+
+    /**
+     * Get the product image URL with local fallback.
+     */
+    public function getImageUrlAttribute(): string
+    {
+        if ($this->image_path) {
+            return asset('storage/' . $this->image_path);
+        }
+
+        return asset('assets/img/galeri/galeri1.jpg');
+    }
+
+    /**
+     * Get formatted price in Rupiah.
+     */
+    public function getFormattedPriceAttribute(): string
+    {
+        return 'Rp ' . number_format($this->price, 0, ',', '.');
+    }
+
+    /**
+     * Get WhatsApp order link.
+     */
+    public function getWhatsappLinkAttribute(): string
+    {
+        $phone = $this->seller_phone ?: '6281234567890';
+        $text  = urlencode("Halo, saya tertarik dengan produk \"{$this->name}\" di Lapak Desa Sindangmukti. Apakah masih tersedia?");
+
+        return "https://wa.me/{$phone}?text={$text}";
+    }
+
+    /**
+     * Get stock availability label.
+     */
+    public function getStockLabelAttribute(): string
+    {
+        if ($this->stock === null || $this->stock <= 0) {
+            return 'Stok Habis';
+        }
+
+        if ($this->stock > 50) {
+            return "Tersedia (50+ pcs)";
+        }
+
+        return "Tersedia ({$this->stock} pcs)";
+    }
+
+    // ─── Mutators ─────────────────────────────────────────────
+
+    /**
+     * Ensure all saved phone numbers have 628 format.
+     */
     public function setSellerPhoneAttribute($value)
     {
         // Remove all non-numeric characters
