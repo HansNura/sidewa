@@ -224,100 +224,64 @@ class PageController extends Controller
     }
 
     /**
-     * Tampilkan halaman Produk Hukum Desa
+     * Tampilkan halaman Produk Hukum Desa — full DB-driven.
      */
-    public function produkHukum()
+    public function produkHukum(Request $request)
     {
         $pageTitle = "JDIH & Produk Hukum Desa";
         $pageSubtitle = "Wadah keterbukaan informasi produk hukum pemerintahan. Jelajahi Peraturan Desa, Keputusan Kepala Desa, dan dokumen regulasi resmi lainnya.";
 
-        $statistikHukum = [
-            'perdes' => 45,
-            'sk_kades' => 112,
-            'perkades' => 24,
-            'kep_bpd' => 18
-        ];
+        // ── Filters ──
+        $search   = $request->query('q');
+        $kategori = $request->query('kategori');
+        $tahun    = $request->query('tahun');
 
-        $daftarHukum = [
-            [
-                'id' => 'perdes-04-2024',
-                'tipe_icon' => 'fa-file-pdf',
-                'tipe_warna' => 'red', // red untuk pdf
-                'kategori' => 'Peraturan Desa',
-                'kategori_warna' => 'blue',
-                'status' => 'Berlaku',
-                'status_ikon' => 'fa-check-circle',
-                'status_warna' => 'green',
-                'judul' => 'Peraturan Desa Sindangmukti Nomor 04 Tahun 2024',
-                'tentang' => 'Rencana Kerja Pemerintah Desa (RKPDes) Tahun Anggaran 2025',
-                'ditetapkan' => '15 Okt 2024',
-                'unduhan' => 124,
-                'detail' => [
-                    'nomor' => '04',
-                    'tahun' => '2024',
-                    'diundangkan' => '17 Okt 2024',
-                    'pemrakarsa' => 'Pemerintah Desa',
-                    'penandatangan' => 'Kepala Desa Sindangmukti',
-                    'file_nama' => 'Perdes_04_2024_RKPDes.pdf',
-                    'file_ukuran' => '2.4 MB',
-                    'file_tipe' => 'PDF',
-                    'link_unduh' => '#'
-                ]
-            ],
-            [
-                'id' => 'sk-141-015-2024',
-                'tipe_icon' => 'fa-file-pdf',
-                'tipe_warna' => 'red',
-                'kategori' => 'SK Kepala Desa',
-                'kategori_warna' => 'emerald',
-                'status' => 'Berlaku',
-                'status_ikon' => 'fa-check-circle',
-                'status_warna' => 'green',
-                'judul' => 'Keputusan Kepala Desa Sindangmukti Nomor 141/015/SK/2024',
-                'tentang' => 'Pembentukan Susunan Pengurus Karang Taruna "Bina Karya" Masa Bakti 2024-2027',
-                'ditetapkan' => '02 Sep 2024',
-                'unduhan' => 85,
-                'detail' => [
-                    'nomor' => '141/015/SK/2024',
-                    'tahun' => '2024',
-                    'diundangkan' => '03 Sep 2024',
-                    'pemrakarsa' => 'Pemerintah Desa',
-                    'penandatangan' => 'Kepala Desa Sindangmukti',
-                    'file_nama' => 'SK_Karang_Taruna_2024.pdf',
-                    'file_ukuran' => '1.2 MB',
-                    'file_tipe' => 'PDF',
-                    'link_unduh' => '#'
-                ]
-            ],
-            [
-                'id' => 'perdes-02-2020',
-                'tipe_icon' => 'fa-file-pdf',
-                'tipe_warna' => 'gray', // karena dicabut
-                'kategori' => 'Peraturan Desa',
-                'kategori_warna' => 'blue',
-                'status' => 'Tidak Berlaku / Dicabut',
-                'status_ikon' => 'fa-ban',
-                'status_warna' => 'red',
-                'judul' => 'Peraturan Desa Sindangmukti Nomor 02 Tahun 2020',
-                'tentang' => 'Pembentukan Badan Usaha Milik Desa (BUMDes) "Sejahtera"',
-                'keterangan_status' => '*Telah digantikan oleh Perdes No. 01 Tahun 2024',
-                'ditetapkan' => '10 Feb 2020',
-                'unduhan' => 0, // opsional untuk dicabut
-                'detail' => [
-                    'nomor' => '02',
-                    'tahun' => '2020',
-                    'diundangkan' => '12 Feb 2020',
-                    'pemrakarsa' => 'Pemerintah Desa',
-                    'penandatangan' => 'Kepala Desa Sindangmukti',
-                    'file_nama' => 'Perdes_02_2020_BUMDes.pdf',
-                    'file_ukuran' => '3.1 MB',
-                    'file_tipe' => 'PDF',
-                    'link_unduh' => '#'
-                ]
-            ]
-        ];
+        // ── Category stats (count per category) ──
+        $categories = \App\Models\JdihCategory::withCount('documents')->orderBy('name')->get();
 
-        return view('pages.frontend.informasi.produk-hukum', compact('pageTitle', 'pageSubtitle', 'statistikHukum', 'daftarHukum'));
+        // ── Build query ──
+        $query = \App\Models\JdihDocument::with('category')
+            ->orderByRaw("CASE WHEN status = 'berlaku' THEN 0 ELSE 1 END")
+            ->orderByDesc('established_date');
+
+        if ($search) {
+            $query->search($search);
+        }
+        if ($kategori) {
+            $query->byCategory($kategori);
+        }
+        if ($tahun) {
+            $query->byYear($tahun);
+        }
+
+        $daftarHukum = $query->paginate(10)->withQueryString();
+
+        // ── Available years for filter dropdown ──
+        $availableYears = \App\Models\JdihDocument::whereNotNull('established_date')
+            ->pluck('established_date')
+            ->map(fn($d) => \Carbon\Carbon::parse($d)->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return view('pages.frontend.informasi.produk-hukum', compact(
+            'pageTitle', 'pageSubtitle', 'categories', 'daftarHukum',
+            'search', 'kategori', 'tahun', 'availableYears'
+        ));
+    }
+
+    /**
+     * Download JDIH document and increment counter.
+     */
+    public function downloadJdih(\App\Models\JdihDocument $document)
+    {
+        $document->increment('download_count');
+
+        if ($document->file_path && \Storage::disk('public')->exists($document->file_path)) {
+            return \Storage::disk('public')->download($document->file_path, $document->file_name);
+        }
+
+        return back()->with('error', 'File dokumen tidak tersedia.');
     }
 
     /**

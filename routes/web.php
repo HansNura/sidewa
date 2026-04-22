@@ -71,6 +71,7 @@ Route::get('/informasi/berita-artikel', [FrontendPageController::class, 'beritaA
 Route::get('/informasi/berita-artikel/{slug}', [FrontendPageController::class, 'beritaDetail'])->name('informasi.berita-detail');
 Route::get('/informasi/pengumuman-agenda', [FrontendPageController::class, 'pengumumanAgenda'])->name('informasi.pengumuman');
 Route::get('/informasi/produk-hukum', [FrontendPageController::class, 'produkHukum'])->name('informasi.hukum');
+Route::get('/informasi/produk-hukum/{document}/download', [FrontendPageController::class, 'downloadJdih'])->name('informasi.hukum.download');
 Route::get('/informasi/informasi-publik', [FrontendPageController::class, 'informasiPublik'])->name('informasi.publik');
 Route::get('/informasi/galeri', [FrontendPageController::class, 'galeri'])->name('informasi.galeri');
 
