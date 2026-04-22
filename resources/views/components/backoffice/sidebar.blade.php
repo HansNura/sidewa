@@ -13,7 +13,7 @@
             'icon' => 'fa-solid fa-chart-pie',
             'items' => [
                 ['label' => 'Dashboard Eksekutif', 'route' => 'admin.dashboard'],
-                ['label' => 'Dashboard Operasional', 'route' => 'operator.dashboard'],
+                ['label' => 'Dashboard Operasional', 'route' => 'admin.dashboard-operasional'],
             ],
         ],
         [

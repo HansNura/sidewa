@@ -38,6 +38,8 @@ use App\Http\Controllers\BackOffice\StatistikController;
 use App\Http\Controllers\BackOffice\PresensiController;
 use App\Http\Controllers\BackOffice\DataExchangeController;
 use App\Http\Controllers\BackOffice\ApiIntegrationController;
+use App\Http\Controllers\BackOffice\DashboardEksekutifController;
+use App\Http\Controllers\BackOffice\DashboardOperasionalController;
 
 
 
@@ -93,9 +95,8 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
 
 // Administrator
 Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
-        'pageTitle' => 'Dashboard Administrator',
-    ]))->name('dashboard');
+    Route::get('/dashboard', [DashboardEksekutifController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-operasional', [DashboardOperasionalController::class, 'index'])->name('dashboard-operasional');
 
     // ── Manajemen User ──────────────────────────────────────
     Route::resource('users', UserController::class)->except(['create', 'edit']);
@@ -288,16 +289,12 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 
 // Operator Desa
 Route::middleware(['auth', 'verified', 'role:operator'])->prefix('operator')->name('operator.')->group(function () {
-    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
-        'pageTitle' => 'Dashboard Operator Desa',
-    ]))->name('dashboard');
+    Route::get('/dashboard', [DashboardOperasionalController::class, 'index'])->name('dashboard');
 });
 
 // Kepala Desa
 Route::middleware(['auth', 'verified', 'role:kades'])->prefix('kades')->name('kades.')->group(function () {
-    Route::get('/dashboard', fn () => view('pages.dashboard.index', [
-        'pageTitle' => 'Dashboard Kepala Desa',
-    ]))->name('dashboard');
+    Route::get('/dashboard', [DashboardEksekutifController::class, 'index'])->name('dashboard');
 });
 
 // Perangkat Desa
