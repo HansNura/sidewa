@@ -22,7 +22,7 @@
         searchQuery: '',
         selectedSurat: '{{ old('jenis_surat', '') }}',
         isAgree: false,
-    
+
         suratList: [
             @foreach ($jenisSuratOptions as $key => $label)
             {
@@ -48,7 +48,7 @@
                 } }}'
             }, @endforeach
         ],
-    
+
         get filteredSuratList() {
             if (this.searchQuery === '') return this.suratList;
             return this.suratList.filter(s =>
@@ -56,11 +56,11 @@
                 s.desc.toLowerCase().includes(this.searchQuery.toLowerCase())
             );
         },
-    
+
         get selectedSuratObj() {
             return this.suratList.find(s => s.id === this.selectedSurat) || null;
         },
-    
+
         nextStep() {
             if (this.step < 3) {
                 this.step++;
@@ -328,31 +328,46 @@
                             </div>
 
                             {{-- Prioritas --}}
-                            <div class="border-t border-gray-100 pt-5">
-                                <label class="block text-xs font-bold text-gray-700 mb-2">Prioritas Permohonan</label>
-                                <div class="flex gap-3">
-                                    <label class="flex-1 cursor-pointer">
+                            <div class="border-t border-slate-100 pt-6">
+                                <label
+                                    class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Prioritas
+                                    Permohonan</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {{-- Normal --}}
+                                    <label class="relative flex cursor-pointer group">
                                         <input type="radio" name="prioritas" value="normal"
                                             {{ old('prioritas', 'normal') === 'normal' ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div
-                                            class="flex items-center gap-2 border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 rounded-xl p-3 transition-all">
-                                            <i class="fa-solid fa-circle-dot text-blue-400 text-sm"></i>
-                                            <div>
-                                                <p class="text-sm font-bold text-gray-700">Normal</p>
-                                                <p class="text-[10px] text-gray-500">1-2 hari kerja</p>
+                                            class="w-full flex items-start gap-4 border-2 border-slate-100 rounded-2xl p-4 transition-all duration-300 bg-white
+                                            peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:border-blue-200">
+                                            <div
+                                                class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0 transition-transform group-hover:scale-110">
+                                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-bold text-slate-800">Normal</p>
+                                                <p class="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">
+                                                    Estimasi 1-2 hari kerja sesuai antrean.</p>
                                             </div>
                                         </div>
                                     </label>
-                                    <label class="flex-1 cursor-pointer">
+
+                                    {{-- Mendesak --}}
+                                    <label class="relative flex cursor-pointer group">
                                         <input type="radio" name="prioritas" value="tinggi"
                                             {{ old('prioritas') === 'tinggi' ? 'checked' : '' }} class="sr-only peer">
                                         <div
-                                            class="flex items-center gap-2 border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 rounded-xl p-3 transition-all">
-                                            <i class="fa-solid fa-circle-exclamation text-red-400 text-sm"></i>
-                                            <div>
-                                                <p class="text-sm font-bold text-gray-700">Mendesak</p>
-                                                <p class="text-[10px] text-gray-500">Keperluan urgent</p>
+                                            class="w-full flex items-start gap-4 border-2 border-slate-100 rounded-2xl p-4 transition-all duration-300 bg-white
+                                            peer-checked:border-rose-500 peer-checked:bg-rose-50/50 hover:border-rose-200">
+                                            <div
+                                                class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 shrink-0 transition-transform group-hover:scale-110">
+                                                <i class="fa-solid fa-fire-flame-curved"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-bold text-slate-800">Mendesak</p>
+                                                <p class="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">
+                                                    Keperluan darurat / urgent.</p>
                                             </div>
                                         </div>
                                     </label>
