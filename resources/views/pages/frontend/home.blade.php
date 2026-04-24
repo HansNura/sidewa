@@ -570,109 +570,58 @@
         </div>
     </section>
 
-    <section id="lapak" class="py-24 bg-white">
-        <div class="px-6 mx-auto max-w-7xl" x-data="{
-            search: '',
-            category: 'Semua',
-            categories: ['Semua', ...{{ Js::from($productCategories) }}],
-            produkList: {{ Js::from($products) }},
-
-            get filteredProduk() {
-                return this.produkList.filter(p =>
-                    (this.category === 'Semua' || p.kategori === this.category) &&
-                    (this.search === '' || p.nama.toLowerCase().includes(this.search.toLowerCase()))
-                );
-            },
-
-            formatHarga(angka) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
-                }).format(angka);
-            }
-        }">
-            <!-- JUDUL -->
-            <div class="mb-12 text-center">
-                <h2 class="text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-3">
-                    Lapak Desa Sindangmukti
-                </h2>
-                <p class="max-w-2xl mx-auto text-gray-600">
-                    Temukan beragam produk, jasa, dan potensi unggulan
-                    masyarakat Desa Sindangmukti.
-                </p>
-            </div>
-
-            <!-- FILTER BAR -->
-            <div class="flex flex-col items-center justify-between gap-4 mb-10 md:flex-row">
-                <div class="flex items-center w-full gap-3 md:w-auto">
-                    <label for="kategori" class="font-medium text-gray-700 whitespace-nowrap">Kategori:</label>
-                    <select id="kategori" x-model="category"
-                        class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E7D32] w-full">
-                        <template x-for="cat in categories" :key="cat">
-                            <option :value="cat" x-text="cat"></option>
-                        </template>
-                    </select>
-                </div>
-                <!-- Diperbaiki: Typo pada class list -->
-                <div class="relative w-full md:w-auto lg:w-1/3">
-                    <input type="text" placeholder="Cari produk..." x-model="search"
-                        class="border rounded-lg w-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-[#2E7D32]" />
-                    <span class="absolute text-gray-400 -translate-y-1/2 left-3 top-1/2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path fill-rule="evenodd"
-                                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </span>
-                </div>
-            </div>
-
-            <!-- GRID PRODUK -->
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <template x-for="produk in filteredProduk" :key="produk.id">
-                    <div
-                        class="flex flex-col overflow-hidden transition bg-white border shadow-md rounded-2xl hover:shadow-lg">
-                        <img :src="produk.foto" :alt="produk.nama" class="object-cover w-full h-52" />
-                        <div class="flex flex-col flex-1 p-5">
-                            <h4 class="mb-1 text-lg font-semibold text-gray-800" x-text="produk.nama"></h4>
-                            <p class="text-[#2E7D32] font-bold mb-2" x-text="formatHarga(produk.harga)"></p>
-                            <p class="mb-1 text-sm text-gray-600">
-                                <strong>Kategori:</strong>
-                                <span x-text="produk.kategori"></span>
-                            </p>
-                            <p class="mb-3 text-sm text-gray-600">
-                                <strong>Pelapak:</strong>
-                                <span x-text="produk.pelapak"></span>
-                            </p>
-                            <div class="flex gap-3 mt-auto">
-                                <!-- PERBAIKAN #9: Ikon ditambahkan ke tombol -->
-                                <button
-                                    class="flex-1 bg-[#2E7D32] text-white py-2 px-3 rounded-lg text-sm hover:bg-[#256928] transition flex items-center justify-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                                        class="w-4 h-4">
-                                        <path
-                                            d="M2.5 3A1.5 1.5 0 0 0 1 4.5V5a.5.5 0 0 0 .5.5H2a.5.5 0 0 0 .484-.375A2.484 2.484 0 0 1 4.312 3H2.5zM14 4.5A1.5 1.5 0 0 0 12.5 3h-8.188a2.484 2.484 0 0 1 1.826 1.5H13.5a.5.5 0 0 0 .5-.5V4.5zM1.5 6a.5.5 0 0 0-.5.5v2A1.5 1.5 0 0 0 2.5 10H3a.5.5 0 0 0 .484-.375A2.484 2.484 0 0 1 5.312 8H1.5V6zM14.5 6H5.312a2.484 2.484 0 0 1 1.826 1.5H14.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM3.484 10.625A.5.5 0 0 0 3 11h1.312a2.484 2.484 0 0 1 1.826 1.5H1.5v-1a.5.5 0 0 0-.5-.5A1.5 1.5 0 0 0 0 12.5v2A1.5 1.5 0 0 0 1.5 16h13A1.5 1.5 0 0 0 16 14.5v-2A1.5 1.5 0 0 0 14.5 11H6.688a2.484 2.484 0 0 1-1.826-1.5H3.484z" />
-                                    </svg>
-                                    Beli
-                                </button>
-                                <button
-                                    class="flex-1 border border-[#2E7D32] text-[#2E7D32] py-2 px-3 rounded-lg text-sm hover:bg-[#2E7D32]/10 transition flex items-center justify-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                                        class="w-4 h-4">
-                                        <path fill-rule="evenodd"
-                                            d="M8.5 3a.5.5 0 0 0-1 0v.518a3.5 3.5 0 0 0-2.35 1.14l-.367-.368a.5.5 0 0 0-.708.708l.368.367A3.5 3.5 0 0 0 3.518 7.5H3a.5.5 0 0 0 0 1h.518a3.5 3.5 0 0 0 1.14 2.35l-.368.367a.5.5 0 1 0 .708.708l.367-.368A3.5 3.5 0 0 0 7.5 12.482V13a.5.5 0 0 0 1 0v-.518a3.5 3.5 0 0 0 2.35-1.14l.367.368a.5.5 0 0 0 .708-.708l-.368-.367A3.5 3.5 0 0 0 12.482 8.5H13a.5.5 0 0 0 0-1h-.518a3.5 3.5 0 0 0-1.14-2.35l.368-.367a.5.5 0 1 0-.708-.708l-.367.368A3.5 3.5 0 0 0 8.5 3.518V3zM8 5.5A2.5 2.5 0 1 0 8 10.5 2.5 2.5 0 0 0 8 5.5z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    Detail
-                                </button>
-                            </div>
-                        </div>
+    <!-- SECTION: LAPAK DESA (PREVIEW) -->
+    <section id="lapak" class="py-24 bg-slate-50/50">
+        <div class="px-6 mx-auto max-w-7xl">
+            <!-- HEADER -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div class="max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        Ekonomi Kreatif
                     </div>
-                </template>
+                    <h2 class="text-3xl md:text-4xl font-black text-slate-800 mb-4 leading-tight">
+                        Lapak Desa <span class="text-emerald-600 italic">Sindangmukti</span>
+                    </h2>
+                    <p class="text-slate-600 text-lg leading-relaxed">
+                        Temukan beragam produk, jasa, dan potensi unggulan masyarakat Desa Sindangmukti langsung dari tangan pertama.
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ route('lapak') }}" class="group inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 rounded-2xl shadow-sm border border-emerald-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300">
+                        Jelajahi Lapak
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 group-hover:translate-x-1 transition-transform">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- GRID PRODUK (Limit to 8) -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @foreach(collect($products)->take(8) as $produk)
+                    <x-frontend.lapak-item :produk="$produk" />
+                @endforeach
+            </div>
+
+            <!-- BOTTOM CTA -->
+            <div class="mt-16 text-center">
+                <a href="{{ route('lapak') }}" class="inline-flex items-center gap-3 bg-emerald-600 text-white font-bold px-10 py-4 rounded-3xl shadow-[0_10px_40px_rgba(5,150,105,0.2)] hover:bg-emerald-700 hover:-translate-y-1 transition-all duration-300">
+                    Lihat Selengkapnya
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                    </svg>
+                </a>
+                <p class="mt-6 text-slate-500 text-sm font-medium">
+                    Mendukung Produk Lokal, Memajukan Desa.
+                </p>
             </div>
         </div>
     </section>
+
 
     <section id="galeri" class="overflow-hidden py-24 bg-[#F9FAFB]" x-data="{
         tab: 'all',

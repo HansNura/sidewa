@@ -108,37 +108,7 @@
             @if($products->count() > 0)
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach($products as $produk)
-                        <article class="flex flex-col overflow-hidden transition-all bg-white border border-gray-200 shadow-sm rounded-2xl hover:shadow-lg hover:-translate-y-1 group">
-                            <figure class="relative overflow-hidden bg-gray-100 aspect-square">
-                                <img src="{{ $produk->image_url }}" alt="{{ $produk->name }}"
-                                     class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" loading="lazy">
-                                @if($produk->category)
-                                    <span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-2.5 py-1 rounded-md shadow-sm">
-                                        {{ $produk->category->name }}
-                                    </span>
-                                @endif
-                            </figure>
-                            <div class="flex flex-col flex-grow p-4">
-                                <a href="{{ route('lapak.detail', $produk->slug) }}"
-                                   class="block mb-1 font-bold leading-tight text-gray-800 transition-colors line-clamp-2 group-hover:text-green-600">
-                                    {{ $produk->name }}
-                                </a>
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i class="fa-solid fa-store text-gray-400 text-xs"></i>
-                                    <span class="text-xs font-medium text-gray-500">{{ $produk->seller_name }}</span>
-                                    @if($produk->seller_phone)
-                                        <i class="fa-solid fa-circle-check text-blue-500 text-[10px]" title="Terverifikasi Desa"></i>
-                                    @endif
-                                </div>
-                                <div class="mt-auto">
-                                    <p class="mb-4 text-lg font-black text-green-700">{{ $produk->formatted_price }}</p>
-                                    <a href="{{ $produk->whatsapp_link }}" target="_blank" rel="noopener"
-                                       class="flex items-center justify-center w-full gap-2 py-2.5 text-sm font-bold text-green-700 transition-colors border border-green-200 bg-green-50 hover:bg-green-600 hover:text-white rounded-lg">
-                                        <i class="fa-brands fa-whatsapp text-lg"></i> Beli via WA
-                                    </a>
-                                </div>
-                            </div>
-                        </article>
+                        <x-frontend.lapak-item :produk="$produk" />
                     @endforeach
                 </div>
             @else
