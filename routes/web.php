@@ -318,6 +318,8 @@ Route::middleware(['auth', 'verified', 'role:resepsionis'])->prefix('resepsionis
 
 use App\Http\Controllers\Frontend\WargaAuthController;
 use App\Http\Controllers\Frontend\WargaDashboardController;
+use App\Http\Controllers\Frontend\WargaLayananSuratController;
+use App\Http\Controllers\Frontend\WargaPageController;
 
 // Login warga (public)
 Route::get('/layanan/mandiri/login', [WargaAuthController::class, 'showLogin'])->name('layanan.mandiri.login');
@@ -325,7 +327,32 @@ Route::post('/layanan/mandiri/login', [WargaAuthController::class, 'authenticate
 
 // Protected warga area
 Route::middleware(['auth:warga'])->prefix('layanan/mandiri')->name('warga.')->group(function () {
+
+    // ── Dashboard ──────────────────────────────────────────
     Route::get('/dashboard', [WargaDashboardController::class, 'index'])->name('dashboard');
+
+    // ── Profil Warga ───────────────────────────────────────
+    Route::get('/profil', [WargaPageController::class, 'profil'])->name('profil');
+
+    // ── Layanan Surat ──────────────────────────────────────
+    Route::prefix('surat')->name('surat.')->group(function () {
+        Route::get('/ajukan', [WargaLayananSuratController::class, 'ajukan'])->name('ajukan');
+        Route::post('/ajukan', [WargaLayananSuratController::class, 'store'])->name('store');
+        Route::get('/riwayat', [WargaLayananSuratController::class, 'riwayat'])->name('riwayat');
+        Route::get('/{surat}', [WargaLayananSuratController::class, 'detail'])->name('detail');
+    });
+
+    // ── Bantuan Sosial ─────────────────────────────────────
+    Route::get('/bansos', [WargaPageController::class, 'bansos'])->name('bansos');
+
+    // ── Pengaduan Warga ────────────────────────────────────
+    Route::get('/pengaduan', [WargaPageController::class, 'pengaduan'])->name('pengaduan');
+    Route::post('/pengaduan', [WargaPageController::class, 'storePengaduan'])->name('pengaduan.store');
+
+    // ── Notifikasi & Status ───────────────────────────────
+    Route::get('/notifikasi', [WargaPageController::class, 'notifikasi'])->name('notifikasi');
+
+    // ── Logout ─────────────────────────────────────────────
     Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
 });
 

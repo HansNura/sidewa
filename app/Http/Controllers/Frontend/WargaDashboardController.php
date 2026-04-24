@@ -63,28 +63,28 @@ class WargaDashboardController extends Controller
                 'description' => 'Buat permohonan baru',
                 'icon'        => 'fa-solid fa-file-signature',
                 'color'       => 'blue',
-                'route'       => '#',
+                'route'       => route('warga.surat.ajukan'),
             ],
             [
                 'title'       => 'Riwayat Surat',
                 'description' => 'Cek status permohonan',
                 'icon'        => 'fa-solid fa-clock-rotate-left',
                 'color'       => 'emerald',
-                'route'       => '#',
+                'route'       => route('warga.surat.riwayat'),
             ],
             [
                 'title'       => 'Cek Bansos',
                 'description' => 'Informasi bantuan sosial',
                 'icon'        => 'fa-solid fa-hand-holding-heart',
                 'color'       => 'amber',
-                'route'       => '#',
+                'route'       => route('warga.bansos'),
             ],
             [
                 'title'       => 'Buat Pengaduan',
                 'description' => 'Sampaikan aspirasi Anda',
                 'icon'        => 'fa-solid fa-bullhorn',
                 'color'       => 'red',
-                'route'       => '#',
+                'route'       => route('warga.pengaduan'),
             ],
         ];
 
