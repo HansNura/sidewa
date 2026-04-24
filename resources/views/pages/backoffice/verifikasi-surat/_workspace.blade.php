@@ -39,20 +39,24 @@
                 class="bg-white border border-amber-300 text-amber-600 hover:bg-amber-50 shadow-sm rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer">
                 <i class="fa-solid fa-pen-to-square mr-1"></i> Kembalikan (Revisi)
             </button>
-            {{-- Approve & TTE (for menunggu_tte) --}}
+            @if(auth()->user()->hasRole('administrator', 'kades'))
+            {{-- Approve & TTE — Kades / Admin only --}}
             <button @click="pinModalOpen = true" x-show="currentSurat?.status === 'menunggu_tte'"
                 :disabled="!isValidated"
                 :class="!isValidated ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-green-700 hover:bg-green-800 shadow-md'"
                 class="text-white rounded-xl px-5 py-2 text-sm font-bold transition-all flex items-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-signature"></i> Setujui & TTE
             </button>
-            {{-- Verify (for verifikasi status — operator advances) --}}
+            @endif
+            @if(auth()->user()->hasRole('administrator', 'operator'))
+            {{-- Verify — Operator / Admin advances to TTE --}}
             <button @click="processVerify(currentSurat?.id)" x-show="currentSurat?.status === 'verifikasi'"
                 :disabled="!isValidated"
                 :class="!isValidated ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-blue-700 hover:bg-blue-800 shadow-md'"
                 class="text-white rounded-xl px-5 py-2 text-sm font-bold transition-all flex items-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-arrow-right"></i> Verifikasi & Lanjutkan ke TTE
             </button>
+            @endif
         </div>
     </header>
 
@@ -260,21 +264,25 @@
             <div class="p-6 border-t border-gray-100 bg-gray-50 shrink-0">
                 <p class="text-[10px] text-gray-500 mb-3 text-center">Dengan menyetujui, Anda menempelkan TTE (QR Code) secara legal pada dokumen ini.</p>
 
-                {{-- TTE Button (for menunggu_tte) --}}
+                @if(auth()->user()->hasRole('administrator', 'kades'))
+                {{-- TTE Button — Kades / Admin only --}}
                 <button @click="pinModalOpen = true" x-show="currentSurat?.status === 'menunggu_tte'"
                     :disabled="!isValidated"
                     :class="!isValidated ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-green-700 hover:bg-green-800 shadow-md hover:-translate-y-0.5'"
                     class="w-full text-white rounded-xl px-5 py-3.5 text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-signature"></i> Otorisasi & Bubuhkan TTE
                 </button>
+                @endif
 
-                {{-- Verify Button (for verifikasi) --}}
+                @if(auth()->user()->hasRole('administrator', 'operator'))
+                {{-- Verify Button — Operator / Admin --}}
                 <button @click="processVerify(currentSurat?.id)" x-show="currentSurat?.status === 'verifikasi'"
                     :disabled="!isValidated"
                     :class="!isValidated ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-blue-700 hover:bg-blue-800 shadow-md hover:-translate-y-0.5'"
                     class="w-full text-white rounded-xl px-5 py-3.5 text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-arrow-right"></i> Verifikasi & Kirim ke Kepala Desa
                 </button>
+                @endif
             </div>
         </div>
 

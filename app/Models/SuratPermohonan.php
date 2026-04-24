@@ -6,16 +6,18 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SuratPermohonan extends Model
 {
     protected $table = 'surat_permohonan';
 
     protected $fillable = [
-        'nomor_tiket', 'penduduk_id', 'operator_id',
+        'nomor_tiket', 'penduduk_id', 'operator_id', 'kades_id',
         'jenis_surat', 'prioritas', 'status',
         'catatan', 'alasan_tolak',
         'keperluan', 'berlaku_hingga', 'nama_usaha',
+        'lampiran_path', 'pdf_path',
         'tanggal_pengajuan', 'tanggal_selesai',
     ];
 
@@ -76,12 +78,12 @@ class SuratPermohonan extends Model
     public function statusBadge(): array
     {
         return match ($this->status) {
-            'draft'        => ['bg' => 'bg-gray-100',   'text' => 'text-gray-700',   'border' => 'border-gray-200',   'icon' => 'fa-bookmark',     'label' => 'Draft'],
             'pengajuan'    => ['bg' => 'bg-blue-100',   'text' => 'text-blue-700',   'border' => 'border-blue-200',   'icon' => 'fa-file-import',  'label' => 'Pengajuan Baru'],
             'verifikasi'   => ['bg' => 'bg-amber-100',  'text' => 'text-amber-700',  'border' => 'border-amber-200',  'icon' => 'fa-list-check',   'label' => 'Verifikasi Berkas'],
             'menunggu_tte' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-700', 'border' => 'border-purple-200', 'icon' => 'fa-signature',    'label' => 'Menunggu TTE Kades'],
             'selesai'      => ['bg' => 'bg-green-100',  'text' => 'text-green-700',  'border' => 'border-green-200',  'icon' => 'fa-check-double', 'label' => 'Selesai'],
             'ditolak'      => ['bg' => 'bg-red-100',    'text' => 'text-red-700',    'border' => 'border-red-200',    'icon' => 'fa-xmark',        'label' => 'Ditolak'],
+            default        => ['bg' => 'bg-gray-100',   'text' => 'text-gray-700',   'border' => 'border-gray-200',   'icon' => 'fa-file',         'label' => ucfirst($this->status)],
         };
     }
 
@@ -98,8 +100,8 @@ class SuratPermohonan extends Model
      */
     public function slaInfo(): array
     {
-        if (in_array($this->status, ['selesai', 'ditolak', 'draft'])) {
-            return ['label' => $this->status === 'draft' ? 'Draft' : 'Selesai', 'overdue' => false, 'hours' => 0];
+        if (in_array($this->status, ['selesai', 'ditolak'])) {
+            return ['label' => 'Selesai', 'overdue' => false, 'hours' => 0];
         }
 
         $deadline = $this->tanggal_pengajuan->addHours(self::SLA_HOURS);
@@ -156,9 +158,14 @@ class SuratPermohonan extends Model
         );
     }
 
-    public function scopeDraft(Builder $query): Builder
+    public function kades(): BelongsTo
     {
-        return $query->where('status', 'draft');
+        return $this->belongsTo(User::class, 'kades_id');
+    }
+
+    public function lampiran(): HasMany
+    {
+        return $this->hasMany(LampiranSurat::class);
     }
 
     public function scopeOverdue(Builder $query): Builder

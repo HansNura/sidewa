@@ -210,7 +210,7 @@
                 <i class="fa-solid fa-arrow-left"></i> Ganti Jenis Surat
             </button>
 
-            <form action="{{ route('warga.surat.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            <form action="{{ route('warga.surat.store') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 @csrf
                 <input type="hidden" name="jenis_surat" :value="selectedSurat">
 
@@ -330,6 +330,48 @@
                             </div>
                         </div>
                     </section>
+
+                    {{-- Upload Lampiran (GAP-08) --}}
+                    <section class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <header class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Lampiran Pendukung</h3>
+                            <p class="text-xs text-gray-500 mt-1">Upload dokumen pendukung (opsional). Maks. 5 file, ukuran maks. 2MB per file.</p>
+                        </header>
+                        <div class="p-5">
+                            <div x-data="{ files: [] }" class="space-y-3">
+                                <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-green-400 transition-all">
+                                    <div class="flex flex-col items-center gap-1 text-gray-500">
+                                        <i class="fa-solid fa-cloud-arrow-up text-xl text-gray-400"></i>
+                                        <span class="text-xs font-semibold">Klik untuk upload atau drag & drop</span>
+                                        <span class="text-[10px] text-gray-400">PDF, JPG, PNG — Maks. 2MB</span>
+                                    </div>
+                                    <input type="file" name="lampiran[]" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden"
+                                           @change="files = Array.from($event.target.files)">
+                                </label>
+
+                                {{-- File list preview --}}
+                                <template x-if="files.length > 0">
+                                    <div class="space-y-2">
+                                        <template x-for="(file, idx) in files" :key="idx">
+                                            <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2 text-sm">
+                                                <i class="fa-solid fa-file text-gray-400"></i>
+                                                <span class="flex-1 truncate text-gray-700" x-text="file.name"></span>
+                                                <span class="text-[10px] text-gray-400 shrink-0" x-text="(file.size / 1024).toFixed(0) + ' KB'"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                @error('lampiran')
+                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                @enderror
+                                @error('lampiran.*')
+                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
 
                 {{-- KOLOM KANAN: SUBMIT --}}

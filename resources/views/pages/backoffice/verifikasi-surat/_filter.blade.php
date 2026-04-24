@@ -1,6 +1,6 @@
 {{-- Filter & Search --}}
 <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 transition-all">
-    <form method="GET" action="{{ route('admin.verifikasi-surat.index') }}" class="flex flex-col md:flex-row gap-4">
+    <form method="GET" action="{{ route(auth()->user()->routePrefix() . '.verifikasi-surat.index') }}" class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
             <input type="text" name="search" value="{{ $search ?? '' }}"

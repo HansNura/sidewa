@@ -1,22 +1,47 @@
 {{--
     Sidebar Navigation — Back-Office Panel
+    Role-Aware: Each role only sees menus they have access to.
     Uses Alpine.js x-data from parent layout (sidebarOpen)
 --}}
 @php
     $user = auth()->user();
     $currentRoute = request()->route()?->getName() ?? '';
+    $prefix = $user->routePrefix(); // admin | operator | kades
 
-    // Sidebar menu structure — centralised for easy maintenance
-    $menuGroups = [
-        [
+    // ─── Build menu groups based on user role ──────────────────────────────
+    $menuGroups = [];
+
+    // ── Dashboard ──────────────────────────────────
+    if ($user->isAdministrator()) {
+        $menuGroups[] = [
             'label' => 'Dashboard',
             'icon' => 'fa-solid fa-chart-pie',
             'items' => [
                 ['label' => 'Dashboard Eksekutif', 'route' => 'admin.dashboard'],
                 ['label' => 'Dashboard Operasional', 'route' => 'admin.dashboard-operasional'],
             ],
-        ],
-        [
+        ];
+    } elseif ($user->isOperator()) {
+        $menuGroups[] = [
+            'label' => 'Dashboard',
+            'icon' => 'fa-solid fa-chart-pie',
+            'items' => [
+                ['label' => 'Dashboard Operasional', 'route' => 'operator.dashboard'],
+            ],
+        ];
+    } elseif ($user->isKades()) {
+        $menuGroups[] = [
+            'label' => 'Dashboard',
+            'icon' => 'fa-solid fa-chart-pie',
+            'items' => [
+                ['label' => 'Dashboard Eksekutif', 'route' => 'kades.dashboard'],
+            ],
+        ];
+    }
+
+    // ── Manajemen Sistem (Admin Only) ────────────────────
+    if ($user->isAdministrator()) {
+        $menuGroups[] = [
             'label' => 'Manajemen Sistem',
             'icon' => 'fa-solid fa-server',
             'items' => [
@@ -25,40 +50,69 @@
                 ['label' => 'Identitas Desa', 'route' => 'admin.village-settings.edit'],
                 ['label' => 'Konfigurasi Sistem', 'route' => 'admin.system-config.edit'],
             ],
-        ],
-        [
+        ];
+    }
+
+    // ── Data Kependudukan (Admin + Operator) ─────────────
+    if ($user->hasRole('administrator', 'operator')) {
+        $menuGroups[] = [
             'label' => 'Data Kependudukan',
             'icon' => 'fa-solid fa-users',
             'items' => [
-                ['label' => 'Data Penduduk', 'route' => 'admin.penduduk.index'],
-                ['label' => 'Data Keluarga (KK)', 'route' => 'admin.kartu-keluarga.index'],
-                ['label' => 'Wilayah Administratif', 'route' => 'admin.wilayah.index'],
-                ['label' => 'Kesehatan & Stunting', 'route' => 'admin.kesehatan.index'],
-                ['label' => 'Bantuan Sosial', 'route' => 'admin.bansos.index'],
-                ['label' => 'Pertanahan Desa', 'route' => 'admin.pertanahan.index'],
+                ['label' => 'Data Penduduk', 'route' => "{$prefix}.penduduk.index"],
+                ['label' => 'Data Keluarga (KK)', 'route' => "{$prefix}.kartu-keluarga.index"],
+                ['label' => 'Wilayah Administratif', 'route' => "{$prefix}.wilayah.index"],
+                ['label' => 'Kesehatan & Stunting', 'route' => "{$prefix}.kesehatan.index"],
+                ['label' => 'Bantuan Sosial', 'route' => "{$prefix}.bansos.index"],
+                ...($user->isAdministrator() ? [['label' => 'Pertanahan Desa', 'route' => 'admin.pertanahan.index']] : []),
             ],
-        ],
-        [
+        ];
+    }
+
+    // ── Layanan Administrasi ─────────────────────────────
+    if ($user->hasRole('administrator', 'operator', 'kades')) {
+        $items = [];
+
+        // Dashboard Layanan (admin + operator)
+        if ($user->hasRole('administrator', 'operator')) {
+            $items[] = ['label' => 'Dashboard Layanan', 'route' => "{$prefix}.layanan-surat.index"];
+            $items[] = ['label' => 'Buat Surat Baru', 'route' => "{$prefix}.layanan-surat.create"];
+        }
+
+        // Arsip Surat (all three)
+        $items[] = ['label' => 'Arsip Surat', 'route' => "{$prefix}.arsip-surat.index"];
+
+        // Template Surat (admin + operator)
+        if ($user->hasRole('administrator', 'operator')) {
+            $items[] = ['label' => 'Template Surat', 'route' => $user->isAdministrator() ? 'admin.template-surat.index' : "{$prefix}.template-surat.index"];
+        }
+
+        // Verifikasi & TTE (all three, but different actions)
+        $items[] = ['label' => 'Verifikasi & TTE', 'route' => "{$prefix}.verifikasi-surat.index"];
+
+        $menuGroups[] = [
             'label' => 'Layanan Administrasi',
             'icon' => 'fa-solid fa-envelope-open-text',
-            'items' => [
-                ['label' => 'Dashboard Layanan', 'route' => 'admin.layanan-surat.index'],
-                ['label' => 'Buat Surat Baru', 'route' => 'admin.layanan-surat.create'],
-                ['label' => 'Arsip Surat', 'route' => 'admin.arsip-surat.index'],
-                ['label' => 'Template Surat', 'route' => 'admin.template-surat.index'],
-                ['label' => 'Verifikasi & TTE', 'route' => 'admin.verifikasi-surat.index'],
-            ],
-        ],
-        [
+            'items' => $items,
+        ];
+    }
+
+    // ── Presensi & Tamu (Admin + Operator) ───────────────
+    if ($user->hasRole('administrator', 'operator')) {
+        $menuGroups[] = [
             'label' => 'Presensi & Tamu',
             'icon' => 'fa-solid fa-fingerprint',
             'items' => [
-                ['label' => 'Monitoring Presensi', 'route' => 'admin.presensi.monitoring'],
-                ['label' => 'Rekap Kehadiran', 'route' => 'admin.presensi.rekap'],
-                ['label' => 'Buku Tamu', 'route' => 'admin.buku-tamu.index'],
+                ['label' => 'Monitoring Presensi', 'route' => "{$prefix}.presensi.monitoring"],
+                ...($user->isAdministrator() ? [['label' => 'Rekap Kehadiran', 'route' => 'admin.presensi.rekap']] : []),
+                ['label' => 'Buku Tamu', 'route' => "{$prefix}.buku-tamu.index"],
             ],
-        ],
-        [
+        ];
+    }
+
+    // ── Keuangan Desa (Admin Only) ──────────────────────
+    if ($user->isAdministrator()) {
+        $menuGroups[] = [
             'label' => 'Keuangan Desa',
             'icon' => 'fa-solid fa-wallet',
             'items' => [
@@ -66,16 +120,24 @@
                 ['label' => 'Realisasi Anggaran', 'route' => 'admin.realisasi.index'],
                 ['label' => 'Laporan Keuangan', 'route' => 'admin.laporan.index'],
             ],
-        ],
-        [
+        ];
+    }
+
+    // ── Pembangunan Desa (Admin Only) ───────────────────
+    if ($user->isAdministrator()) {
+        $menuGroups[] = [
             'label' => 'Pembangunan Desa',
             'icon' => 'fa-solid fa-person-digging',
             'items' => [
                 ['label' => 'Data Pembangunan', 'route' => 'admin.pembangunan.index'],
                 ['label' => 'Data Perencanaan', 'route' => 'admin.perencanaan.index'],
             ],
-        ],
-        [
+        ];
+    }
+
+    // ── Konten Website (Admin Only) ─────────────────────
+    if ($user->isAdministrator()) {
+        $menuGroups[] = [
             'label' => 'Konten Website',
             'icon' => 'fa-solid fa-globe',
             'items' => [
@@ -86,8 +148,12 @@
                 ['label' => 'Produk Hukum (JDIH)', 'route' => 'admin.jdih.index'],
                 ['label' => 'Produk UMKM', 'route' => 'admin.umkm.index'],
             ],
-        ],
-        [
+        ];
+    }
+
+    // ── Laporan & Integrasi (Admin Only) ────────────────
+    if ($user->isAdministrator()) {
+        $menuGroups[] = [
             'label' => 'Laporan & Integrasi',
             'icon' => 'fa-solid fa-file-lines',
             'items' => [
@@ -96,8 +162,8 @@
                 ['label' => 'Export / Import Data', 'route' => 'admin.data-exchange.index'],
                 ['label' => 'Integrasi API', 'route' => 'admin.api.index'],
             ],
-        ],
-    ];
+        ];
+    }
 @endphp
 
 <aside

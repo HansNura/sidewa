@@ -158,8 +158,6 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     // Wizard Buat Surat Baru (sebelum route parametric agar tidak konflik)
     Route::get('layanan-surat/buat', [LayananSuratController::class, 'create'])->name('layanan-surat.create');
     Route::post('layanan-surat/buat', [LayananSuratController::class, 'storeWizard'])->name('layanan-surat.store-wizard');
-    Route::get('layanan-surat/drafts', [LayananSuratController::class, 'drafts'])->name('layanan-surat.drafts');
-    Route::get('layanan-surat/{surat}/edit-wizard', [LayananSuratController::class, 'editWizard'])->name('layanan-surat.edit-wizard');
 
     Route::patch('layanan-surat/{surat}/status', [LayananSuratController::class, 'updateStatus'])->name('layanan-surat.update-status');
     Route::delete('layanan-surat/{surat}', [LayananSuratController::class, 'destroy'])->name('layanan-surat.destroy');
@@ -292,11 +290,80 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 // Operator Desa
 Route::middleware(['auth', 'verified', 'role:operator'])->prefix('operator')->name('operator.')->group(function () {
     Route::get('/dashboard', [DashboardOperasionalController::class, 'index'])->name('dashboard');
+
+    // ── Data Penduduk ─────────────────────────────────
+    Route::resource('penduduk', PendudukController::class)->except(['create', 'edit']);
+
+    // ── Kartu Keluarga ───────────────────────────────
+    Route::resource('kartu-keluarga', KartuKeluargaController::class)->only(['index', 'show', 'store', 'destroy']);
+    Route::post('kartu-keluarga/{kartu_keluarga}/add-member', [KartuKeluargaController::class, 'addMember'])->name('kartu-keluarga.add-member');
+    Route::delete('kartu-keluarga/{kartu_keluarga}/remove-member/{penduduk}', [KartuKeluargaController::class, 'removeMember'])->name('kartu-keluarga.remove-member');
+    Route::get('kartu-keluarga-search-penduduk', [KartuKeluargaController::class, 'searchPenduduk'])->name('kartu-keluarga.search-penduduk');
+
+    // ── Wilayah Administratif ─────────────────────
+    Route::resource('wilayah', WilayahController::class)->except(['create', 'edit']);
+
+    // ── Kesehatan & Stunting ──────────────────────
+    Route::get('kesehatan', [KesehatanController::class, 'index'])->name('kesehatan.index');
+    Route::post('kesehatan', [KesehatanController::class, 'store'])->name('kesehatan.store');
+    Route::get('kesehatan/search-balita', [KesehatanController::class, 'searchBalita'])->name('kesehatan.search-balita');
+    Route::get('kesehatan/{penduduk}', [KesehatanController::class, 'show'])->name('kesehatan.show');
+    Route::delete('kesehatan/pengukuran/{pengukuran}', [KesehatanController::class, 'destroy'])->name('kesehatan.destroy');
+
+    // ── Bantuan Sosial ──────────────────────────
+    Route::get('bansos', [BansosController::class, 'index'])->name('bansos.index');
+    Route::post('bansos', [BansosController::class, 'store'])->name('bansos.store');
+    Route::get('bansos/search-penduduk', [BansosController::class, 'searchPenduduk'])->name('bansos.search-penduduk');
+    Route::get('bansos/{banso}', [BansosController::class, 'show'])->name('bansos.show');
+    Route::patch('bansos/{banso}/status', [BansosController::class, 'updateStatus'])->name('bansos.update-status');
+
+    // ── Layanan Surat ────────────────────────
+    Route::get('layanan-surat', [LayananSuratController::class, 'index'])->name('layanan-surat.index');
+    Route::post('layanan-surat', [LayananSuratController::class, 'store'])->name('layanan-surat.store');
+    Route::get('layanan-surat/search-penduduk', [LayananSuratController::class, 'searchPenduduk'])->name('layanan-surat.search-penduduk');
+    Route::get('layanan-surat/buat', [LayananSuratController::class, 'create'])->name('layanan-surat.create');
+    Route::post('layanan-surat/buat', [LayananSuratController::class, 'storeWizard'])->name('layanan-surat.store-wizard');
+    Route::patch('layanan-surat/{surat}/status', [LayananSuratController::class, 'updateStatus'])->name('layanan-surat.update-status');
+
+    // ── Template Surat ──────────────────────
+    Route::get('template-surat', [TemplateSuratController::class, 'index'])->name('template-surat.index');
+    Route::get('template-surat/{template}', [TemplateSuratController::class, 'show'])->name('template-surat.show');
+
+    // ── Arsip Surat ────────────────────────
+    Route::get('arsip-surat', [ArsipSuratController::class, 'index'])->name('arsip-surat.index');
+    Route::get('arsip-surat/{surat}', [ArsipSuratController::class, 'show'])->name('arsip-surat.show');
+
+    // ── Verifikasi Surat (verify step only, no TTE) ──
+    Route::get('verifikasi-surat', [VerifikasiSuratController::class, 'index'])->name('verifikasi-surat.index');
+    Route::get('verifikasi-surat/{surat}', [VerifikasiSuratController::class, 'show'])->name('verifikasi-surat.show');
+    Route::post('verifikasi-surat/{surat}/verify', [VerifikasiSuratController::class, 'verify'])->name('verifikasi-surat.verify');
+    Route::post('verifikasi-surat/{surat}/revisi', [VerifikasiSuratController::class, 'revisi'])->name('verifikasi-surat.revisi');
+
+    // ── Presensi Pegawai ───────────────────
+    Route::get('presensi/monitoring', [PresensiPegawaiController::class, 'index'])->name('presensi.monitoring');
+    Route::post('presensi/koreksi-manual', [PresensiPegawaiController::class, 'storeManual'])->name('presensi.store-manual');
+    Route::get('presensi/{user}/info', [PresensiPegawaiController::class, 'showInfo'])->name('presensi.show-info');
+
+    // ── Buku Tamu ────────────────
+    Route::get('buku-tamu', [LaporanBukuTamuController::class, 'index'])->name('buku-tamu.index');
+    Route::get('buku-tamu/{bukuTamu}/detail', [LaporanBukuTamuController::class, 'show'])->name('buku-tamu.show');
 });
 
 // Kepala Desa
 Route::middleware(['auth', 'verified', 'role:kades'])->prefix('kades')->name('kades.')->group(function () {
     Route::get('/dashboard', [DashboardEksekutifController::class, 'index'])->name('dashboard');
+
+    // ── Verifikasi & TTE Surat (Kades Access) ─────────────
+    Route::get('verifikasi-surat', [VerifikasiSuratController::class, 'index'])->name('verifikasi-surat.index');
+    Route::get('verifikasi-surat/{surat}', [VerifikasiSuratController::class, 'show'])->name('verifikasi-surat.show');
+    Route::post('verifikasi-surat/{surat}/approve', [VerifikasiSuratController::class, 'approve'])->name('verifikasi-surat.approve');
+    Route::post('verifikasi-surat/{surat}/reject', [VerifikasiSuratController::class, 'reject'])->name('verifikasi-surat.reject');
+    Route::post('verifikasi-surat/{surat}/revisi', [VerifikasiSuratController::class, 'revisi'])->name('verifikasi-surat.revisi');
+    Route::post('verifikasi-surat/{surat}/verify', [VerifikasiSuratController::class, 'verify'])->name('verifikasi-surat.verify');
+
+    // ── Arsip Surat (Read-Only) ─────────────
+    Route::get('arsip-surat', [ArsipSuratController::class, 'index'])->name('arsip-surat.index');
+    Route::get('arsip-surat/{surat}', [ArsipSuratController::class, 'show'])->name('arsip-surat.show');
 });
 
 // Perangkat Desa

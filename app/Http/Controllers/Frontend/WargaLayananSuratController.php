@@ -62,6 +62,9 @@ class WargaLayananSuratController extends Controller
             'prioritas'   => ['required', 'in:normal,tinggi'],
             'nama_usaha'  => ['nullable', 'string', 'max:150', 'required_if:jenis_surat,pengantar_usaha'],
             'berlaku_hingga' => ['nullable', 'date', 'after:today'],
+            // GAP-08: File upload validation
+            'lampiran'    => ['nullable', 'array', 'max:5'],
+            'lampiran.*'  => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ], [
             'jenis_surat.required'       => 'Jenis surat wajib dipilih.',
             'jenis_surat.in'             => 'Jenis surat tidak valid.',
@@ -69,6 +72,9 @@ class WargaLayananSuratController extends Controller
             'keperluan.min'              => 'Keperluan minimal 10 karakter.',
             'nama_usaha.required_if'     => 'Nama usaha wajib diisi untuk Surat Pengantar Usaha.',
             'berlaku_hingga.after'       => 'Tanggal berlaku harus setelah hari ini.',
+            'lampiran.max'               => 'Maksimal 5 file lampiran.',
+            'lampiran.*.max'             => 'Ukuran file maksimal 2MB.',
+            'lampiran.*.mimes'           => 'Format file harus PDF, JPG, atau PNG.',
         ]);
 
         // Cek data penduduk
@@ -84,7 +90,7 @@ class WargaLayananSuratController extends Controller
         $nomorTiket = SuratPermohonan::generateTiket();
 
         // Simpan permohonan
-        SuratPermohonan::create([
+        $surat = SuratPermohonan::create([
             'nomor_tiket'       => $nomorTiket,
             'penduduk_id'       => $penduduk->id,
             'jenis_surat'       => $validated['jenis_surat'],
@@ -96,6 +102,21 @@ class WargaLayananSuratController extends Controller
             'status'            => 'pengajuan',
             'tanggal_pengajuan' => now(),
         ]);
+
+        // GAP-08: Handle file uploads
+        if ($request->hasFile('lampiran')) {
+            foreach ($request->file('lampiran') as $file) {
+                $path = $file->store('lampiran-surat/' . $surat->id, 'public');
+
+                \App\Models\LampiranSurat::create([
+                    'surat_permohonan_id' => $surat->id,
+                    'nama_file'           => $file->getClientOriginalName(),
+                    'path'                => $path,
+                    'tipe'                => 'pendukung',
+                    'ukuran'              => $file->getSize(),
+                ]);
+            }
+        }
 
         return redirect()->route('warga.surat.riwayat')
             ->with('success', "Permohonan surat berhasil dikirim dengan nomor tiket {$nomorTiket}. Petugas desa akan memproses dalam 1-2 hari kerja.");

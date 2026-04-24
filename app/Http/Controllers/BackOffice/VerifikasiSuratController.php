@@ -108,6 +108,7 @@ class VerifikasiSuratController extends Controller
 
     /**
      * Approve & apply TTE (digital signature).
+     * GAP-03 FIX: Real PIN verification via Hash::check against stored tte_pin.
      */
     public function approve(Request $request, SuratPermohonan $surat): JsonResponse
     {
@@ -118,8 +119,24 @@ class VerifikasiSuratController extends Controller
             'pin.size'     => 'PIN harus 6 digit.',
         ]);
 
-        // In a real system, this would verify against a stored hashed PIN.
-        // For now, we accept any 6-digit PIN as valid.
+        /** @var User $user */
+        $user = $request->user();
+
+        // Validate role: only kades or administrator can TTE
+        if (!$user->hasRole(User::ROLE_KADES, User::ROLE_ADMINISTRATOR)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya Kepala Desa yang dapat menandatangani surat.',
+            ], 403);
+        }
+
+        // Verify PIN against stored hash
+        if (!$user->tte_pin || !\Illuminate\Support\Facades\Hash::check($request->input('pin'), $user->tte_pin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PIN TTE salah. Silakan coba lagi.',
+            ], 422);
+        }
 
         if (!in_array($surat->status, ['verifikasi', 'menunggu_tte'])) {
             return response()->json([
@@ -130,16 +147,23 @@ class VerifikasiSuratController extends Controller
 
         $surat->update([
             'status'          => 'selesai',
+            'kades_id'        => $user->id,
             'tanggal_selesai' => Carbon::now(),
         ]);
 
-        /** @var User $actor */
-        $actor = $request->user();
+        // Generate PDF
+        try {
+            app(\App\Services\SuratPdfService::class)->generate($surat);
+        } catch (\Throwable $e) {
+            // PDF generation failure should not block TTE
+            report($e);
+        }
+
         ActivityLog::record(
-            $actor,
+            $user,
             'tte_surat',
             "Menandatangani (TTE) surat {$surat->nomor_tiket} — {$surat->jenisShort()} untuk {$surat->penduduk?->nama}",
-            ['surat_id' => $surat->id, 'jenis' => $surat->jenis_surat]
+            ['surat_id' => $surat->id, 'kades_id' => $user->id, 'jenis' => $surat->jenis_surat]
         );
 
         return response()->json([

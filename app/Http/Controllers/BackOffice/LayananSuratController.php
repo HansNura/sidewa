@@ -145,7 +145,7 @@ class LayananSuratController extends Controller
             'berlaku_hingga' => ['required', 'string', 'max:100'],
             'nama_usaha'     => ['nullable', 'required_if:jenis_surat,pengantar_usaha', 'string', 'max:255'],
             'keterangan_lain'=> ['nullable', 'string', 'max:500'],
-            'submit_action'  => ['required', 'in:proses,draft,assign'],
+            'submit_action'  => ['required', 'in:proses,assign'],
         ], [
             'penduduk_id.required'    => 'Data pemohon wajib dipilih.',
             'jenis_surat.required'    => 'Template surat wajib dipilih.',
@@ -155,7 +155,6 @@ class LayananSuratController extends Controller
 
         $status = match ($validated['submit_action']) {
             'proses' => 'pengajuan',
-            'draft'  => 'draft',
             'assign' => 'verifikasi',
         };
 
@@ -176,9 +175,8 @@ class LayananSuratController extends Controller
         /** @var User $actor */
         $actor = $request->user();
         $actionLabel = match ($validated['submit_action']) {
-            'proses' => 'dikirim ke antrian TTE',
-            'draft'  => 'disimpan sebagai draft',
-            'assign' => 'diteruskan ke petugas',
+            'proses' => 'dikirim ke antrian',
+            'assign' => 'diteruskan ke petugas untuk verifikasi',
         };
         ActivityLog::record(
             $actor,
@@ -194,59 +192,7 @@ class LayananSuratController extends Controller
         ]);
     }
 
-    /**
-     * List drafts belonging to the current operator (JSON).
-     */
-    public function drafts(Request $request): JsonResponse
-    {
-        $drafts = SuratPermohonan::with('penduduk:id,nama,nik')
-            ->draft()
-            ->where('operator_id', $request->user()->id)
-            ->orderByDesc('updated_at')
-            ->limit(20)
-            ->get()
-            ->map(fn (SuratPermohonan $s) => [
-                'id'           => $s->id,
-                'jenis_surat'  => $s->jenis_surat,
-                'jenis_short'  => $s->jenisShort(),
-                'jenis_label'  => $s->jenisLabel(),
-                'nama_pemohon' => $s->penduduk?->nama ?? '-',
-                'updated_at'   => $s->updated_at->translatedFormat('d M Y, H:i'),
-            ]);
-
-        return response()->json($drafts);
-    }
-
-    /**
-     * Load a draft's full data for resuming the wizard (JSON).
-     */
-    public function editWizard(SuratPermohonan $surat): JsonResponse
-    {
-        // Only allow loading drafts
-        if ($surat->status !== 'draft') {
-            return response()->json(['error' => 'Hanya draft yang dapat di-edit.'], 422);
-        }
-
-        $surat->load('penduduk');
-
-        return response()->json([
-            'id'              => $surat->id,
-            'jenis_surat'     => $surat->jenis_surat,
-            'jenis_label'     => $surat->jenisLabel(),
-            'keperluan'       => $surat->keperluan,
-            'berlaku_hingga'  => $surat->berlaku_hingga,
-            'nama_usaha'      => $surat->nama_usaha,
-            'catatan'         => $surat->catatan,
-            'penduduk'        => $surat->penduduk ? [
-                'id'        => $surat->penduduk->id,
-                'nik'       => $surat->penduduk->nik,
-                'nama'      => $surat->penduduk->nama,
-                'ttl'       => $surat->penduduk->tempat_lahir . ', ' . $surat->penduduk->tanggal_lahir->translatedFormat('d F Y'),
-                'pekerjaan' => $surat->penduduk->pekerjaan ?? '-',
-                'alamat'    => $surat->penduduk->alamatLengkap(),
-            ] : null,
-        ]);
-    }
+    // Draft feature removed — flow simplified to: Ajukan → Verifikasi → TTE → Selesai
 
     // ═══════════════════════════════════════════════════════════════
     //  END WIZARD

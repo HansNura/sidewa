@@ -14,8 +14,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nik', 'nip', 'jabatan', 'is_active', 'last_login_at', 'last_login_ip'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nik', 'nip', 'jabatan', 'tte_pin', 'is_active', 'last_login_at', 'last_login_ip'])]
+#[Hidden(['password', 'tte_pin', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -157,6 +157,22 @@ class User extends Authenticatable
     public function roleBadgeClasses(): string
     {
         return self::ROLE_BADGE_CLASSES[$this->role] ?? 'bg-gray-100 text-gray-600';
+    }
+
+    /**
+     * Get the route name prefix for this user's role.
+     * Used by sidebar and views to build role-aware route names.
+     */
+    public function routePrefix(): string
+    {
+        return match ($this->role) {
+            self::ROLE_ADMINISTRATOR => 'admin',
+            self::ROLE_OPERATOR      => 'operator',
+            self::ROLE_KADES         => 'kades',
+            self::ROLE_PERANGKAT     => 'perangkat',
+            self::ROLE_RESEPSIONIS   => 'resepsionis',
+            default                  => 'admin',
+        };
     }
 
     /**

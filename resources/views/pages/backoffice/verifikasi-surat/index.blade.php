@@ -3,7 +3,7 @@
 @section('title', 'Verifikasi & TTE Surat - Panel Administrasi')
 
 @section('content')
-
+@php $verifikasiBaseUrl = url(auth()->user()->routePrefix() . '/verifikasi-surat'); @endphp
 <div x-data="{
         verifyWorkspaceOpen: false,
         pinModalOpen: false,
@@ -37,7 +37,7 @@
             this.verifyWorkspaceOpen = true;
             this.resetChecklist();
             try {
-                const res = await fetch(`{{ url('admin/verifikasi-surat') }}/${id}`, {
+                const res = await fetch(`{{ $verifikasiBaseUrl }}/${id}`, {
                     headers: { 'Accept': 'application/json' }
                 });
                 this.currentSurat = await res.json();
@@ -71,7 +71,7 @@
             }
             this.isSigning = true;
             try {
-                const res = await fetch(`{{ url('admin/verifikasi-surat') }}/${this.currentSurat.id}/approve`, {
+                const res = await fetch(`{{ $verifikasiBaseUrl }}/${this.currentSurat.id}/approve`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -102,7 +102,7 @@
                 return;
             }
             try {
-                const res = await fetch(`{{ url('admin/verifikasi-surat') }}/${this.currentSurat.id}/reject`, {
+                const res = await fetch(`{{ $verifikasiBaseUrl }}/${this.currentSurat.id}/reject`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -130,7 +130,7 @@
                 return;
             }
             try {
-                const res = await fetch(`{{ url('admin/verifikasi-surat') }}/${this.currentSurat.id}/revisi`, {
+                const res = await fetch(`{{ $verifikasiBaseUrl }}/${this.currentSurat.id}/revisi`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -154,7 +154,7 @@
         // ── Verify (operator advances to TTE) ──
         async processVerify(id) {
             try {
-                const res = await fetch(`{{ url('admin/verifikasi-surat') }}/${id}/verify`, {
+                const res = await fetch(`{{ $verifikasiBaseUrl }}/${id}/verify`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
