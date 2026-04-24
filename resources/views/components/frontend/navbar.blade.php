@@ -1,11 +1,16 @@
-<header :class="{ 'shadow-md bg-white/90 backdrop-blur-lg text-gray-700': sticky, 'text-white': !sticky }"
+@php
+    // Navbar hanya transparan di halaman Home. Di halaman lain, dia harus solid sejak awal.
+    $isHome = request()->routeIs('home');
+@endphp
+
+<header :class="{ 'shadow-md bg-white/90 backdrop-blur-lg text-gray-700': sticky || !@json($isHome), 'text-white': !sticky && @json($isHome) }"
     class="fixed top-0 left-0 z-50 w-full transition-all duration-300">
     <div class="flex items-center justify-between px-6 py-4 mx-auto max-w-7xl">
         <a href="{{ url('/') }}" class="flex items-center gap-2">
             <img src="{{ asset('assets/img/logo.webp') }}" alt="Logo Desa" class="w-10 h-10 rounded-full" />
             <div class="flex flex-col leading-tight">
                 <span class="text-lg font-semibold transition-colors"
-                    :class="{ 'text-primary': sticky, 'text-white': !sticky }">Desa Sindangmukti</span>
+                    :class="{ 'text-primary': sticky || !@json($isHome), 'text-white': !sticky && @json($isHome) }">Desa Sindangmukti</span>
                 <span class="text-xs">Kec. Panumbangan, Kab. Ciamis</span>
             </div>
         </a>
@@ -85,7 +90,7 @@
         </nav>
         <div @click.outside="mobileMenuOpen = false" class="lg:hidden">
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="focus:outline-none" aria-label="Toggle menu"
-                :class="{ 'text-primary': sticky, 'text-white': !sticky }">
+                :class="{ 'text-primary': sticky || !@json($isHome), 'text-white': !sticky && @json($isHome) }">
                 <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
