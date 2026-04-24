@@ -207,39 +207,19 @@
 @endpush
 
 @section('content')
-<main class="pt-24 bg-gray-50" x-data="dataPekerjaan()" x-init="setHighchartsTheme(); initPekerjaanChart();">
-    <section class="py-12 bg-white border-b border-gray-200">
-        <div class="px-6 mx-auto max-w-7xl">
-            <nav class="flex mb-2" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 text-sm text-gray-500 md:space-x-2">
-                    <li class="inline-flex items-center">
-                        <a href="{{ url('/') }}" class="inline-flex items-center transition-colors hover:text-[#2e7d32]">
-                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                            </svg>
-                            Beranda
-                        </a>
-                    </li>
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="ml-1 md:ml-2">Data Desa</span>
-                        </div>
-                    </li>
-                    <li aria-current="page">
-                        <div class="flex items-center">
-                            <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="ml-1 font-medium text-gray-800 md:ml-2">{{ $pageTitle }}</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-            <h1 class="text-3xl font-bold text-[#2e7d32] md:text-4xl">{{ $pageTitle }}</h1>
-            <p class="mt-2 text-lg text-gray-600">{{ $pageSubtitle }}</p>
+<main class="bg-gray-50 pt-16" x-data="dataPekerjaan()" x-init="setHighchartsTheme(); initPekerjaanChart();">
+
+    <!-- HEADER DATA: GRADIENT SaaS STYLE -->
+    <section class="bg-gradient-to-br from-green-800 to-green-600 text-white py-16 md:py-20 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <span
+                class="bg-green-700/50 text-green-100 text-sm font-semibold px-3 py-1 rounded-full border border-green-500/30 mb-4 inline-block">Statistik Desa</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">{{ $pageTitle }}</h1>
+            <p class="text-lg text-green-100 max-w-2xl mx-auto leading-relaxed">
+                {{ $pageSubtitle }}
+            </p>
         </div>
     </section>
 
@@ -271,7 +251,7 @@
                     </div>
                     <div class="flex-grow">
                         <p class="text-base font-medium text-green-100">{{ $highlightStat['label'] }}</p>
-                        <p class="text-2xl font-bold text-white">{{ number_format($highlightStat['value'], 0, ',', '.') }} {{ $highlightStat['unit'] }}</p>
+                        <p class="text-2xl font-bold text-white">{{ is_numeric($highlightStat['value']) ? number_format($highlightStat['value'], 0, ',', '.') : $highlightStat['value'] }} {{ $highlightStat['unit'] }}</p>
                     </div>
                     <div class="flex-shrink-0 w-32 text-right">
                         <p class="text-sm font-medium text-green-100">Data Per</p>
@@ -293,7 +273,7 @@
                         </div>
 
                         <div class="flex items-end justify-between mt-4">
-                            <p class="text-3xl font-bold text-gray-900">{{ number_format($stat['value'], 0, ',', '.') }}</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ is_numeric($stat['value']) ? number_format($stat['value'], 0, ',', '.') : $stat['value'] }}</p>
 
                             <div class="flex-shrink-0 w-24 text-right">
                                 <p class="mb-1 text-base font-bold" :class="getCardProgressClass({ color: '{{ $stat['color'] }}', isHighlight: false })" x-text="calculatePercentage({{ $stat['value'] }}, total)"></p>

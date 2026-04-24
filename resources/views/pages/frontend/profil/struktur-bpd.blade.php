@@ -3,56 +3,29 @@
 @section('title', 'BPD & Lembaga Desa - Desa Sindangmukti')
 
 @section('content')
-<div class="pt-24 bg-gray-50 text-gray-800 antialiased" x-data="{ tab: 'pemerintahan', openAccordion: null }">
+<div class="bg-gray-50 text-gray-800 antialiased pt-16" x-data="{ tab: 'pemerintahan', openAccordion: null }">
 
-    <!-- HEADER HALAMAN (Breadcrumb) -->
-    <section class="py-12 bg-white border-b border-gray-200">
-        <div class="px-6 mx-auto max-w-7xl">
-            <nav class="flex mb-2" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 text-sm text-gray-500 md:space-x-2">
-                    <li class="inline-flex items-center">
-                        <a href="{{ url('/') }}" class="inline-flex items-center transition-colors hover:text-[#2e7d32]">
-                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                            </svg>
-                            Beranda
-                        </a>
-                    </li>
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="ml-1 md:ml-2">Profil Desa</span>
-                        </div>
-                    </li>
-                    <li aria-current="page">
-                        <div class="flex items-center">
-                            <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="ml-1 font-medium text-gray-800 md:ml-2">BPD & Lembaga</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-            <h1 class="text-3xl font-bold md:text-4xl text-[#2e7d32]">
-                BPD & Lembaga Desa
-            </h1>
-            <p class="mt-2 text-lg text-gray-600">
-                Struktur kelembagaan yang berperan dalam pembangunan dan
-                pelayanan masyarakat Desa Sindangmukti.
+    <!-- HEADER HALAMAN: GRADIENT SaaS STYLE -->
+    <section class="bg-gradient-to-br from-green-800 to-green-600 text-white py-16 md:py-20 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <span
+                class="bg-green-700/50 text-green-100 text-sm font-semibold px-3 py-1 rounded-full border border-green-500/30 mb-4 inline-block">Kelembagaan Desa</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">BPD & Lembaga Desa Sindangmukti</h1>
+            <p class="text-lg text-green-100 max-w-2xl mx-auto leading-relaxed">
+                Struktur tata kelola dan lembaga kemasyarakatan yang bersinergi dalam membangun Desa Sindangmukti.
             </p>
         </div>
     </section>
 
     <!-- NAVIGASI TAB -->
-    <section class="py-16">
+    <section class="py-12">
         <div class="px-6 mx-auto max-w-7xl lg:px-8">
-            <div class="flex justify-center mb-10 border-b border-gray-200">
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
                 <button @click="tab = 'pemerintahan'"
-                    :class="{ 'border-[#2e7d32] text-[#2e7d32]': tab === 'pemerintahan', 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': tab !== 'pemerintahan' }"
-                    class="flex items-center gap-2 px-1 py-4 -mb-px text-lg font-medium transition-colors duration-200 border-b-2">
+                    :class="{ 'bg-green-600 text-white shadow-lg shadow-green-600/30': tab === 'pemerintahan', 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200': tab !== 'pemerintahan' }"
+                    class="flex items-center gap-2 px-6 py-3 rounded-2xl text-base font-bold transition-all duration-300">
                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M15.75 1.5a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z" clip-rule="evenodd" />
                         <path fill-rule="evenodd" d="M12.75 4.5a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
@@ -62,11 +35,11 @@
                         <path fill-rule="evenodd" d="M.75 13.5A.75.75 0 0 1 1.5 12.75h17a.75.75 0 0 1 0 1.5h-17a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
                         <path fill-rule="evenodd" d="M4.25 16.5a.75.75 0 0 0 0 1.5h14.5a.75.75 0 0 0 0-1.5H4.25Z" clip-rule="evenodd" />
                     </svg>
-                    Struktur Pemerintahan (SOTK)
+                    Struktur SOTK
                 </button>
                 <button @click="tab = 'bpd'"
-                    :class="{ 'border-[#2e7d32] text-[#2e7d32]': tab === 'bpd', 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': tab !== 'bpd' }"
-                    class="flex items-center gap-2 px-1 py-4 ml-8 -mb-px text-lg font-medium transition-colors duration-200 border-b-2">
+                    :class="{ 'bg-green-600 text-white shadow-lg shadow-green-600/30': tab === 'bpd', 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200': tab !== 'bpd' }"
+                    class="flex items-center gap-2 px-6 py-3 rounded-2xl text-base font-bold transition-all duration-300">
                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-5.5-2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 12a5.99 5.99 0 0 0-4.793 2.39A6.483 6.483 0 0 0 10 16.5a6.483 6.483 0 0 0 4.793-2.11A5.99 5.99 0 0 0 10 12Z" clip-rule="evenodd" />
                     </svg>
@@ -77,18 +50,26 @@
             <!-- KONTEN TAB -->
             <div>
                 <!-- TAB 1: Struktur Pemerintahan (SOTK) -->
-                <div x-show="tab === 'pemerintahan'" x-cloak>
-                    <div class="max-w-4xl p-6 mx-auto space-y-8 bg-white border border-gray-100 shadow-lg rounded-xl">
+                <div x-show="tab === 'pemerintahan'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="max-w-4xl mx-auto grid gap-6">
                         @foreach($strukturSOTK as $item)
-                        <div class="pb-4 border-b border-gray-100 last:border-none">
-                            <h3 class="text-lg font-semibold text-[#2e7d32]">{{ $item['jabatan'] }}</h3>
-                            <p class="mt-1 text-sm text-gray-600">{{ $item['deskripsi'] }}</p>
+                        <div class="group p-8 bg-white border border-slate-100 shadow-sm rounded-[2rem] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-green-100 transition-all duration-300">
+                            <h3 class="text-xl font-black text-green-700 mb-3 tracking-tight">{{ $item['jabatan'] }}</h3>
+                            <p class="text-slate-600 leading-relaxed mb-6">{{ $item['deskripsi'] }}</p>
                             @if(count($item['fungsi']) > 0)
-                            <ul class="pl-5 mt-2 space-y-1 text-sm text-gray-700 list-disc">
-                                @foreach($item['fungsi'] as $fungsi)
-                                <li>{{ $fungsi }}</li>
-                                @endforeach
-                            </ul>
+                            <div class="space-y-3">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Tugas & Fungsi Utama</p>
+                                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    @foreach($item['fungsi'] as $fungsi)
+                                    <li class="flex items-start gap-3 text-sm text-slate-600">
+                                        <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        {{ $fungsi }}
+                                    </li>
+                                    @endforeach
+                                </ul>
+                            </div>
                             @endif
                         </div>
                         @endforeach
@@ -96,69 +77,89 @@
                 </div>
 
                 <!-- TAB 2: BPD -->
-                <div x-show="tab === 'bpd'" x-cloak>
-                    <div class="space-y-12">
+                <div x-show="tab === 'bpd'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="space-y-16">
                         <!-- Deskripsi BPD -->
-                        <div>
-                            <h2 class="mb-4 text-2xl font-bold text-[#2e7d32]">
-                                Badan Permusyawaratan Desa (BPD)
-                            </h2>
-                            <p class="leading-relaxed text-gray-700">{{ $bpdDeskripsi }}</p>
+                        <div class="max-w-3xl mx-auto text-center">
+                            <h2 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Badan Permusyawaratan Desa (BPD)</h2>
+                            <p class="text-lg leading-relaxed text-slate-600">{{ $bpdDeskripsi }}</p>
                         </div>
 
                         <!-- Fungsi & Tugas Accordion -->
-                        <div class="space-y-3">
+                        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Accordion Fungsi -->
-                            <div class="border border-gray-200 rounded-lg shadow-sm">
+                            <div class="bg-white border border-slate-100 rounded-[2rem] shadow-sm overflow-hidden transition-all duration-300">
                                 <button @click="openAccordion === 'fungsi' ? openAccordion = null : openAccordion = 'fungsi'"
-                                    class="flex items-center justify-between w-full p-4 text-left transition bg-gray-50 hover:bg-green-50">
-                                    <span class="font-semibold text-gray-800">Fungsi BPD</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform"
-                                        :class="{ 'rotate-180': openAccordion === 'fungsi' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                    class="flex items-center justify-between w-full p-8 text-left transition hover:bg-green-50/50">
+                                    <span class="text-lg font-black text-slate-900 tracking-tight">Fungsi BPD</span>
+                                    <div class="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center transition-transform duration-300" :class="{ 'rotate-180 bg-green-600 border-green-600 text-white': openAccordion === 'fungsi' }">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
                                 </button>
-                                <div x-show="openAccordion === 'fungsi'" class="p-5 text-gray-700 bg-white" style="display: none;">
-                                    <ul class="pl-5 space-y-2 list-disc">
+                                <div x-show="openAccordion === 'fungsi'" x-transition class="p-8 pt-0 text-slate-600">
+                                    <ul class="space-y-3">
                                         @foreach($bpdFungsi as $fungsi)
-                                        <li>{{ $fungsi }}</li>
+                                        <li class="flex items-start gap-3 text-sm">
+                                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            {{ $fungsi }}
+                                        </li>
                                         @endforeach
                                     </ul>
                                 </div>
                             </div>
                             <!-- Accordion Tugas -->
-                            <div class="border border-gray-200 rounded-lg shadow-sm">
+                            <div class="bg-white border border-slate-100 rounded-[2rem] shadow-sm overflow-hidden transition-all duration-300">
                                 <button @click="openAccordion === 'tugas' ? openAccordion = null : openAccordion = 'tugas'"
-                                    class="flex items-center justify-between w-full p-4 text-left transition bg-gray-50 hover:bg-green-50">
-                                    <span class="font-semibold text-gray-800">Tugas BPD</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform"
-                                        :class="{ 'rotate-180': openAccordion === 'tugas' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                    class="flex items-center justify-between w-full p-8 text-left transition hover:bg-green-50/50">
+                                    <span class="text-lg font-black text-slate-900 tracking-tight">Tugas BPD</span>
+                                    <div class="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center transition-transform duration-300" :class="{ 'rotate-180 bg-green-600 border-green-600 text-white': openAccordion === 'tugas' }">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
                                 </button>
-                                <div x-show="openAccordion === 'tugas'" class="p-5 text-gray-700 bg-white" style="display: none;">
-                                    <ul class="pl-5 space-y-2 list-disc">
+                                <div x-show="openAccordion === 'tugas'" x-transition class="p-8 pt-0 text-slate-600">
+                                    <ul class="space-y-3">
                                         @foreach($bpdTugas as $tugas)
-                                        <li>{{ $tugas }}</li>
+                                        <li class="flex items-start gap-3 text-sm">
+                                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            {{ $tugas }}
+                                        </li>
                                         @endforeach
                                     </ul>
                                 </div>
                             </div>
                         </div>
-
+    
                         <!-- Daftar Anggota BPD -->
-                        <div class="space-y-6">
-                            <h3 class="text-2xl font-bold text-[#2e7d32]">
-                                Anggota BPD (2019–2025)
-                            </h3>
-                            <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        <div class="space-y-8">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="w-12 h-1 bg-green-600 rounded-full"></div>
+                                <h3 class="text-2xl font-black text-slate-900 tracking-tight">Anggota BPD (2019–2025)</h3>
+                            </div>
+                            
+                            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                                 @foreach($bpdMembers as $person)
-                                <div class="p-5 text-center transition bg-white border border-gray-100 rounded-lg shadow-md hover:shadow-lg">
-                                    <img src="{{ $person['photo'] }}" alt="{{ $person['name'] }}"
-                                        class="object-cover w-24 h-24 mx-auto mb-3 rounded-full" />
-                                    <h4 class="font-semibold text-gray-800">{{ $person['name'] }}</h4>
-                                    <p class="text-sm font-medium text-[#2e7d32]">{{ $person['position'] }}</p>
-                                    <p class="mt-1 text-xs text-gray-500">{{ $person['address'] }}</p>
+                                <div class="group p-6 text-center bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500">
+                                    <div class="relative w-28 h-28 mx-auto mb-6">
+                                        <div class="absolute inset-0 bg-green-100 rounded-full scale-0 group-hover:scale-110 transition-transform duration-500"></div>
+                                        <img src="{{ $person['photo'] }}" alt="{{ $person['name'] }}"
+                                            class="relative z-10 object-cover w-28 h-28 mx-auto rounded-full border-4 border-white shadow-md" />
+                                    </div>
+                                    <h4 class="text-lg font-black text-slate-900 mb-1 group-hover:text-green-700 transition-colors">{{ $person['name'] }}</h4>
+                                    <p class="text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">{{ $person['position'] }}</p>
+                                    <div class="flex items-center justify-center gap-1.5 text-xs text-slate-400">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        </svg>
+                                        {{ $person['address'] }}
+                                    </div>
                                 </div>
                                 @endforeach
                             </div>
@@ -170,31 +171,47 @@
     </section>
 
     <!-- LEMBAGA LAIN -->
-    <section class="px-6 py-20 mx-auto bg-white border-t border-gray-100 max-w-7xl lg:px-8">
-        <h2 class="mb-8 text-2xl font-bold text-center text-[#2e7d32]">
-            Lembaga Kemasyarakatan Desa
-        </h2>
-        <div class="max-w-4xl mx-auto space-y-4">
-            @foreach($lembagaDesa as $index => $lembaga)
-            <div class="border border-gray-200 rounded-lg shadow-sm">
-                <button @click="openAccordion === 'lembaga{{ $index }}' ? openAccordion = null : openAccordion = 'lembaga{{ $index }}'"
-                    class="flex items-center justify-between w-full p-4 text-left rounded-t-lg bg-gray-50 hover:bg-green-50">
-                    <span class="font-semibold text-gray-800">{{ $lembaga['nama'] }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform"
-                        :class="{ 'rotate-180': openAccordion === 'lembaga{{ $index }}' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="openAccordion === 'lembaga{{ $index }}'" class="p-5 text-gray-700 bg-white rounded-b-lg" style="display: none;">
-                    <p class="mb-3 text-sm">{{ $lembaga['deskripsi'] }}</p>
-                    <ul class="pl-5 space-y-1 text-sm list-disc">
-                        @foreach($lembaga['program'] as $program)
-                        <li>{{ $program }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+    <section class="py-24 bg-white border-t border-slate-100">
+        <div class="px-6 mx-auto max-w-7xl lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight mb-4">Lembaga Kemasyarakatan Desa</h2>
+                <div class="h-1.5 w-20 bg-green-600 rounded-full mx-auto"></div>
             </div>
-            @endforeach
+            
+            <div class="max-w-4xl mx-auto space-y-4">
+                @foreach($lembagaDesa as $index => $lembaga)
+                <div class="bg-white border border-slate-100 rounded-[1.5rem] shadow-sm overflow-hidden transition-all duration-300">
+                    <button @click="openAccordion === 'lembaga{{ $index }}' ? openAccordion = null : openAccordion = 'lembaga{{ $index }}'"
+                        class="flex items-center justify-between w-full p-6 text-left transition hover:bg-green-50/50">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center font-bold shadow-sm">
+                                {{ $index + 1 }}
+                            </div>
+                            <span class="text-lg font-bold text-slate-900">{{ $lembaga['nama'] }}</span>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center transition-transform duration-300 shadow-sm" :class="{ 'rotate-180 bg-green-600 border-green-600 text-white': openAccordion === 'lembaga{{ $index }}' }">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div x-show="openAccordion === 'lembaga{{ $index }}'" x-transition class="p-8 pt-2 text-slate-600 bg-white border-t border-slate-50">
+                        <p class="mb-6 leading-relaxed">{{ $lembaga['deskripsi'] }}</p>
+                        <div class="space-y-4">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Program Utama</p>
+                            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @foreach($lembaga['program'] as $program)
+                                <li class="flex items-center gap-3 text-sm font-medium text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    {{ $program }}
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
     </section>
 </div>

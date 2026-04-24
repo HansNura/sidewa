@@ -17,14 +17,14 @@
 <main class="flex-grow pt-16 bg-gray-50">
 
     <!-- SECTION 1: HEADER SECTION -->
-    <section class="relative py-12 overflow-hidden text-white bg-gradient-to-br from-green-800 to-green-600 md:py-16">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="relative z-10 px-4 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
-            <span class="inline-block px-4 py-1 mb-4 text-sm font-semibold border rounded-full bg-green-700/50 text-green-100 border-green-500/30">
-                <i class="fa-regular fa-newspaper mr-1"></i> Informasi Publik
-            </span>
-            <h1 class="mb-4 text-4xl font-bold tracking-tight md:text-5xl">{{ $pageTitle }}</h1>
-            <p class="max-w-2xl mx-auto text-lg leading-relaxed text-green-100">
+    <section class="bg-gradient-to-br from-green-800 to-green-600 text-white py-16 md:py-20 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <span
+                class="bg-green-700/50 text-green-100 text-sm font-semibold px-3 py-1 rounded-full border border-green-500/30 mb-4 inline-block">Warta Desa</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">{{ $pageTitle }}</h1>
+            <p class="text-lg text-green-100 max-w-2xl mx-auto leading-relaxed">
                 {{ $pageSubtitle }}
             </p>
         </div>

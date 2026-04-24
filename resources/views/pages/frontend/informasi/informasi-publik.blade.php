@@ -18,16 +18,14 @@
 <main class="flex-grow pt-16 bg-gray-50" x-data="informasiPublikData()">
 
     <!-- SECTION 1: HEADER SECTION -->
-    <section class="relative py-12 overflow-hidden text-white bg-gradient-to-br from-[#2e7d32] to-[#1b5e20] md:py-16">
+    <section class="bg-gradient-to-br from-green-800 to-green-600 text-white py-16 md:py-20 relative overflow-hidden">
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
         </div>
-        <div class="relative z-10 px-4 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
-            <span class="inline-block px-4 py-1 mb-4 text-sm font-semibold border rounded-full bg-green-700/50 text-green-100 border-green-500/30">
-                <svg class="inline-block w-4 h-4 mr-1 pb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg> 
-                PPID Desa
-            </span>
-            <h1 class="mb-4 text-4xl font-bold tracking-tight md:text-5xl">{{ $pageTitle }}</h1>
-            <p class="max-w-2xl mx-auto text-lg leading-relaxed text-green-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <span
+                class="bg-green-700/50 text-green-100 text-sm font-semibold px-3 py-1 rounded-full border border-green-500/30 mb-4 inline-block">Layanan PPID</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">{{ $pageTitle }}</h1>
+            <p class="text-lg text-green-100 max-w-2xl mx-auto leading-relaxed">
                 {{ $pageSubtitle }}
             </p>
         </div>
