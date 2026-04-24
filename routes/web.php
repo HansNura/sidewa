@@ -407,6 +407,7 @@ Route::middleware(['auth:warga'])->prefix('layanan/mandiri')->name('warga.')->gr
         Route::post('/ajukan', [WargaLayananSuratController::class, 'store'])->name('store');
         Route::get('/riwayat', [WargaLayananSuratController::class, 'riwayat'])->name('riwayat');
         Route::get('/{surat}', [WargaLayananSuratController::class, 'detail'])->name('detail');
+        Route::get('/{surat}/download', [WargaLayananSuratController::class, 'download'])->name('download');
     });
 
     // ── Bantuan Sosial ─────────────────────────────────────

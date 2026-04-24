@@ -177,6 +177,40 @@ class WargaLayananSuratController extends Controller
         ]);
     }
 
+    /**
+     * Download dokumen PDF hasil verifikasi & TTE.
+     */
+    public function download(SuratPermohonan $surat)
+    {
+        $penduduk = $this->getPenduduk();
+
+        // Authorization
+        if (! $penduduk || $surat->penduduk_id !== $penduduk->id) {
+            abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
+        }
+
+        // Cek status dan keberadaan path
+        if ($surat->status !== 'selesai' || ! $surat->pdf_path) {
+            return back()->with('error', 'Dokumen belum tersedia atau belum ditandatangani.');
+        }
+
+        // Tentukan path lengkap (asumsi disimpan di disk 'public')
+        $filePath = storage_path('app/public/' . $surat->pdf_path);
+
+        if (! file_exists($filePath)) {
+            // Coba di disk local (private) jika tidak ada di public
+            $filePath = storage_path('app/' . $surat->pdf_path);
+        }
+
+        if (! file_exists($filePath)) {
+            return back()->with('error', 'File fisik dokumen tidak ditemukan di server. Silakan hubungi admin.');
+        }
+
+        $fileName = str_replace('#', '', $surat->nomor_tiket) . '_' . str_replace(' ', '_', $surat->jenisShort()) . '.pdf';
+
+        return response()->download($filePath, $fileName);
+    }
+
     // ─── Helper ─────────────────────────────────────────────────
 
     /**

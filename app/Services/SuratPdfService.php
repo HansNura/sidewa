@@ -60,7 +60,7 @@ class SuratPdfService
             '{{agama_pemohon}}'   => $penduduk->agama ?? '-',
             '{{jenis_kelamin}}'   => $penduduk->jenisKelaminLabel() ?? '-',
             '{{keperluan}}'       => $surat->keperluan ?? '-',
-            '{{berlaku_hingga}}'  => $surat->berlaku_hingga ?? '-',
+            '{{berlaku_hingga}}'  => $surat->formatBerlakuHingga(),
             '{{nama_usaha}}'      => $surat->nama_usaha ?? '-',
             '{{nomor_surat}}'     => $surat->nomor_tiket,
             '{{tahun}}'           => now()->year,

@@ -12,17 +12,35 @@
                 </tr>
             </thead>
             <tbody class="text-sm divide-y divide-gray-100">
-                @forelse ($queue as $surat)
+                @php $hasVisible = false; @endphp
+                @foreach ($queue as $surat)
                     @php
                         $badge = $surat->statusBadge();
                         $isTTE = $surat->status === 'menunggu_tte';
+
+                        // Role-based visibility logic
+                        $shouldShow = false;
+                        if (auth()->user()->isAdministrator()) {
+                            $shouldShow = true;
+                        } elseif (auth()->user()->isKades() && $isTTE) {
+                            $shouldShow = true;
+                        } elseif (auth()->user()->isOperator() && !$isTTE) {
+                            $shouldShow = true;
+                        }
+
+                        if (!$shouldShow) {
+                            continue;
+                        }
+                        $hasVisible = true;
                     @endphp
-                    <tr class="transition-colors {{ $isTTE ? 'hover:bg-green-50/30 bg-green-50/10' : 'hover:bg-gray-50' }}">
+                    <tr
+                        class="transition-colors {{ $isTTE ? 'hover:bg-green-50/30 bg-green-50/10' : 'hover:bg-gray-50' }}">
                         {{-- Tiket & Jenis --}}
                         <td class="p-4">
-                            <div class="font-bold text-gray-900 font-mono text-[12px] mb-0.5">{{ $surat->nomor_tiket }}</div>
+                            <div class="font-bold text-gray-900 font-mono text-[12px] mb-0.5">{{ $surat->nomor_tiket }}
+                            </div>
                             <div class="font-semibold {{ $isTTE ? 'text-green-700' : 'text-gray-700' }} hover:underline cursor-pointer"
-                                 @click="openWorkspace({{ $surat->id }})">
+                                @click="openWorkspace({{ $surat->id }})">
                                 {{ $surat->jenisLabel() }}
                             </div>
                         </td>
@@ -42,19 +60,23 @@
                             @if ($surat->tanggal_pengajuan->isToday())
                                 <span class="text-xs font-semibold text-gray-700">Hari ini</span><br>
                             @else
-                                <span class="text-xs font-semibold text-gray-700">{{ $surat->tanggal_pengajuan->translatedFormat('d M Y') }}</span><br>
+                                <span
+                                    class="text-xs font-semibold text-gray-700">{{ $surat->tanggal_pengajuan->translatedFormat('d M Y') }}</span><br>
                             @endif
-                            <span class="text-[10px] text-gray-400">{{ $surat->tanggal_pengajuan->format('H:i') }} WIB</span>
+                            <span class="text-[10px] text-gray-400">{{ $surat->tanggal_pengajuan->format('H:i') }}
+                                WIB</span>
                         </td>
 
                         {{-- Status Badge --}}
                         <td class="p-4 text-center">
                             @if ($isTTE)
-                                <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-1 rounded border border-green-200 uppercase tracking-wide">
+                                <span
+                                    class="inline-flex items-center gap-1.5 bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-1 rounded border border-green-200 uppercase tracking-wide">
                                     <i class="fa-solid fa-signature"></i> Menunggu TTE
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded border border-amber-200 uppercase tracking-wide">
+                                <span
+                                    class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded border border-amber-200 uppercase tracking-wide">
                                     <i class="fa-solid fa-list-check"></i> Menunggu Verifikasi
                                 </span>
                             @endif
@@ -77,17 +99,19 @@
                             </div>
                         </td>
                     </tr>
-                @empty
+                @endforeach
+
+                @if (!$hasVisible)
                     <tr>
                         <td colspan="5" class="p-8 text-center">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="fa-solid fa-check-double text-4xl text-gray-200"></i>
-                                <p class="text-sm text-gray-500 font-medium">Tidak ada surat menunggu verifikasi.</p>
-                                <p class="text-xs text-gray-400">Semua surat telah diproses. 🎉</p>
+                                <p class="text-sm text-gray-500 font-medium">Tidak ada antrian untuk Anda.</p>
+                                <p class="text-xs text-gray-400">Semua tugas saat ini telah selesai diproses. 🎉</p>
                             </div>
                         </td>
                     </tr>
-                @endforelse
+                @endif
             </tbody>
         </table>
     </div>

@@ -123,6 +123,30 @@ class SuratPermohonan extends Model
         ];
     }
 
+    /**
+     * Safely format berlaku_hingga field.
+     * Can be a date or a string like "1 Bulan".
+     */
+    public function formatBerlakuHingga(): string
+    {
+        if (!$this->berlaku_hingga) {
+            return '-';
+        }
+
+        try {
+            // Check if it's a valid date string (YYYY-MM-DD)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->berlaku_hingga)) {
+                return Carbon::parse($this->berlaku_hingga)->translatedFormat('d F Y');
+            }
+            
+            // Try parsing anyway if it looks like a date
+            return Carbon::parse($this->berlaku_hingga)->translatedFormat('d F Y');
+        } catch (\Exception $e) {
+            // If it fails (e.g. "1 Bulan"), return as is
+            return $this->berlaku_hingga;
+        }
+    }
+
     // ─── Scopes ────────────────────────────────────────────────
 
     public function scopeAktif(Builder $query): Builder
