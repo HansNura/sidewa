@@ -87,6 +87,23 @@
             <a href="{{ route('transparansi') }}" class="{{ request()->routeIs('transparansi') ? 'text-primary border-b-2 border-primary pb-1' : 'hover:text-primary' }}">Transparansi</a>
             <a href="{{ route('layanan') }}" class="{{ request()->routeIs('layanan') ? 'text-primary border-b-2 border-primary pb-1' : 'hover:text-primary' }}">Layanan</a>
             <a href="{{ route('lapak') }}" class="{{ request()->routeIs('lapak*') ? 'text-primary border-b-2 border-primary pb-1' : 'hover:text-primary' }}">Lapak Desa</a>
+            
+            {{-- TOMBOL MASUK (DROPDOWN) --}}
+            <div x-data="{ loginOpen: false }" @mouseenter="loginOpen = true" @mouseleave="loginOpen = false" class="relative">
+                <button type="button" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold transition-all rounded-full shadow-sm"
+                    :class="{ 'bg-emerald-600 text-white hover:bg-emerald-700': sticky || !@json($isHome), 'bg-white text-emerald-700 hover:bg-emerald-50': !sticky && @json($isHome) }">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                </button>
+                <div x-cloak x-show="loginOpen" x-transition.opacity.duration.150ms
+                    class="absolute right-0 w-48 py-2 mt-2 bg-white border border-gray-100 rounded-xl shadow-xl text-slate-700">
+                    <a href="{{ route('login') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+                        <i class="fa-solid fa-user-tie w-4 text-center"></i> Aparatur Desa
+                    </a>
+                    <a href="{{ route('layanan.mandiri.login') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                        <i class="fa-solid fa-users w-4 text-center"></i> Warga Desa
+                    </a>
+                </div>
+            </div>
         </nav>
         <div @click.outside="mobileMenuOpen = false" class="lg:hidden">
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="focus:outline-none" aria-label="Toggle menu"
@@ -233,6 +250,19 @@
                     </li>
                     <li>
                         <a href="{{ route('lapak') }}" class="block py-2 {{ request()->routeIs('lapak*') ? 'text-primary font-bold' : 'hover:text-primary' }}">Lapak Desa</a>
+                    </li>
+                    
+                    {{-- TOMBOL MASUK MOBILE --}}
+                    <li class="pt-4 mt-2 border-t border-slate-100">
+                        <p class="mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Akses Sistem</p>
+                        <div class="flex flex-col gap-2">
+                            <a href="{{ route('login') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-emerald-700 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors">
+                                <i class="fa-solid fa-user-tie w-4 text-center"></i> Aparatur Desa
+                            </a>
+                            <a href="{{ route('layanan.mandiri.login') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-blue-700 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                                <i class="fa-solid fa-users w-4 text-center"></i> Warga Desa
+                            </a>
+                        </div>
                     </li>
                 </ul>
             </nav>

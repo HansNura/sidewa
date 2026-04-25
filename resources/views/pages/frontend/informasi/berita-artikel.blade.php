@@ -133,34 +133,7 @@
             @if($daftarArtikel->count() > 0)
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 md:gap-8">
                 @foreach($daftarArtikel as $artikel)
-                <article class="flex flex-col h-full overflow-hidden transition-all bg-white border border-gray-200 shadow-sm rounded-xl hover:-translate-y-1 hover:shadow-md group">
-                    <figure class="relative h-48 overflow-hidden">
-                        <img src="{{ $artikel->thumbnail_url }}" alt="{{ $artikel->judul }}"
-                             class="object-cover w-full h-full transition-transform duration-500 transform group-hover:scale-105">
-                        <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-green-700 text-xs font-bold px-2.5 py-1 rounded-md shadow-sm">
-                            {{ $artikel->category_name }}
-                        </span>
-                    </figure>
-                    <div class="flex flex-col flex-grow p-5">
-                        <div class="flex items-center gap-3 mb-2 text-xs font-medium text-gray-500">
-                            <span><i class="fa-regular fa-clock mr-1"></i> {{ $artikel->formatted_date }}</span>
-                            @if($artikel->view_count > 0)
-                                <span class="text-gray-300">|</span>
-                                <span><i class="fa-regular fa-eye mr-1"></i> {{ number_format($artikel->view_count) }}x</span>
-                            @endif
-                        </div>
-                        <h3 class="mb-2 text-lg font-bold leading-tight text-gray-800 transition-colors group-hover:text-green-600">
-                            {{ $artikel->judul }}
-                        </h3>
-                        <p class="flex-grow mb-4 text-sm text-gray-600 line-clamp-3">
-                            {{ $artikel->excerpt }}
-                        </p>
-                        <a href="{{ route('informasi.berita-detail', $artikel->slug) }}"
-                           class="block w-full py-2 mt-auto text-sm font-semibold text-center text-green-600 transition-colors border border-gray-200 rounded-lg bg-gray-50 hover:bg-green-600 hover:text-white">
-                            Baca Artikel
-                        </a>
-                    </div>
-                </article>
+                <x-frontend.berita-item :artikel="$artikel" />
                 @endforeach
             </div>
             @else
