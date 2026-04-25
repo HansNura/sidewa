@@ -10,8 +10,8 @@
     'default' => 'administrator',
 ])
 
-<div class="mb-8" x-data="{ activeRole: '{{ old('role', $default) }}' }">
-    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 text-center">
+<div class="mb-6" x-data="{ activeRole: '{{ old('role', $default) }}' }">
+    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 text-center">
         Pilih Peran Akses
     </p>
 
@@ -22,7 +22,7 @@
                 role="tab"
                 :aria-selected="activeRole === '{{ $role['key'] }}'"
                 @click="activeRole = '{{ $role['key'] }}'"
-                class="flex-1 min-w-[calc(33%-0.25rem)] py-2 px-2 rounded-lg text-xs sm:text-sm transition-all duration-200 cursor-pointer"
+                class="flex-1 min-w-[calc(33%-0.25rem)] py-1.5 px-2 rounded-lg text-[11px] sm:text-xs transition-all duration-200 cursor-pointer"
                 :class="activeRole === '{{ $role['key'] }}'
                     ? 'bg-white shadow text-green-700 font-bold border border-gray-200'
                     : 'text-gray-500 font-medium hover:text-gray-700'"

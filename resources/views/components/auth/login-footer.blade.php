@@ -1,10 +1,10 @@
 {{-- Login Footer / Back Navigation --}}
-<footer class="mt-8 text-center">
-    <p class="text-sm text-gray-500 mb-2">Bukan aparatur desa?</p>
+<footer class="mt-6 text-center">
+    <p class="text-[10px] text-gray-400 mb-2 uppercase font-black tracking-widest">Bukan aparatur desa?</p>
     <a href="{{ route('home') }}"
-       class="inline-flex items-center text-sm font-semibold text-gray-600
-              hover:text-green-700 transition-colors bg-white px-5 py-2.5
-              rounded-full shadow-sm border border-gray-200 hover:border-green-300">
+       class="inline-flex items-center text-[11px] font-bold text-gray-500
+              hover:text-green-700 transition-colors bg-white px-4 py-2
+              rounded-full shadow-sm border border-gray-100 hover:border-green-200">
         <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Portal Publik
     </a>
 </footer>

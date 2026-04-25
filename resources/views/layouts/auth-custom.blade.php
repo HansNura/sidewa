@@ -52,13 +52,13 @@
     @stack('styles')
 </head>
 
-<body class="antialiased min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-100">
+<body class="antialiased min-h-screen flex items-center justify-center relative overflow-x-hidden bg-slate-50">
 
     {{-- Background Decorations --}}
     @include('components.auth.background-blobs')
 
     {{-- Page Content --}}
-    <main class="w-full max-w-md px-4 py-8 relative z-10">
+    <main class="w-full max-w-md px-4 py-4 relative z-10">
         @yield('content')
     </main>
 
