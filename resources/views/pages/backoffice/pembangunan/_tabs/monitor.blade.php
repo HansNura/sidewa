@@ -12,12 +12,10 @@
 </div>
 @endif
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Chart: Kategori Distribusi -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col">
-        <h3 class="font-bold text-gray-800 mb-4 text-sm">Distribusi Proyek per Bidang</h3>
-        <div id="chartCategoryDist" class="w-full h-64 flex-1"></div>
-    </div>
+<!-- Chart: Kategori Distribusi -->
+<div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col h-full min-h-[300px]">
+    <h3 class="font-bold text-gray-800 mb-4 text-xs uppercase tracking-wider">Distribusi Bidang</h3>
+    <div id="chartCategoryDist" class="w-full flex-1"></div>
 </div>
 
 @push('scripts')
@@ -31,12 +29,12 @@
             });
 
             Highcharts.chart('chartCategoryDist', {
-                chart: { type: 'pie', backgroundColor: 'transparent' },
+                chart: { type: 'pie', backgroundColor: 'transparent', height: 280 },
                 title: { text: null },
                 plotOptions: {
                     pie: { innerSize: '60%', dataLabels: { enabled: false }, showInLegend: true, borderWidth: 2, borderColor: '#fff' }
                 },
-                legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', itemStyle: { fontSize: '11px' } },
+                legend: { layout: 'horizontal', align: 'center', verticalAlign: 'bottom', itemStyle: { fontSize: '9px' } },
                 series: [{ name: 'Jumlah Proyek', data: pieData }]
             });
         }

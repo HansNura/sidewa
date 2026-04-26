@@ -75,6 +75,11 @@ Route::get('/informasi/produk-hukum/{document}/download', [FrontendPageControlle
 Route::get('/informasi/informasi-publik', [FrontendPageController::class, 'informasiPublik'])->name('informasi.publik');
 Route::get('/informasi/galeri', [FrontendPageController::class, 'galeri'])->name('informasi.galeri');
 
+// Transparansi Pembangunan (Public)
+use App\Http\Controllers\Frontend\TransparansiPembangunanController;
+Route::get('/transparansi/pembangunan', [TransparansiPembangunanController::class, 'index'])->name('transparansi.pembangunan');
+Route::get('/transparansi/pembangunan/{id}', [TransparansiPembangunanController::class, 'show'])->name('transparansi.pembangunan.detail');
+
 // ──────────────────────────────────────────────────────────
 // AUTHENTICATED ROUTES
 // ──────────────────────────────────────────────────────────
@@ -218,6 +223,8 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
     Route::post('pembangunan/data', [PembangunanController::class, 'store'])->name('pembangunan.store');
     Route::get('pembangunan/data/drawer/{id}', [PembangunanController::class, 'detail'])->name('pembangunan.detail');
     Route::post('pembangunan/data/{id}/progress', [PembangunanController::class, 'updateProgress'])->name('pembangunan.update-progress');
+    Route::post('pembangunan/data/{id}/master', [PembangunanController::class, 'updateMaster'])->name('pembangunan.update-master');
+    Route::delete('pembangunan/data/{id}', [PembangunanController::class, 'destroy'])->name('pembangunan.destroy');
 
     // ── Perencanaan Pembangunan ──
     Route::get('pembangunan/perencanaan', [PerencanaanController::class, 'index'])->name('perencanaan.index');

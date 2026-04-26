@@ -20,7 +20,7 @@
              <button @click="detailDrawerOpen = false" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 -mr-2"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
 
-        <div id="drawer-content" class="flex-1 overflow-y-auto custom-scrollbar relative bg-gray-50/20">
+        <div id="drawer-content" class="flex-1 flex flex-col relative bg-gray-50/20 overflow-hidden">
              <!-- Ajax Inject -->
         </div>
         

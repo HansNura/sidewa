@@ -122,8 +122,22 @@
                 </div>
             </div>
 
-            <a href="{{ route('transparansi') }}"
-                class="transition-colors hover:text-emerald-500 {{ request()->routeIs('transparansi') ? 'text-emerald-500' : '' }}">Transparansi</a>
+            <div x-data="{ transpOpen: false }" @mouseenter="transpOpen = true" @mouseleave="transpOpen = false" class="relative">
+                <button type="button" class="flex items-center gap-1 transition-colors hover:text-emerald-500"
+                    :class="{ 'text-emerald-500': transpOpen || {{ json_encode(request()->routeIs('transparansi*')) }} }">
+                    Transparansi
+                    <svg class="w-4 h-4 mt-[2px] transition-transform duration-200" :class="{ 'rotate-180': transpOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-cloak x-show="transpOpen" x-transition.opacity.duration.150ms
+                    class="absolute left-0 w-56 py-2 mt-3 bg-white border border-slate-100 rounded-2xl shadow-xl text-slate-700 overflow-hidden" role="menu">
+                    <a href="{{ route('transparansi') }}"
+                        class="block px-5 py-2.5 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Transparansi APBDes</a>
+                    <a href="{{ route('transparansi.pembangunan') }}"
+                        class="block px-5 py-2.5 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Transparansi Pembangunan</a>
+                </div>
+            </div>
             <a href="{{ route('layanan') }}"
                 class="transition-colors hover:text-emerald-500 {{ request()->routeIs('layanan') ? 'text-emerald-500' : '' }}">Layanan</a>
             <a href="{{ route('lapak') }}"
@@ -314,9 +328,25 @@
                             </li>
                         </ul>
                     </li>
-                    <li>
-                        <a href="{{ route('transparansi') }}"
-                            class="block px-4 py-3 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors {{ request()->routeIs('transparansi') ? 'bg-emerald-50 text-emerald-600' : '' }}">Transparansi</a>
+                    <li x-data="{ openTransp: false }">
+                        <button @click="openTransp = !openTransp"
+                            class="flex items-center justify-between w-full px-4 py-3 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                            <span>Transparansi</span>
+                            <svg :class="{ 'rotate-180': openTransp }" class="w-5 h-5 transition-transform transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <ul x-show="openTransp" x-transition x-cloak
+                            class="pl-4 ml-6 space-y-1 mt-1 text-sm font-semibold border-l-2 border-slate-100">
+                            <li>
+                                <a href="{{ route('transparansi') }}"
+                                    class="block px-4 py-2 text-slate-500 hover:text-emerald-600 transition-colors">Transparansi APBDes</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('transparansi.pembangunan') }}"
+                                    class="block px-4 py-2 text-slate-500 hover:text-emerald-600 transition-colors">Transparansi Pembangunan</a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="{{ route('layanan') }}"

@@ -50,22 +50,8 @@
         <!-- TOP NAVBAR -->
         <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0 no-print">
             <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span
-                        class="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md uppercase tracking-wider">Akses
-                        Bendahara</span>
-                </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Pelaporan Keuangan</h1>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center font-bold text-xs">
-                    Ws</div>
-                <div class="hidden md:block text-right">
-                    <p class="text-xs font-bold text-gray-900 leading-none">{{ auth()->user()->name ?? 'Wina Sekretaris' }}
-                    </p>
-                    <p class="text-[10px] text-gray-500 mt-1">Bendahara Desa</p>
-                </div>
+                <p class="text-sm text-gray-500 mt-1">Laporan Keuangan Desa.</p>
             </div>
         </header>
 

@@ -18,12 +18,8 @@
         <!-- TOP NAVBAR & HEADERS -->
         <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0">
             <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span
-                        class="text-xs font-semibold px-2.5 py-1 bg-green-100 text-green-700 rounded-md uppercase tracking-wider">Akses
-                        Bendahara</span>
-                </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Realisasi & Monitoring</h1>
+                <p class="text-sm text-gray-500 mt-1">Realisasi dan monitoring APBDes.</p>
             </div>
 
             <!-- Filters & Quick Action -->

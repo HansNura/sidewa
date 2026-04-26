@@ -8,11 +8,6 @@
         <!-- TOP NAVBAR & HEADERS -->
         <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0 transition-opacity">
             <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span
-                        class="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md uppercase tracking-wider">Akses
-                        Keuangan</span>
-                </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Manajemen APBDes</h1>
                 <p class="text-sm text-gray-500 mt-1">Pengelolaan Anggaran Pendapatan dan Belanja Desa (Murni).</p>
             </div>

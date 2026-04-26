@@ -6,15 +6,21 @@
         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition ease-transform duration-300" x-transition:leave-start="translate-x-0"
         x-transition:leave-end="translate-x-full"
-        class="relative bg-white w-full max-w-md h-full shadow-2xl flex flex-col border-l border-gray-200">
+        class="relative bg-white w-full max-w-2xl h-full shadow-2xl flex flex-col border-l border-gray-200">
 
-        <!-- Outer Header Container -->
+        <!-- Header -->
         <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-start bg-gray-50/50 shrink-0">
-            <h3 class="font-extrabold text-lg text-gray-900 leading-tight">Detail Perencanaan</h3>
-            <button @click="detailDrawerOpen = false" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 -mr-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+             <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                      <i class="fa-solid fa-clipboard-list"></i>
+                  </div>
+                  <h3 class="font-extrabold text-lg text-gray-900 leading-tight">Detail Perencanaan</h3>
+             </div>
+             
+             <button @click="detailDrawerOpen = false" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 -mr-2"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
 
-        <div id="drawer-content" class="flex-1 overflow-y-auto custom-scrollbar relative">
+        <div id="drawer-content" class="flex-1 flex flex-col relative bg-gray-50/20 overflow-hidden">
              <!-- Ajax Inject -->
         </div>
         
