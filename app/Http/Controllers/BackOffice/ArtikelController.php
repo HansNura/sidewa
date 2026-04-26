@@ -70,6 +70,48 @@ class ArtikelController extends Controller
     }
 
     /**
+     * Hapus Kategori
+     */
+    public function destroyCategory($id)
+    {
+        $category = ArticleCategory::findOrFail($id);
+        // Nullkan referensi artikel
+        Article::where('kategori_id', $category->id)->update(['kategori_id' => null]);
+        $category->delete();
+
+        return back()->with('success', 'Kategori berhasil dihapus. Artikel terkait menjadi Uncategorized.');
+    }
+
+    /**
+     * Tambah Tag Baru
+     */
+    public function storeTag(Request $request)
+    {
+        $request->validate([
+            'nama_tag' => 'required|string|max:100|unique:tags,nama_tag'
+        ]);
+
+        Tag::create([
+            'nama_tag' => $request->nama_tag,
+            'slug' => Str::slug($request->nama_tag)
+        ]);
+
+        return back()->with('success', 'Tag baru berhasil ditambahkan.');
+    }
+
+    /**
+     * Hapus Tag
+     */
+    public function destroyTag($id)
+    {
+        $tag = Tag::findOrFail($id);
+        $tag->articles()->detach(); // Lepas relasi pivot
+        $tag->delete();
+
+        return back()->with('success', 'Tag berhasil dihapus.');
+    }
+
+    /**
      * Menyimpan / Memperbarui Artikel (Dengan Rich Text Processing)
      */
     public function store(Request $request)
@@ -82,6 +124,7 @@ class ArtikelController extends Controller
             'kategori_id' => 'nullable|exists:article_categories,id',
             'published_at' => 'nullable|date',
             'tags_input' => 'nullable|string', // comma separated strings
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $article = null;
@@ -92,6 +135,13 @@ class ArtikelController extends Controller
             $article = new Article();
             $slug = Str::slug($request->judul) . '-' . time();
             $article->user_id = auth()->id() ?? 1; // Opsional: Auth ID fallback
+        }
+
+        if ($request->hasFile('cover_image')) {
+            if ($article->cover_image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($article->cover_image);
+            }
+            $article->cover_image = $request->file('cover_image')->store('berita/cover', 'public');
         }
 
         $article->judul = $request->judul;

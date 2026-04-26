@@ -12,58 +12,110 @@
             <button @click="uploadModalOpen = false" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
 
-        <form action="{{ route('admin.galeri.media.store') }}" method="POST" enctype="multipart/form-data" class="overflow-y-auto custom-scrollbar flex-1 flex flex-col md:flex-row">
+        <form action="{{ route('admin.galeri.media.store') }}" method="POST" enctype="multipart/form-data" class="flex-1 flex flex-col min-h-0">
             @csrf
             
-            <!-- Kolom Kiri: Input Files -->
-            <div class="w-full md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-gray-100 flex flex-col gap-4">
-                <div class="space-y-1 h-full">
-                    <label class="text-xs font-bold text-gray-700 uppercase mb-2 block">Pilih File (Bisa multi-file)</label>
-                    <div class="h-full border-2 border-dashed border-green-300 bg-green-50/50 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-green-50 transition-colors min-h-[250px] relative">
-                        <input type="file" name="files[]" multiple accept="image/jpeg,image/png,video/mp4" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-green-500 text-2xl shadow-sm mb-4">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col md:flex-row min-h-0">
+                <!-- Kolom Kiri: Input Files & Preview -->
+                <div class="w-full md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-gray-100 space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-700 uppercase mb-2 block">Pilih File (Bisa multi-file)</label>
+                        <div class="relative group">
+                            <div class="w-full border-2 border-dashed border-green-300 bg-green-50/50 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-green-100/50 hover:border-green-400 transition-all min-h-[180px] p-4">
+                                <input type="file" id="upload-input" name="files[]" multiple accept="image/jpeg,image/png,video/mp4" required 
+                                    @change="handleFileChange($event)"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-green-600 text-xl shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <h4 class="font-bold text-gray-800 text-sm">Klik / Tarik File di Sini</h4>
+                                <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">JPG, PNG (Max 5MB) | MP4 (Max 20MB)</p>
+                            </div>
                         </div>
-                        <h4 class="font-bold text-gray-800">Klik / Tarik File di Sini</h4>
-                        <p class="text-[10px] font-mono text-gray-400 mt-4 uppercase">JPG, PNG (Max 5MB) | MP4 (Max 20MB)</p>
+                    </div>
+
+                    <!-- PREVIEW SECTION -->
+                    <template x-if="filePreviews.length > 0">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pratinjau File (<span x-text="filePreviews.length"></span>)</label>
+                                <button type="button" @click="filePreviews = []; allFiles = []; $el.closest('form').querySelector('input[type=file]').value = ''" class="text-[10px] text-red-500 font-bold hover:underline">Hapus Semua</button>
+                            </div>
+                            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                <template x-for="(file, index) in filePreviews" :key="index">
+                                    <div class="aspect-square rounded-lg border border-gray-200 bg-gray-50 overflow-hidden relative group shadow-sm">
+                                        <template x-if="file.type.startsWith('image/')">
+                                            <img :src="file.url" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="file.type === 'video/mp4'">
+                                            <div class="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-1">
+                                                <i class="fa-solid fa-film text-lg mb-1 text-slate-400"></i>
+                                                <span class="text-[8px] truncate w-full text-center" x-text="file.name"></span>
+                                            </div>
+                                        </template>
+                                        <!-- Actions Overlay -->
+                                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                            <button type="button" @click="openUploadLightbox(index)" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center backdrop-blur-sm transition-all shadow-sm">
+                                                <i class="fa-solid fa-expand text-xs"></i>
+                                            </button>
+                                            <button type="button" @click="removeFile(index)" class="w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-600 text-white flex items-center justify-center backdrop-blur-sm transition-all shadow-sm">
+                                                <i class="fa-solid fa-trash-can text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Kolom Kanan: Meta Data Input -->
+                <div class="w-full md:w-1/2 p-6 bg-gray-50/50 space-y-5">
+                    <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-bold text-blue-900 mb-0.5 uppercase tracking-wide">Bulk Setup</p>
+                            <p class="text-[10px] text-blue-700 leading-relaxed">Pengaturan di bawah ini akan diterapkan ke <b>seluruh</b> file yang Anda upload sekaligus.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-700 uppercase tracking-wide">Simpan ke Album</label>
+                        <div class="relative">
+                            <select name="album_id" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer appearance-none">
+                                <option value="">Tanpa Album (Umum)</option>
+                                @foreach($albums as $ab)
+                                    <option value="{{ $ab->id }}">{{ $ab->nama_album }}</option>
+                                @endforeach
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-700 uppercase tracking-wide">Deskripsi Media</label>
+                        <textarea name="deskripsi" rows="4" placeholder="Tuliskan keterangan mengenai foto/video ini..." class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 outline-none resize-none transition-all placeholder:text-gray-300"></textarea>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-gray-700 uppercase tracking-wide">Tags / Label</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-tag absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
+                            <input type="text" name="tags" placeholder="Misal: Jalan, HUT RI, Kegiatan..." class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1 italic italic">Gunakan koma (,) untuk memisahkan beberapa tag.</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Kolom Kanan: Meta Data Input -->
-            <div class="w-full md:w-1/2 p-6 bg-gray-50/50 space-y-5">
-                <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex items-start gap-2">
-                    <i class="fa-solid fa-circle-info text-blue-500 mt-0.5 text-xs"></i>
-                    <p class="text-[10px] text-blue-800 leading-relaxed">Pengaturan di bawah ini akan diterapkan ke <b>semua</b> file dalam antrean upload saat ini (Bulk Update).</p>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-700 uppercase">Simpan ke Album</label>
-                    <select name="album_id" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
-                        <option value="">Tanpa Album</option>
-                        @foreach($albums as $ab)
-                            <option value="{{ $ab->id }}">{{ $ab->nama_album }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-700 uppercase">Deskripsi Umum</label>
-                    <textarea name="deskripsi" rows="3" placeholder="Tuliskan keterangan mengenai foto/video ini..." class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 outline-none resize-none"></textarea>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-700 uppercase">Tags / Label</label>
-                    <input type="text" name="tags" placeholder="Misal: Jalan, Pembangunan, Gotong Royong..." class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none">
-                    <p class="text-[10px] text-gray-400 mt-1">Pisahkan dengan koma (,).</p>
-                </div>
-            </div>
             
-            <div class="absolute bottom-0 left-0 w-full px-6 py-4 border-t border-gray-100 bg-white shrink-0 flex justify-end gap-3 z-10">
-                <button type="button" @click="uploadModalOpen = false" class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">Batal</button>
-                <button type="submit" class="px-8 py-2.5 rounded-xl text-sm font-bold text-white bg-green-700 hover:bg-green-800 shadow-md transition-all flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up"></i> Terapkan & Upload</button>
+            <div class="px-6 py-4 border-t border-gray-100 bg-white shrink-0 flex justify-end gap-3">
+                <button type="button" @click="uploadModalOpen = false" class="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all border border-transparent">Batal</button>
+                <button type="submit" class="px-8 py-2.5 rounded-xl text-sm font-bold text-white bg-green-700 hover:bg-green-800 shadow-lg shadow-green-900/10 transition-all flex items-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-upload"></i> Mulai Upload
+                </button>
             </div>
-            <div class="h-20 w-full md:hidden"></div>
         </form>
     </div>
 </div>
@@ -227,4 +279,56 @@
             <span class="font-bold text-green-600"><i class="fa-solid fa-globe mr-1"></i> Modul Galeri Aktif</span>
         </div>
     </div>
+</div>
+
+<!-- 5. LIGHTBOX: PREVIEW UPLOAD QUEUE -->
+<div x-show="uploadLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center p-4" x-cloak
+    @keydown.escape.window="uploadLightboxOpen = false"
+    @keydown.left.window="uploadLightboxIndex = (uploadLightboxIndex > 0) ? uploadLightboxIndex - 1 : filePreviews.length - 1"
+    @keydown.right.window="uploadLightboxIndex = (uploadLightboxIndex < filePreviews.length - 1) ? uploadLightboxIndex + 1 : 0">
+    
+    <div x-show="uploadLightboxOpen" x-transition.opacity class="absolute inset-0 bg-black/95 backdrop-blur-md" @click="uploadLightboxOpen = false"></div>
+    
+    <template x-if="uploadLightboxIndex !== null && filePreviews[uploadLightboxIndex]">
+        <div class="relative w-full h-full flex flex-col items-center justify-center">
+            <!-- Header -->
+            <div class="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent z-10">
+                <div class="text-white">
+                    <p class="font-bold text-sm md:text-lg" x-text="filePreviews[uploadLightboxIndex].name"></p>
+                    <p class="text-[10px] md:text-xs text-gray-400" x-text="filePreviews[uploadLightboxIndex].size"></p>
+                </div>
+                <button @click="uploadLightboxOpen = false" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="relative z-0 max-w-5xl max-h-[80vh] w-full flex items-center justify-center p-4">
+                <template x-if="filePreviews[uploadLightboxIndex].type.startsWith('image/')">
+                    <img :src="filePreviews[uploadLightboxIndex].url" 
+                        x-show="uploadLightboxOpen"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 scale-95" 
+                        x-transition:enter-end="opacity-100 scale-100"
+                        class="max-w-full max-h-full object-contain rounded-lg shadow-2xl ring-1 ring-white/10">
+                </template>
+                <template x-if="filePreviews[uploadLightboxIndex].type === 'video/mp4'">
+                    <video :src="filePreviews[uploadLightboxIndex].url" controls class="max-w-full max-h-full rounded-lg shadow-2xl ring-1 ring-white/10"></video>
+                </template>
+            </div>
+
+            <!-- Navigation -->
+            <div class="absolute bottom-10 left-0 right-0 flex justify-center gap-4 z-10">
+                <button @click="uploadLightboxIndex = (uploadLightboxIndex > 0) ? uploadLightboxIndex - 1 : filePreviews.length - 1" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all backdrop-blur-md">
+                    <i class="fa-solid fa-chevron-left text-xl"></i>
+                </button>
+                <div class="bg-white/10 px-6 py-3 rounded-full backdrop-blur-md text-white text-sm font-black flex items-center tracking-widest">
+                    <span x-text="uploadLightboxIndex + 1"></span> <span class="mx-2 opacity-30">/</span> <span x-text="filePreviews.length"></span>
+                </div>
+                <button @click="uploadLightboxIndex = (uploadLightboxIndex < filePreviews.length - 1) ? uploadLightboxIndex + 1 : 0" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all backdrop-blur-md">
+                    <i class="fa-solid fa-chevron-right text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </template>
 </div>

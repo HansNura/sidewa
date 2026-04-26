@@ -35,19 +35,88 @@
         openDetail(media) {
             this.selectedMedia = media;
             this.detailDrawerOpen = true;
+        },
+
+        filePreviews: [],
+        allFiles: [],
+        uploadLightboxOpen: false,
+        uploadLightboxIndex: null,
+
+        handleFileChange(event) {
+            const newFiles = Array.from(event.target.files);
+            const input = document.getElementById('upload-input');
+            const dt = new DataTransfer();
+
+            // 1. Ambil file yang sudah ada di previews (jika ada)
+            // Kita perlu menyimpan referensi File asli. 
+            // Mari kita modifikasi struktur filePreviews untuk menyimpan objek File.
+            
+            // Re-sync DataTransfer dengan file lama + file baru
+            if(!this.allFiles) this.allFiles = [];
+            
+            newFiles.forEach(file => {
+                // Opsional: Cek duplikat berdasarkan nama & ukuran
+                const isDuplicate = this.allFiles.some(f => f.name === file.name && f.size === file.size);
+                if (!isDuplicate) {
+                    this.allFiles.push(file);
+                    
+                    // Buat Preview untuk file baru ini saja
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.filePreviews.push({
+                            url: e.target.result,
+                            name: file.name,
+                            type: file.type,
+                            size: (file.size / 1024).toFixed(1) + ' KB'
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Update input.files agar berisi semua file di allFiles
+            this.allFiles.forEach(file => dt.items.add(file));
+            input.files = dt.files;
+        },
+
+        removeFile(index) {
+            this.filePreviews.splice(index, 1);
+            this.allFiles.splice(index, 1);
+            
+            // Sinkronisasi dengan input file
+            const input = document.getElementById('upload-input');
+            const dt = new DataTransfer();
+            this.allFiles.forEach(file => dt.items.add(file));
+            input.files = dt.files;
+        },
+
+        openUploadLightbox(index) {
+            this.uploadLightboxIndex = index;
+            this.uploadLightboxOpen = true;
         }
     }">
 
-    <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0 px-4 sm:px-6 pt-6">
+    <!-- TOP NAVBAR -->
+    <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md uppercase tracking-wider">Akses Publikasi</span>
-            </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Manajemen Konten Publik</h1>
+            <p class="text-sm text-gray-500 mt-1">Kelola aset visual, foto, dan video dokumentasi kegiatan desa.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <button @click="previewModalOpen = true" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-xl px-4 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-desktop text-green-600"></i> <span class="hidden sm:inline">Preview Web</span>
+            </button>
+            <button @click="albumModalOpen = true" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-xl px-4 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-folder-plus text-amber-500"></i> <span class="hidden sm:inline">Buat Album</span>
+            </button>
+            <button @click="uploadModalOpen = true; filePreviews = []; allFiles = []" class="bg-green-700 hover:bg-green-800 text-white shadow-md rounded-xl px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media
+            </button>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-8 custom-scrollbar">
+    <main class="flex-1 overflow-y-auto pb-8 custom-scrollbar">
         @if(session('success'))
             <div class="mb-4 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-bold shadow-sm">
                 <i class="fa-solid fa-circle-check mr-2"></i>{{ session('success') }}
@@ -70,54 +139,62 @@
 
         <div class="max-w-7xl mx-auto space-y-6">
 
-            <section class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900 tracking-tight">Galeri & Media</h2>
-                    <p class="text-sm text-gray-500 mt-1">Kelola aset visual, foto, dan video dokumentasi kegiatan desa.</p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-3">
-                    <button @click="previewModalOpen = true" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-xl px-4 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-desktop text-green-600"></i> <span class="hidden sm:inline">Preview Web</span>
-                    </button>
-                    <button @click="albumModalOpen = true" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-xl px-4 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-folder-plus text-amber-500"></i> <span class="hidden sm:inline">Buat Album</span>
-                    </button>
-                    <button @click="uploadModalOpen = true" class="bg-green-700 hover:bg-green-800 text-white shadow-md rounded-xl px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media
-                    </button>
-                </div>
-            </section>
-
             <!-- SUMMARY CARDS -->
-            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Media</p>
-                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-images text-xs"></i></div>
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {{-- Total Media --}}
+                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-blue-600">
+                        <i class="fa-solid fa-images text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-gray-900">{{ $totalMedia }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Total Media</p>
+                        <h3 class="text-2xl font-black text-blue-700 tracking-tight leading-none">{{ $totalMedia }}</h3>
+                    </div>
                 </article>
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Album</p>
-                        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-folder-open text-xs"></i></div>
+
+                {{-- Total Album --}}
+                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-amber-600">
+                        <i class="fa-solid fa-folder-open text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-gray-900">{{ $totalAlbum }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-0.5">Total Album</p>
+                        <h3 class="text-2xl font-black text-amber-700 tracking-tight leading-none">{{ $totalAlbum }}</h3>
+                    </div>
                 </article>
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Video Uploaded</p>
-                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center"><i class="fa-solid fa-video text-xs"></i></div>
+
+                {{-- Video Uploaded --}}
+                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-rose-600">
+                        <i class="fa-solid fa-video text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-gray-900">{{ $totalVideo }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-0.5">Video Uploaded</p>
+                        <h3 class="text-2xl font-black text-rose-700 tracking-tight leading-none">{{ $totalVideo }}</h3>
+                    </div>
                 </article>
-                <article class="bg-gray-900 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between border-l-4 border-l-green-500 hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider">Storage Terpakai</p>
-                        <div class="w-8 h-8 rounded-lg bg-gray-800 text-green-400 flex items-center justify-center"><i class="fa-solid fa-hard-drive text-xs"></i></div>
+
+                {{-- Storage Terpakai --}}
+                <article class="bg-gray-900 rounded-2xl p-5 border border-gray-800 shadow-xl hover:-translate-y-1 transition-all flex items-center gap-4 group relative overflow-hidden border-l-4 border-l-green-500">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity text-green-400">
+                        <i class="fa-solid fa-hard-drive text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold">{{ $formattedStorageVal }} <span class="text-sm font-medium text-gray-400">{{ $formattedStorageUnit }}</span></h3>
+                    <div class="w-12 h-12 rounded-2xl bg-gray-800 text-green-400 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-hard-drive"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-green-400 uppercase tracking-widest mb-0.5">Storage Terpakai</p>
+                        <h3 class="text-2xl font-black text-white tracking-tight leading-none">{{ $formattedStorageVal }} <span class="text-sm font-medium text-gray-400">{{ $formattedStorageUnit }}</span></h3>
+                    </div>
                 </article>
             </section>
 
@@ -136,11 +213,13 @@
             </section>
 
             <!-- TAB CONTENT -->
-            @if($tab == 'media')
-                @include('pages.backoffice.galeri._tab_media')
-            @else
-                @include('pages.backoffice.galeri._tab_album')
-            @endif
+            <div class="pt-2">
+                @if($tab == 'media')
+                    @include('pages.backoffice.galeri._tab_media')
+                @else
+                    @include('pages.backoffice.galeri._tab_album')
+                @endif
+            </div>
 
         </div>
     </main>

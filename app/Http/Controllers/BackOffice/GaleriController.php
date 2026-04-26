@@ -33,7 +33,12 @@ class GaleriController extends Controller
         $formattedStorageUnit = $units[$pow];
 
         // Fetch Data berdasarkan Tab
-        $albums = AlbumGaleri::withCount('medias')->orderBy('created_at', 'desc')->get();
+        $albums = AlbumGaleri::withCount('medias')
+            ->with(['medias' => function($q) {
+                $q->orderBy('created_at', 'desc')->limit(4);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
         
         $mediaQuery = MediaGaleri::with('album')->orderBy('created_at', 'desc');
         if ($request->album_id) {

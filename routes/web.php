@@ -242,6 +242,9 @@ Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->
 
     Route::get('konten/berita', [ArtikelController::class, 'index'])->name('artikel.index');
     Route::post('konten/berita/kategori', [ArtikelController::class, 'storeCategory'])->name('artikel.kategori.store');
+    Route::delete('konten/berita/kategori/{id}', [ArtikelController::class, 'destroyCategory'])->name('artikel.kategori.destroy');
+    Route::post('konten/berita/tag', [ArtikelController::class, 'storeTag'])->name('artikel.tag.store');
+    Route::delete('konten/berita/tag/{id}', [ArtikelController::class, 'destroyTag'])->name('artikel.tag.destroy');
     Route::post('konten/berita', [ArtikelController::class, 'store'])->name('artikel.store');
     Route::post('konten/berita/bulk', [ArtikelController::class, 'bulkAction'])->name('artikel.bulk');
     Route::get('konten/berita/api/{id}', [ArtikelController::class, 'apiDetail'])->name('artikel.api.detail');

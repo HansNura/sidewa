@@ -40,13 +40,16 @@
         detailDrawerOpen: false,
         previewModalOpen: false,
         catModalOpen: false,
+        tagModalOpen: false,
         selectAll: false,
         selectedRows: [],
         
         // Editor State
         articleId: null,
         articleTitle: '',
+        articleSlug: '',
         publishStatus: 'draft',
+        coverPreview: '',
         
         // Modal Preview State
         previewDevice: 'desktop',
@@ -55,96 +58,127 @@
         async openEditor(id = null) {
             this.articleId = id;
             if(id) {
-                // Fetch existing article data (stub implementation, assuming quill initialization below hooks into this somehow)
-                const res = await fetch(`/konten/berita/api/${id}`);
+                const res = await fetch(`/admin/konten/berita/api/${id}`);
                 const data = await res.json();
                 this.articleTitle = data.judul;
+                this.articleSlug = data.slug;
                 this.publishStatus = data.status;
-                // Set form data and Quill HTML...
+                this.coverPreview = data.cover_image ? `/storage/${data.cover_image}` : '';
+                
                 document.getElementById('editor_title').value = data.judul;
                 document.getElementById('editor_status').value = data.status;
                 document.getElementById('editor_slug').value = data.slug;
                 document.getElementById('editor_kategori_id').value = data.kategori_id;
                 
-                // Assuming we use a global quill instance
+                let tagsString = data.tags ? data.tags.map(t => t.nama_tag).join(',') : '';
+                window.dispatchEvent(new CustomEvent('open-editor-tags', { detail: tagsString }));
+                
                 window.contentEditor.root.innerHTML = data.konten_html;
             } else {
                 this.articleTitle = '';
+                this.articleSlug = '';
                 this.publishStatus = 'draft';
+                this.coverPreview = '';
                 document.getElementById('editorForm').reset();
+                window.dispatchEvent(new CustomEvent('open-editor-tags', { detail: '' }));
                 if(window.contentEditor) window.contentEditor.root.innerHTML = '';
             }
             this.editorOpen = true;
         }
     }">
 
-    <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0 px-4 sm:px-6 pt-6 -z-10">
+    <!-- TOP NAVBAR -->
+    <header class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md uppercase tracking-wider">Akses Publikasi</span>
-            </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Manajemen Konten Publik</h1>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Manajemen Berita & Artikel</h1>
+            <p class="text-sm text-gray-500 mt-1">Buat, kelola, dan publikasikan informasi terbaru untuk website publik.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <button class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-xl px-4 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-arrow-up-right-from-square text-blue-500"></i> <span class="hidden sm:inline">Kunjungi Web</span>
+            </button>
+            <button @click="openEditor()" class="bg-green-700 hover:bg-green-800 text-white shadow-md rounded-xl px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-pen-nib"></i> Tulis Artikel Baru
+            </button>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-8 custom-scrollbar">
+    <main class="flex-1 overflow-y-auto pb-8 custom-scrollbar">
         @if(session('success'))
             <div class="mb-4 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-bold shadow-sm">
                 <i class="fa-solid fa-circle-check mr-2"></i>{{ session('success') }}
             </div>
         @endif
+        @if ($errors->any())
+            <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-bold shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation mr-2"></i>Terdapat kesalahan:
+                <ul class="list-disc pl-5 mt-1 text-xs">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <div class="max-w-7xl mx-auto space-y-6">
 
-            <!-- HEADER ACTIONS -->
-            <section class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900 tracking-tight">Manajemen Berita & Artikel</h2>
-                    <p class="text-sm text-gray-500 mt-1">Buat, kelola, dan publikasikan informasi terbaru untuk website publik.</p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-3">
-                    <button class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-xl px-4 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-blue-500"></i> <span class="hidden sm:inline">Kunjungi Web Publik</span>
-                    </button>
-                    <button @click="openEditor()" class="bg-green-700 hover:bg-green-800 text-white shadow-md rounded-xl px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-pen-nib"></i> Tulis Artikel Baru
-                    </button>
-                </div>
-            </section>
-
             <!-- SUMMARY CARDS -->
-            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Artikel</p>
-                        <div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-file-lines text-xs"></i></div>
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {{-- Total Artikel --}}
+                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                        <i class="fa-solid fa-file-lines text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-gray-900">{{ $totalArticles }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Total Artikel</p>
+                        <h3 class="text-2xl font-black text-gray-900 tracking-tight leading-none">{{ $totalArticles }}</h3>
+                    </div>
                 </article>
 
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group border-b-4 border-b-green-500">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Terpublikasi</p>
-                        <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center"><i class="fa-solid fa-globe text-xs"></i></div>
+                {{-- Terpublikasi --}}
+                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-emerald-600">
+                        <i class="fa-solid fa-globe text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-green-600">{{ $totalPublished }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-0.5">Terpublikasi</p>
+                        <h3 class="text-2xl font-black text-emerald-700 tracking-tight leading-none">{{ $totalPublished }}</h3>
+                    </div>
                 </article>
 
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group border-b-4 border-b-amber-500">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Draft & Terjadwal</p>
-                        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-pen-ruler text-xs"></i></div>
+                {{-- Draft & Terjadwal --}}
+                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-amber-600">
+                        <i class="fa-solid fa-pen-ruler text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-amber-600">{{ $totalDraftScheduled }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-pen-ruler"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-0.5">Draft & Terjadwal</p>
+                        <h3 class="text-2xl font-black text-amber-700 tracking-tight leading-none">{{ $totalDraftScheduled }}</h3>
+                    </div>
                 </article>
 
-                <article class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between group border-b-4 border-b-gray-400">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Diarsipkan (Private)</p>
-                        <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-box-archive text-xs"></i></div>
+                {{-- Diarsipkan --}}
+                <article class="bg-gray-900 rounded-2xl p-5 border border-gray-800 shadow-xl hover:-translate-y-1 transition-all flex items-center gap-4 group relative overflow-hidden border-l-4 border-l-green-500">
+                    <div class="absolute top-0 right-0 p-2 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity text-green-400">
+                        <i class="fa-solid fa-box-archive text-7xl rotate-12"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-gray-600">{{ $totalArchived }}</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-gray-800 text-green-400 flex items-center justify-center shrink-0 text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-green-400 uppercase tracking-widest mb-0.5">Diarsipkan</p>
+                        <h3 class="text-2xl font-black text-white tracking-tight leading-none">{{ $totalArchived }}</h3>
+                    </div>
                 </article>
             </section>
 
@@ -163,11 +197,13 @@
             </section>
 
             <!-- TAB CONTENT -->
-            @if($tab == 'artikel')
-                @include('pages.backoffice.artikel._tab_artikel')
-            @else
-                @include('pages.backoffice.artikel._tab_kategori')
-            @endif
+            <div class="pt-2">
+                @if($tab == 'artikel')
+                    @include('pages.backoffice.artikel._tab_artikel')
+                @else
+                    @include('pages.backoffice.artikel._tab_kategori')
+                @endif
+            </div>
 
         </div>
     </main>

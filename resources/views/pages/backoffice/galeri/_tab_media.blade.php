@@ -1,19 +1,22 @@
 <div x-show="activeTab === 'media'" x-transition.opacity class="space-y-6">
     <!-- Filter Panel -->
-    <div class="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-4">
-        <div class="flex-1 relative">
-            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-            <input type="text" placeholder="Cari nama file atau tag..." class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 transition-all">
+        <div class="flex flex-col flex-wrap lg:flex-nowrap md:flex-row gap-3">
+            <div class="flex-1 min-w-[200px] relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Cari nama file atau tag..." class="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl pl-11 pr-4 py-2.5 focus:ring-2 focus:ring-green-500 outline-none transition-all">
+            </div>
+            <form action="{{ route('admin.galeri.index') }}" method="GET" class="w-full md:w-48 relative shrink-0">
+                <input type="hidden" name="tab" value="media">
+                <select name="album_id" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-green-500 outline-none cursor-pointer font-medium text-gray-700">
+                    <option value="">Semua Album</option>
+                    @foreach($albums as $ab)
+                        <option value="{{ $ab->id }}" {{ request('album_id') == $ab->id ? 'selected' : '' }}>{{ $ab->nama_album }}</option>
+                    @endforeach
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+            </form>
         </div>
-        <form action="{{ route('admin.galeri.index') }}" method="GET" class="w-full md:w-48">
-            <input type="hidden" name="tab" value="media">
-            <select name="album_id" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer font-medium text-gray-700">
-                <option value="">Semua Album</option>
-                @foreach($albums as $ab)
-                    <option value="{{ $ab->id }}" {{ request('album_id') == $ab->id ? 'selected' : '' }}>{{ $ab->nama_album }}</option>
-                @endforeach
-            </select>
-        </form>
     </div>
 
     <!-- Media Grid -->

@@ -9,7 +9,7 @@
 @endpush
 
 @section('content')
-    <main class="flex-grow bg-gray-50 pt-16">
+    <main class="flex-grow bg-gray-50 pt-16" x-data="proyekDetailData()">
 
         <!-- SECTION 1: HEADER DETAIL PROYEK -->
         <section class="bg-gradient-to-br from-green-800 to-green-600 text-white py-12 md:py-16 relative overflow-hidden">
@@ -155,12 +155,25 @@
                         </div>
                         @if($proyek->fotos->count() > 0)
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                @foreach($proyek->fotos as $foto)
-                                    <div class="group relative aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                                        <img src="{{ $foto->foto_url }}" alt="{{ $foto->keterangan }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
-                                        <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs">
-                                            Tahap {{ $foto->progres_saat_foto }}%
-                                            @if($foto->keterangan) — {{ $foto->keterangan }} @endif
+                                @foreach($proyek->fotos as $index => $foto)
+                                    <div @click="openLightbox({{ $index }})" class="group relative aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200 cursor-pointer shadow-sm">
+                                        <img src="{{ $foto->foto_url }}" alt="{{ $foto->keterangan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy">
+                                        
+                                        <!-- Black Gradient Overlay -->
+                                        <div class="absolute inset-0 flex flex-col justify-end p-3 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-gray-900/90 via-gray-900/20 to-transparent group-hover:opacity-100">
+                                            <p class="text-white text-[10px] font-bold">
+                                                Tahap {{ $foto->progres_saat_foto }}%
+                                            </p>
+                                            @if($foto->keterangan)
+                                                <p class="text-[10px] text-gray-300 line-clamp-1">{{ $foto->keterangan }}</p>
+                                            @endif
+                                        </div>
+
+                                        <!-- Zoom Icon Overlay -->
+                                        <div class="absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none group-hover:opacity-100">
+                                            <div class="flex items-center justify-center w-10 h-10 text-white rounded-full bg-white/20 backdrop-blur-sm">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
@@ -295,5 +308,89 @@
                 </div>
             </div>
         </section>
+        <!-- SECTION: LIGHTBOX PREVIEW MODAL -->
+        <div x-show="lightboxOpen" x-cloak class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 transition-opacity bg-black/95" style="display: none;"
+            @keydown.escape.window="closeLightbox()"
+            @keydown.left.window="prevImage()"
+            @keydown.right.window="nextImage()">
+
+            <template x-if="activeImage !== null">
+                <div class="relative flex items-center justify-center w-full h-full">
+                    <!-- Action Top Bar -->
+                    <div class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 md:p-6 bg-gradient-to-b from-black/70 to-transparent">
+                        <div>
+                            <p class="text-lg font-bold text-white drop-shadow-md" x-text="'Tahap ' + photos[activeImage].progres + '%'"></p>
+                            <p class="text-sm text-gray-300 drop-shadow-sm" x-text="photos[activeImage].keterangan"></p>
+                        </div>
+                        <button @click="closeLightbox()" class="flex items-center justify-center w-10 h-10 text-white transition-all rounded-full hover:text-red-500 bg-black/40 hover:bg-black/60 focus:outline-none shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <button @click.stop="prevImage()" class="absolute z-20 hidden transition-all -translate-y-1/2 left-4 md:left-8 top-1/2 text-white/50 hover:text-white hover:scale-110 sm:block">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button @click.stop="nextImage()" class="absolute z-20 hidden transition-all -translate-y-1/2 right-4 md:right-8 top-1/2 text-white/50 hover:text-white hover:scale-110 sm:block">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+
+                    <!-- Background for Closing -->
+                    <div class="absolute inset-0 z-0" @click="closeLightbox()"></div>
+
+                    <!-- Main Image Container -->
+                    <div class="relative z-10 flex items-center justify-center max-w-5xl w-full h-full max-h-[80vh] mt-8 pointer-events-none">
+                        <img :src="photos[activeImage].url" :alt="photos[activeImage].keterangan"
+                            x-show="lightboxOpen"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 scale-95 -translate-y-10" 
+                            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                            class="object-contain max-w-full max-h-full shadow-2xl rounded-sm pointer-events-auto">
+                    </div>
+                </div>
+            </template>
+        </div>
     </main>
+
+    @push('scripts')
+    <script>
+        function proyekDetailData() {
+            return {
+                photos: @json($proyek->fotos->map(fn($f) => [
+                    'url' => $f->foto_url,
+                    'progres' => $f->progres_saat_foto,
+                    'keterangan' => $f->keterangan ?? 'Dokumentasi Pembangunan'
+                ])),
+                lightboxOpen: false,
+                activeImage: null,
+                openLightbox(index) {
+                    this.activeImage = index;
+                    this.lightboxOpen = true;
+                    document.body.style.overflow = 'hidden';
+                },
+                closeLightbox() {
+                    this.lightboxOpen = false;
+                    setTimeout(() => {
+                        this.activeImage = null;
+                        document.body.style.overflow = 'auto';
+                    }, 300);
+                },
+                prevImage() {
+                    if (this.activeImage > 0) {
+                        this.activeImage--;
+                    } else {
+                        this.activeImage = this.photos.length - 1;
+                    }
+                },
+                nextImage() {
+                    if (this.activeImage < this.photos.length - 1) {
+                        this.activeImage++;
+                    } else {
+                        this.activeImage = 0;
+                    }
+                }
+            }
+        }
+    </script>
+    @endpush
 @endsection
