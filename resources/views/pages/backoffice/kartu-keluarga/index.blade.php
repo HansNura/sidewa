@@ -4,7 +4,7 @@
 
 @section('content')
 
-{{-- Alpine.js State --}}
+<script>window.__wilayahTree = @json($wilayahTree);</script>
 <div x-data="{
         addModalOpen: {{ $errors->any() ? 'true' : 'false' }},
         detailDrawerOpen: false,
@@ -14,6 +14,24 @@
         memberSearchQuery: '',
         selectedMemberId: null,
         selectedMemberRelasi: 'Istri',
+
+        wilayahTree: window.__wilayahTree,
+        selectedDusun: '{{ old('dusun') }}',
+        selectedRw: '{{ old('rw') }}',
+        selectedRt: '{{ old('rt') }}',
+
+        get availableRws() {
+            if (!this.selectedDusun) return [];
+            const dusun = this.wilayahTree.find(d => d.nama === this.selectedDusun);
+            return dusun ? (dusun.children_recursive || []) : [];
+        },
+
+        get availableRts() {
+            if (!this.selectedRw) return [];
+            const rws = this.availableRws;
+            const rw = rws.find(r => r.nama === this.selectedRw);
+            return rw ? (rw.children_recursive || []) : [];
+        },
 
         async openDetail(id) {
             try {

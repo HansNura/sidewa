@@ -80,6 +80,35 @@ class Penduduk extends Model
     }
 
     /**
+     * Get combined parents name (Ayah & Ibu), inferring from Kartu Keluarga if needed.
+     */
+    public function getOrangTuaGabungan(): string
+    {
+        $namaAyah = $this->nama_ayah;
+        $namaIbu  = $this->nama_ibu;
+
+        if (empty($namaAyah) || empty($namaIbu)) {
+            if ($this->relationLoaded('kartuKeluarga') || $this->kartuKeluarga) {
+                // If relation is not loaded, calling $this->kartuKeluarga will lazy load it
+                $anggota = $this->kartuKeluarga?->anggota ?? [];
+                foreach ($anggota as $a) {
+                    if (empty($namaAyah) && (in_array($a->status_hubungan, ['Ayah', 'Suami']) || ($a->status_hubungan === 'Kepala Keluarga' && $a->jenis_kelamin === 'L'))) {
+                        $namaAyah = $a->nama;
+                    }
+                    if (empty($namaIbu) && (in_array($a->status_hubungan, ['Istri', 'Ibu']) || ($a->status_hubungan === 'Kepala Keluarga' && $a->jenis_kelamin === 'P'))) {
+                        $namaIbu = $a->nama;
+                    }
+                }
+            }
+        }
+
+        return collect([
+            $namaAyah ? "$namaAyah (Ayah)" : null,
+            $namaIbu ? "$namaIbu (Ibu)" : null,
+        ])->filter()->join(' & ');
+    }
+
+    /**
      * Status badge color map.
      */
     public function statusColor(): array

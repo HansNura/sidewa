@@ -348,10 +348,10 @@
                             class="absolute -top-10 right-0 text-white hover:text-red-400 text-3xl font-bold transition-colors">
                             &times;
                         </button>
-                        <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1600"
+                        <img src="{{ $posterCurrent?->gambar_baliho_url ?? 'https://placehold.co/1200x800/E8F5E9/2E7D32?text=Baliho+Belum+Diunggah' }}"
                             alt="Infografis Full" class="w-full h-auto rounded-lg shadow-2xl border border-gray-700">
                         <p class="text-center text-gray-300 mt-4 text-sm font-medium">Infografis APBDes
-                            {{ request('tahun', 2024) }} (Resolusi Penuh)</p>
+                            {{ $tahunBerjalan }} (Resolusi Penuh)</p>
                     </div>
                 </div>
             </section>

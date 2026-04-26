@@ -1,20 +1,54 @@
 {{-- Data Table --}}
 <section class="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden flex flex-col xl:col-span-2">
-    <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50/50">
-        <div>
-            <h3 class="font-bold text-gray-800">Daftar Pengukuran Balita</h3>
-            <p class="text-xs text-gray-500 mt-0.5">Hasil penimbangan dan pengukuran tinggi badan terbaru.</p>
-        </div>
-        <form method="GET" action="{{ route('admin.kesehatan.index') }}" class="flex gap-2">
-            @if ($dusun)
-                <input type="hidden" name="dusun" value="{{ $dusun }}">
-            @endif
-            <div class="relative w-full sm:w-48 shrink-0">
-                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input type="text" name="search" value="{{ $search }}" placeholder="Cari NIK / Nama..."
-                       class="w-full bg-white border border-gray-300 rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+    <div class="p-5 border-b border-gray-100 flex flex-col gap-4 bg-gray-50/50">
+        <div class="flex flex-col xl:flex-row justify-between xl:items-center gap-4">
+            <div>
+                <h3 class="font-bold text-gray-800">Daftar Pengukuran Balita</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Hasil penimbangan dan pengukuran tinggi badan terbaru.</p>
             </div>
-        </form>
+            <form method="GET" action="{{ route('admin.kesehatan.index') }}" class="flex flex-wrap items-center gap-2"
+                id="filterTableForm">
+                @if (request('dusun'))
+                    <input type="hidden" name="dusun" value="{{ request('dusun') }}">
+                @endif
+
+                {{-- Status Gizi Filter --}}
+                <select name="gizi" onchange="document.getElementById('filterTableForm').submit()"
+                    class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-[11px] font-semibold text-gray-600 focus:ring-2 focus:ring-green-500 outline-none w-full sm:w-auto shadow-sm cursor-pointer hover:bg-gray-50">
+                    <option value="">Semua Status Gizi</option>
+                    <option value="normal" {{ request('gizi') == 'normal' ? 'selected' : '' }}>Normal</option>
+                    <option value="stunting" {{ request('gizi') == 'stunting' ? 'selected' : '' }}>Stunting
+                        (Pendek/Sangat Pendek)</option>
+                    <option value="tinggi" {{ request('gizi') == 'tinggi' ? 'selected' : '' }}>Tinggi</option>
+                </select>
+
+                {{-- Umur Filter --}}
+                <select name="umur" onchange="document.getElementById('filterTableForm').submit()"
+                    class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-[11px] font-semibold text-gray-600 focus:ring-2 focus:ring-green-500 outline-none w-full sm:w-auto shadow-sm cursor-pointer hover:bg-gray-50">
+                    <option value="">Semua Umur</option>
+                    <option value="0-6" {{ request('umur') == '0-6' ? 'selected' : '' }}>0 - 6 Bulan</option>
+                    <option value="7-24" {{ request('umur') == '7-24' ? 'selected' : '' }}>7 - 24 Bulan</option>
+                    <option value="25-59" {{ request('umur') == '25-59' ? 'selected' : '' }}>25 - 59 Bulan</option>
+                </select>
+
+                {{-- JK Filter --}}
+                <select name="jk" onchange="document.getElementById('filterTableForm').submit()"
+                    class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-[11px] font-semibold text-gray-600 focus:ring-2 focus:ring-green-500 outline-none w-full sm:w-auto shadow-sm cursor-pointer hover:bg-gray-50">
+                    <option value="">Semua Gender</option>
+                    <option value="L" {{ request('jk') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                    <option value="P" {{ request('jk') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                </select>
+
+                {{-- Search --}}
+                <div class="relative w-full sm:w-48 shrink-0 shadow-sm">
+                    <i
+                        class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[11px]"></i>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari NIK / Nama..."
+                        class="w-full bg-white border border-gray-300 rounded-lg pl-8 pr-3 py-2 text-[11px] font-semibold focus:ring-2 focus:ring-green-500 outline-none">
+                </div>
+            </form>
+        </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -34,13 +68,15 @@
                         $badge = $p->statusBadge();
                         $isStunting = $p->isStunting();
                     @endphp
-                    <tr class="hover:bg-gray-50 transition-colors {{ $isStunting ? ($p->status_gizi === 'sangat_pendek' ? 'bg-red-50/30' : 'bg-red-50/10') : '' }}">
+                    <tr
+                        class="hover:bg-gray-50 transition-colors {{ $isStunting ? ($p->status_gizi === 'sangat_pendek' ? 'bg-red-50/30' : 'bg-red-50/10') : '' }}">
                         {{-- Identity --}}
                         <td class="p-4">
                             <div class="font-bold text-gray-900 leading-tight flex items-center gap-2">
                                 {{ $p->penduduk?->nama ?? '-' }}
                                 @if ($p->status_gizi === 'sangat_pendek')
-                                    <i class="fa-solid fa-circle-exclamation text-red-500 text-xs" title="Perlu Intervensi Segera"></i>
+                                    <i class="fa-solid fa-circle-exclamation text-red-500 text-xs"
+                                        title="Perlu Intervensi Segera"></i>
                                 @endif
                             </div>
                             <div class="text-[10px] font-mono text-gray-500 mt-0.5">{{ $p->penduduk?->nik }}</div>
@@ -66,7 +102,8 @@
 
                         {{-- Status --}}
                         <td class="p-4 text-center">
-                            <span class="{{ $badge['bg'] }} {{ $badge['text'] }} text-[10px] font-bold px-2.5 py-1 rounded border {{ $badge['border'] }} uppercase tracking-wide">
+                            <span
+                                class="{{ $badge['bg'] }} {{ $badge['text'] }} text-[10px] font-bold px-2.5 py-1 rounded border {{ $badge['border'] }} uppercase tracking-wide">
                                 {{ $badge['label'] }}
                             </span>
                         </td>
@@ -80,7 +117,7 @@
                                     <i class="fa-solid fa-notes-medical text-xs"></i>
                                 </button>
                                 <form method="POST" action="{{ route('admin.kesehatan.destroy', $p) }}"
-                                      onsubmit="return confirm('Hapus data pengukuran ini?')">
+                                    onsubmit="return confirm('Hapus data pengukuran ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -105,13 +142,16 @@
     </div>
 
     {{-- Pagination --}}
-    @if ($pengukuran->hasPages())
-        <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-sm text-gray-500 font-medium">
-                Menampilkan <span class="font-bold text-gray-900">{{ $pengukuran->firstItem() }}-{{ $pengukuran->lastItem() }}</span>
-                dari <span class="font-bold text-gray-900">{{ $pengukuran->total() }}</span> Balita
-            </p>
-            {{ $pengukuran->links('vendor.pagination.tailwind') }}
-        </div>
-    @endif
+    <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-gray-500 font-medium">
+            Menampilkan <span
+                class="font-bold text-gray-900">{{ $pengukuran->firstItem() ?? 0 }}-{{ $pengukuran->lastItem() ?? 0 }}</span>
+            dari <span class="font-bold text-gray-900">{{ $pengukuran->total() }}</span> Balita
+        </p>
+        @if ($pengukuran->hasPages())
+            <div class="scale-90 origin-right">
+                {{ $pengukuran->links() }}
+            </div>
+        @endif
+    </div>
 </section>

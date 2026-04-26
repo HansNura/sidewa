@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Apbdes;
-use App\Models\ApbdesPoster;
+use App\Models\ApbdesRealisasi;
+use Carbon\Carbon;
 
 class ApbdesSeeder extends Seeder
 {
@@ -13,159 +14,120 @@ class ApbdesSeeder extends Seeder
      */
     public function run(): void
     {
-        // Data APBDes untuk TA 2026
+        $years = [date('Y') - 1, date('Y')];
+
+        foreach ($years as $tahun) {
+            $this->seedTahun($tahun);
+        }
+    }
+
+    private function seedTahun($tahun)
+    {
         // PENDAPATAN
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'PENDAPATAN',
-            'kode_rekening' => '4',
-            'nama_kegiatan' => 'PENDAPATAN',
-            'pagu_anggaran' => 2450000000,
-            'sumber_dana' => 'Semua',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'PENDAPATAN',
-            'kode_rekening' => '4.1',
-            'nama_kegiatan' => 'Pendapatan Asli Desa',
-            'pagu_anggaran' => 250000000,
-            'sumber_dana' => 'PADesa',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'PENDAPATAN',
-            'kode_rekening' => '4.2',
-            'nama_kegiatan' => 'Pendapatan Transfer',
-            'pagu_anggaran' => 2200000000,
-            'sumber_dana' => 'DD/ADD',
-        ]);
-
-        // BELANJA - BIDANG 1
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '1',
-            'nama_kegiatan' => 'BIDANG PENYELENGGARAAN PEMERINTAHAN DESA',
-            'pagu_anggaran' => 850000000,
-            'sumber_dana' => 'ADD/PADesa',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '1.1',
-            'nama_kegiatan' => 'Siltap dan Tunjangan Aparatur',
-            'pagu_anggaran' => 500000000,
-            'sumber_dana' => 'ADD',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '1.1.01',
-            'nama_kegiatan' => 'Penghasilan Tetap Kepala Desa dan Perangkat',
-            'pagu_anggaran' => 350000000,
-            'sumber_dana' => 'ADD',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '1.1.02',
-            'nama_kegiatan' => 'Tunjangan BPD dan Operasional',
-            'pagu_anggaran' => 150000000,
-            'sumber_dana' => 'ADD',
-        ]);
-
-        // BELANJA - BIDANG 2
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '2',
-            'nama_kegiatan' => 'BIDANG PELAKSANAAN PEMBANGUNAN DESA',
-            'pagu_anggaran' => 1250000000,
-            'sumber_dana' => 'DD/BanProv',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '2.1',
-            'nama_kegiatan' => 'Pembangunan Infrastruktur Jalan',
-            'pagu_anggaran' => 800000000,
-            'sumber_dana' => 'DD',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '2.1.01',
-            'nama_kegiatan' => 'Pengaspalan Jalan Dusun Kaler',
-            'pagu_anggaran' => 500000000,
-            'sumber_dana' => 'DD',
-        ]);
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'BELANJA',
-            'kode_rekening' => '2.1.02',
-            'nama_kegiatan' => 'Pembuatan Drainase Lingkungan',
-            'pagu_anggaran' => 300000000,
-            'sumber_dana' => 'DD',
-        ]);
-
-        // PEMBIAYAAN
-        // We will assume Pembiayaan covers SILPA etc.
-        Apbdes::create([
-            'tahun' => 2026,
-            'tipe_anggaran' => 'PEMBIAYAAN',
-            'kode_rekening' => '6',
-            'nama_kegiatan' => 'PEMBIAYAAN DESA',
-            'pagu_anggaran' => 0,
-            'sumber_dana' => 'SiLPA',
-        ]);
-
-        // DUMMY PAST YEARS FOR SILPA CHART
-        $pastYears = [
-            2025 => [
-                'pendapatan' => 2300000000,
-                'belanja' => 2200000000,
-            ],
-            2024 => [
-                'pendapatan' => 1750000000,
-                'belanja' => 1685000000,
-            ],
-            2023 => [
-                'pendapatan' => 1620000000,
-                'belanja' => 1590000000,
-            ],
+        $pendapatanData = [
+            ['kode' => '4.1.1.01', 'nama' => 'Hasil Usaha Desa', 'pagu' => 50000000, 'sumber' => 'PAD'],
+            ['kode' => '4.2.1.01', 'nama' => 'Dana Desa', 'pagu' => 850000000, 'sumber' => 'DD'],
+            ['kode' => '4.2.2.01', 'nama' => 'Bagi Hasil Pajak dan Retribusi', 'pagu' => 45000000, 'sumber' => 'PBH'],
+            ['kode' => '4.2.3.01', 'nama' => 'Alokasi Dana Desa', 'pagu' => 420000000, 'sumber' => 'ADD'],
+            ['kode' => '4.2.4.01', 'nama' => 'Bantuan Keuangan Provinsi', 'pagu' => 130000000, 'sumber' => 'BKP'],
         ];
 
-        foreach ($pastYears as $year => $data) {
-            Apbdes::create([
-                'tahun' => $year,
+        foreach ($pendapatanData as $data) {
+            $apbdes = Apbdes::create([
+                'tahun' => $tahun,
                 'tipe_anggaran' => 'PENDAPATAN',
-                'kode_rekening' => '4',
-                'nama_kegiatan' => 'Total Pendapatan ' . $year,
-                'pagu_anggaran' => $data['pendapatan'],
-                'sumber_dana' => 'Campuran',
+                'kode_rekening' => $data['kode'],
+                'nama_kegiatan' => $data['nama'],
+                'pagu_anggaran' => $data['pagu'],
+                'sumber_dana' => $data['sumber'],
+                'is_published' => true,
             ]);
-            Apbdes::create([
-                'tahun' => $year,
-                'tipe_anggaran' => 'BELANJA',
-                'kode_rekening' => '5',
-                'nama_kegiatan' => 'Total Belanja ' . $year,
-                'pagu_anggaran' => $data['belanja'],
-                'sumber_dana' => 'Campuran',
-            ]);
-            ApbdesPoster::create([
-                'tahun' => $year,
-                'gambar_baliho_url' => 'https://placehold.co/1200x800/2E7D32/fff?text=Baliho+APBDes+' . $year,
-                'perdes_dokumen_url' => '#',
-                'rab_dokumen_url' => '#',
-            ]);
+
+            // Add realisasi (random 70% to 100%)
+            $this->createRealisasi($apbdes, $tahun, rand(70, 100) / 100);
         }
 
-        // POSTER 2026
-        ApbdesPoster::create([
-            'tahun' => 2026,
-            'gambar_baliho_url' => 'https://images.unsplash.com/photo-1541888048245-0d0bc42a0a2d?auto=format&fit=crop&q=80&w=1600',
-            'perdes_dokumen_url' => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-            'rab_dokumen_url' => 'https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_XLSX.xlsx',
-        ]);
+        // BELANJA
+        $belanjaData = [
+            ['kode' => '5.1.1.01', 'nama' => 'Penghasilan Tetap Kepala Desa', 'pagu' => 48000000, 'sumber' => 'ADD'],
+            ['kode' => '5.1.1.02', 'nama' => 'Penghasilan Tetap Perangkat Desa', 'pagu' => 180000000, 'sumber' => 'ADD'],
+            ['kode' => '5.1.2.01', 'nama' => 'Penyediaan Operasional Pemerintah Desa', 'pagu' => 65000000, 'sumber' => 'ADD'],
+            ['kode' => '5.2.1.01', 'nama' => 'Pembangunan Jalan Lingkungan Desa', 'pagu' => 250000000, 'sumber' => 'DD'],
+            ['kode' => '5.2.1.05', 'nama' => 'Pembangunan Saluran Irigasi Tersier', 'pagu' => 120000000, 'sumber' => 'DD'],
+            ['kode' => '5.2.3.01', 'nama' => 'Pembangunan Posyandu', 'pagu' => 85000000, 'sumber' => 'DD'],
+            ['kode' => '5.3.1.01', 'nama' => 'Pembinaan Karang Taruna', 'pagu' => 25000000, 'sumber' => 'DD'],
+            ['kode' => '5.3.2.01', 'nama' => 'Pembinaan PKK', 'pagu' => 15000000, 'sumber' => 'DD'],
+            ['kode' => '5.4.1.01', 'nama' => 'Pelatihan Kepala Desa dan Perangkat', 'pagu' => 20000000, 'sumber' => 'DD'],
+            ['kode' => '5.4.2.01', 'nama' => 'Pelatihan Kader Kesehatan', 'pagu' => 10000000, 'sumber' => 'DD'],
+            ['kode' => '5.5.1.01', 'nama' => 'Bantuan Langsung Tunai (BLT) Desa', 'pagu' => 216000000, 'sumber' => 'DD'],
+        ];
+
+        foreach ($belanjaData as $data) {
+            $apbdes = Apbdes::create([
+                'tahun' => $tahun,
+                'tipe_anggaran' => 'BELANJA',
+                'kode_rekening' => $data['kode'],
+                'nama_kegiatan' => $data['nama'],
+                'pagu_anggaran' => $data['pagu'],
+                'sumber_dana' => $data['sumber'],
+                'is_published' => true,
+            ]);
+
+            // Add realisasi (random 40% to 95%)
+            $this->createRealisasi($apbdes, $tahun, rand(40, 95) / 100);
+        }
+
+        // PEMBIAYAAN
+        $pembiayaanData = [
+            ['kode' => '6.1.1.01', 'nama' => 'Sisa Lebih Perhitungan Anggaran (SiLPA)', 'pagu' => 45000000, 'sumber' => 'PAD'],
+            ['kode' => '6.2.1.01', 'nama' => 'Penyertaan Modal BUMDes', 'pagu' => 50000000, 'sumber' => 'DD'],
+        ];
+
+        foreach ($pembiayaanData as $data) {
+            $apbdes = Apbdes::create([
+                'tahun' => $tahun,
+                'tipe_anggaran' => 'PEMBIAYAAN',
+                'kode_rekening' => $data['kode'],
+                'nama_kegiatan' => $data['nama'],
+                'pagu_anggaran' => $data['pagu'],
+                'sumber_dana' => $data['sumber'],
+                'is_published' => true,
+            ]);
+
+            $this->createRealisasi($apbdes, $tahun, 1.0);
+        }
+    }
+
+    private function createRealisasi($apbdes, $tahun, $ratio)
+    {
+        $totalRealisasi = $apbdes->pagu_anggaran * $ratio;
+
+        // Split into 1 to 4 transactions
+        $numTransactions = rand(1, 4);
+
+        $currentDate = Carbon::create($tahun, 1, 15);
+        $remaining = $totalRealisasi;
+
+        for ($i = 0; $i < $numTransactions; $i++) {
+            $currentDate->addDays(rand(15, 60));
+            if ($currentDate->year > $tahun) {
+                $currentDate = Carbon::create($tahun, 12, 28);
+            }
+
+            if ($i === $numTransactions - 1) {
+                $nominal = $remaining;
+            } else {
+                $nominal = $remaining / ($numTransactions - $i) * (rand(80, 120) / 100);
+            }
+
+            $remaining -= $nominal;
+
+            ApbdesRealisasi::create([
+                'apbdes_id' => $apbdes->id,
+                'tanggal_transaksi' => clone $currentDate,
+                'nominal' => $nominal,
+                'catatan' => 'Realisasi ' . $apbdes->nama_kegiatan . ' Tahap ' . ($i + 1),
+            ]);
+        }
     }
 }

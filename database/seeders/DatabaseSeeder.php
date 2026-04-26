@@ -339,5 +339,8 @@ class DatabaseSeeder extends Seeder
 
         // ─── Layanan Surat (Permohonan + Status) ─────────────────
         $this->call(LayananSuratSeeder::class);
+
+        // ─── APBDes (Keuangan Desa) ──────────────────────────────
+        $this->call(ApbdesSeeder::class);
     }
 }

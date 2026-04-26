@@ -54,18 +54,33 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-600 uppercase">Dusun <span class="text-red-500">*</span></label>
-                            <input type="text" name="dusun" value="{{ old('dusun') }}" placeholder="Kaler"
-                                   class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none" required>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-gray-600 uppercase">RT <span class="text-red-500">*</span></label>
-                            <input type="text" name="rt" value="{{ old('rt') }}" placeholder="01" maxlength="3"
-                                   class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none" required>
+                            <select name="dusun" x-model="selectedDusun" @change="selectedRw = ''; selectedRt = ''"
+                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer" required>
+                                <option value="">-- Pilih Dusun --</option>
+                                <template x-for="dusun in wilayahTree" :key="dusun.id">
+                                    <option :value="dusun.nama" x-text="dusun.nama" :selected="dusun.nama === selectedDusun"></option>
+                                </template>
+                            </select>
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-600 uppercase">RW <span class="text-red-500">*</span></label>
-                            <input type="text" name="rw" value="{{ old('rw') }}" placeholder="02" maxlength="3"
-                                   class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none" required>
+                            <select name="rw" x-model="selectedRw" @change="selectedRt = ''" :disabled="!selectedDusun"
+                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed" required>
+                                <option value="">-- Pilih RW --</option>
+                                <template x-for="rw in availableRws" :key="rw.id">
+                                    <option :value="rw.nama" x-text="rw.nama" :selected="rw.nama === selectedRw"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-600 uppercase">RT <span class="text-red-500">*</span></label>
+                            <select name="rt" x-model="selectedRt" :disabled="!selectedRw"
+                                class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed" required>
+                                <option value="">-- Pilih RT --</option>
+                                <template x-for="rt in availableRts" :key="rt.id">
+                                    <option :value="rt.nama" x-text="rt.nama" :selected="rt.nama === selectedRt"></option>
+                                </template>
+                            </select>
                         </div>
                         <div class="col-span-2 md:col-span-3 space-y-1">
                             <label class="text-[10px] font-bold text-gray-600 uppercase">Detail Alamat Lengkap <span class="text-red-500">*</span></label>

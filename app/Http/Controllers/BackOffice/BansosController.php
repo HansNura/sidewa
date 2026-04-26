@@ -31,7 +31,7 @@ class BansosController extends Controller
             ->filterProgram($program)
             ->filterStatus($status)
             ->orderByDesc('created_at')
-            ->paginate(15)
+            ->paginate(5)
             ->withQueryString();
 
         // Audit: count duplicates

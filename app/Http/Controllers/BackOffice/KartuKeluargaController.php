@@ -39,10 +39,13 @@ class KartuKeluargaController extends Controller
             ->where('status', 'hidup')
             ->count();
 
+        $wilayahTree = \App\Models\Wilayah::tree();
+
         return view('pages.backoffice.kartu-keluarga.index', [
             'kkList'        => $kkList,
             'dusunList'     => $dusunList,
             'unlinkedCount' => $unlinkedCount,
+            'wilayahTree'   => $wilayahTree,
             'filters'       => $request->only(['search', 'dusun', 'sort_anggota']),
             'pageTitle'     => 'Data Keluarga (KK)',
         ]);

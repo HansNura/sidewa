@@ -23,6 +23,11 @@ class KesehatanController extends Controller
     {
         $search = $request->input('search');
         $dusun  = $request->input('dusun');
+        $rw     = $request->input('rw');
+        $rt     = $request->input('rt');
+        $gizi   = $request->input('gizi');
+        $jk     = $request->input('jk');
+        $umur   = $request->input('umur');
 
         // Latest measurement per child (deduped)
         $query = PengukuranBalita::with('penduduk')
@@ -33,14 +38,37 @@ class KesehatanController extends Controller
             $query->search($search);
         }
 
-        if ($dusun) {
-            $query->whereHas('penduduk', fn ($q) => $q->where('dusun', $dusun));
+        if ($dusun || $rw || $rt || $jk) {
+            $query->whereHas('penduduk', function($q) use ($dusun, $rw, $rt, $jk) {
+                if ($dusun) $q->where('dusun', $dusun);
+                if ($rw) $q->where('rw', $rw);
+                if ($rt) $q->where('rt', $rt);
+                if ($jk) $q->where('jenis_kelamin', $jk);
+            });
         }
 
-        $pengukuran = $query->paginate(15)->withQueryString();
+        if ($gizi) {
+            if ($gizi === 'stunting') {
+                $query->stunting();
+            } else {
+                $query->where('status_gizi', $gizi);
+            }
+        }
+
+        if ($umur) {
+            if ($umur === '0-6') $query->whereBetween('umur_bulan', [0, 6]);
+            elseif ($umur === '7-24') $query->whereBetween('umur_bulan', [7, 24]);
+            elseif ($umur === '25-59') $query->whereBetween('umur_bulan', [25, 59]);
+        }
+
+        $pengukuran = $query->paginate(5)->withQueryString();
 
         // ─── KPI Statistics ─────────────────────────────────────
-        $latestIds = PengukuranBalita::latestPerChild()->pluck('id');
+        $kpiQuery = PengukuranBalita::latestPerChild();
+        if ($dusun) {
+            $kpiQuery->whereHas('penduduk', fn($q) => $q->where('dusun', $dusun));
+        }
+        $latestIds = $kpiQuery->pluck('id');
 
         $totalBalita    = $latestIds->count();
         $stuntingAktif  = PengukuranBalita::whereIn('id', $latestIds)->stunting()->count();
@@ -48,14 +76,18 @@ class KesehatanController extends Controller
         $prevalensi     = $totalBalita > 0 ? round(($stuntingAktif / $totalBalita) * 100, 1) : 0;
 
         // Trend: compare current month stunting vs last month
-        $currentMonth = PengukuranBalita::stunting()
+        $qCurrent = PengukuranBalita::stunting()
             ->whereMonth('tanggal_pengukuran', now()->month)
-            ->whereYear('tanggal_pengukuran', now()->year)
-            ->count();
-        $lastMonth = PengukuranBalita::stunting()
+            ->whereYear('tanggal_pengukuran', now()->year);
+        if ($dusun) $qCurrent->whereHas('penduduk', fn($q) => $q->where('dusun', $dusun));
+        $currentMonth = $qCurrent->count();
+
+        $qLast = PengukuranBalita::stunting()
             ->whereMonth('tanggal_pengukuran', now()->subMonth()->month)
-            ->whereYear('tanggal_pengukuran', now()->subMonth()->year)
-            ->count();
+            ->whereYear('tanggal_pengukuran', now()->subMonth()->year);
+        if ($dusun) $qLast->whereHas('penduduk', fn($q) => $q->where('dusun', $dusun));
+        $lastMonth = $qLast->count();
+        
         $trend = $currentMonth - $lastMonth;
 
         // ─── Chart Data ──────────────────────────────────────────
@@ -65,17 +97,18 @@ class KesehatanController extends Controller
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $trendLabels[] = $date->translatedFormat('M');
-            $trendData[] = PengukuranBalita::stunting()
+            $qTrend = PengukuranBalita::stunting()
                 ->whereMonth('tanggal_pengukuran', $date->month)
-                ->whereYear('tanggal_pengukuran', $date->year)
-                ->count();
+                ->whereYear('tanggal_pengukuran', $date->year);
+            if ($dusun) $qTrend->whereHas('penduduk', fn($q) => $q->where('dusun', $dusun));
+            $trendData[] = $qTrend->count();
         }
 
         // Status gizi distribution (latest per child)
         $giziDistribution = [
             ['name' => 'Normal',       'y' => PengukuranBalita::whereIn('id', $latestIds)->where('status_gizi', 'normal')->count(),        'color' => '#22c55e'],
             ['name' => 'Pendek',       'y' => PengukuranBalita::whereIn('id', $latestIds)->where('status_gizi', 'pendek')->count(),        'color' => '#f59e0b'],
-            ['name' => 'Sangat Pendek','y' => $sangatPendek, 'color' => '#ef4444'],
+            ['name' => 'Sangat Pendek', 'y' => $sangatPendek, 'color' => '#ef4444'],
             ['name' => 'Tinggi',       'y' => PengukuranBalita::whereIn('id', $latestIds)->where('status_gizi', 'tinggi')->count(),        'color' => '#3b82f6'],
         ];
 
@@ -85,8 +118,8 @@ class KesehatanController extends Controller
             ->limit(5)
             ->get();
 
-        // Dusun list for filter
-        $dusunList = Penduduk::select('dusun')->distinct()->orderBy('dusun')->pluck('dusun');
+        // Dusun list for filter from Wilayah table
+        $dusunList = \App\Models\Wilayah::where('tipe', 'dusun')->orderBy('nama')->pluck('nama');
 
         return view('pages.backoffice.kesehatan.index', [
             'pengukuran'      => $pengukuran,
@@ -97,7 +130,7 @@ class KesehatanController extends Controller
             'trend'           => $trend,
             'trendLabels'     => $trendLabels,
             'trendData'       => $trendData,
-            'giziDistribution'=> $giziDistribution,
+            'giziDistribution' => $giziDistribution,
             'intervensi'      => $intervensi,
             'dusunList'       => $dusunList,
             'search'          => $search,
@@ -114,7 +147,7 @@ class KesehatanController extends Controller
         $riwayat = PengukuranBalita::where('penduduk_id', $penduduk->id)
             ->orderByDesc('tanggal_pengukuran')
             ->get()
-            ->map(fn ($p) => [
+            ->map(fn($p) => [
                 'id'                  => $p->id,
                 'tanggal_pengukuran'  => $p->tanggal_pengukuran->format('d M Y'),
                 'umur_bulan'          => $p->umur_bulan,
@@ -166,6 +199,11 @@ class KesehatanController extends Controller
         $measureDate = Carbon::parse($validated['tanggal_pengukuran']);
         $validated['umur_bulan'] = $birthDate->diffInMonths($measureDate);
 
+        // Auto-fill nama_ortu if empty
+        if (empty($validated['nama_ortu'])) {
+            $validated['nama_ortu'] = $penduduk->getOrangTuaGabungan();
+        }
+
         PengukuranBalita::create($validated);
 
         /** @var User $actor */
@@ -183,26 +221,63 @@ class KesehatanController extends Controller
     public function searchBalita(Request $request): JsonResponse
     {
         $q = $request->input('q', '');
+        $mode = $request->input('mode', 'search');
 
-        if (strlen($q) < 2) {
-            return response()->json([]);
+        // Always restrict to 0-59 months old
+        $query = Penduduk::where('status', 'hidup')
+            ->where('tanggal_lahir', '>=', now()->subMonths(60));
+
+        if ($q) {
+            $query->where(function ($queryBuilder) use ($q) {
+                $queryBuilder->where('nama', 'like', "%{$q}%")
+                      ->orWhere('nik', 'like', "%{$q}%");
+            });
         }
 
-        $results = Penduduk::where('status', 'hidup')
-            ->where(function ($query) use ($q) {
-                $query->where('nama', 'like', "%{$q}%")
-                      ->orWhere('nik', 'like', "%{$q}%");
-            })
-            ->limit(10)
-            ->get(['id', 'nik', 'nama', 'tanggal_lahir', 'jenis_kelamin'])
-            ->map(fn ($p) => [
-                'id'             => $p->id,
-                'nik'            => $p->nik,
-                'nama'           => $p->nama,
-                'tanggal_lahir'  => $p->tanggal_lahir,
-                'jenis_kelamin'  => $p->jenis_kelamin,
-                'umur_bulan'     => Carbon::parse($p->tanggal_lahir)->diffInMonths(now()),
-            ]);
+        if ($mode === 'browse') {
+            // Apply extra filters for browse modal
+            if ($jk = $request->input('jk')) {
+                $query->where('jenis_kelamin', $jk);
+            }
+            if ($umur = $request->input('umur')) {
+                $now = now();
+                if ($umur === '0-6') {
+                    $query->whereBetween('tanggal_lahir', [(clone $now)->subMonths(6), $now]);
+                } elseif ($umur === '7-24') {
+                    $query->whereBetween('tanggal_lahir', [(clone $now)->subMonths(24), (clone $now)->subMonths(7)]);
+                } elseif ($umur === '25-59') {
+                    $query->whereBetween('tanggal_lahir', [(clone $now)->subMonths(59), (clone $now)->subMonths(25)]);
+                }
+            }
+            $limit = 50;
+        } else {
+            // Dropdown mode requires at least 2 chars
+            if (strlen($q) < 2) {
+                return response()->json([]);
+            }
+            $limit = 10;
+        }
+
+        $results = $query->limit($limit)
+            ->with(['kartuKeluarga.anggota' => function($q) {
+                // Hanya muat anggota yang berpotensi jadi orang tua untuk efisiensi
+                $q->whereIn('status_hubungan', ['Kepala Keluarga', 'Istri', 'Suami', 'Ayah', 'Ibu']);
+            }])
+            ->orderBy('nama')
+            ->get(['id', 'nik', 'nama', 'tanggal_lahir', 'jenis_kelamin', 'nama_ayah', 'nama_ibu', 'kartu_keluarga_id'])
+            ->map(function($p) {
+                return [
+                    'id'                 => $p->id,
+                    'nik'                => $p->nik,
+                    'nama'               => $p->nama,
+                    'tanggal_lahir'      => $p->tanggal_lahir,
+                    'jenis_kelamin'      => $p->jenis_kelamin,
+                    'nama_ayah'          => $p->nama_ayah,
+                    'nama_ibu'           => $p->nama_ibu,
+                    'nama_ortu_gabungan' => $p->getOrangTuaGabungan(),
+                    'umur_bulan'         => (int) floor(Carbon::parse($p->tanggal_lahir)->diffInMonths(now())),
+                ];
+            });
 
         return response()->json($results);
     }

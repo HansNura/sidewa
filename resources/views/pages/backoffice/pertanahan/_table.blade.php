@@ -7,32 +7,36 @@
             <div class="flex-1 relative">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                 <input type="text" name="search" value="{{ $search }}"
-                       placeholder="Cari ID Lahan, Nama Pemilik, atau Blok Lokasi..."
-                       class="w-full bg-white border border-gray-300 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                    placeholder="Cari ID Lahan, Nama Pemilik, atau Blok Lokasi..."
+                    class="w-full bg-white border border-gray-300 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none">
             </div>
 
             <div class="w-full md:w-48 relative shrink-0">
                 <select name="kepemilikan" onchange="this.form.submit()"
-                        class="w-full bg-white border border-gray-300 text-sm rounded-xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
+                    class="w-full bg-white border border-gray-300 text-sm rounded-xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
                     <option value="">Status Kepemilikan</option>
-                    <option value="desa"  {{ $kepemilikan === 'desa' ? 'selected' : '' }}>Aset Desa (TKD)</option>
-                    <option value="warga" {{ $kepemilikan === 'warga' ? 'selected' : '' }}>Milik Pribadi (Warga)</option>
+                    <option value="desa" {{ $kepemilikan === 'desa' ? 'selected' : '' }}>Aset Desa (TKD)</option>
+                    <option value="warga" {{ $kepemilikan === 'warga' ? 'selected' : '' }}>Milik Pribadi (Warga)
+                    </option>
                     <option value="fasum" {{ $kepemilikan === 'fasum' ? 'selected' : '' }}>Fasilitas Umum</option>
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                <i
+                    class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
             </div>
 
             <div class="w-full md:w-40 relative shrink-0">
                 <select name="legalitas" onchange="this.form.submit()"
-                        class="w-full bg-white border border-gray-300 text-sm rounded-xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
+                    class="w-full bg-white border border-gray-300 text-sm rounded-xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
                     <option value="">Legalitas</option>
-                    <option value="shm"              {{ $legalitas === 'shm' ? 'selected' : '' }}>SHM</option>
-                    <option value="shgb"             {{ $legalitas === 'shgb' ? 'selected' : '' }}>SHP / SHGB</option>
-                    <option value="girik"            {{ $legalitas === 'girik' ? 'selected' : '' }}>Girik / Letter C</option>
-                    <option value="ajb"              {{ $legalitas === 'ajb' ? 'selected' : '' }}>AJB</option>
-                    <option value="belum_sertifikat" {{ $legalitas === 'belum_sertifikat' ? 'selected' : '' }}>Belum Sertifikat</option>
+                    <option value="shm" {{ $legalitas === 'shm' ? 'selected' : '' }}>SHM</option>
+                    <option value="shgb" {{ $legalitas === 'shgb' ? 'selected' : '' }}>SHP / SHGB</option>
+                    <option value="girik" {{ $legalitas === 'girik' ? 'selected' : '' }}>Girik / Letter C</option>
+                    <option value="ajb" {{ $legalitas === 'ajb' ? 'selected' : '' }}>AJB</option>
+                    <option value="belum_sertifikat" {{ $legalitas === 'belum_sertifikat' ? 'selected' : '' }}>Belum
+                        Sertifikat</option>
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                <i
+                    class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
             </div>
         </form>
     </div>
@@ -57,7 +61,8 @@
                     @endphp
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4">
-                            <div class="font-bold leading-tight flex items-center gap-1.5 {{ $item->kepemilikan === 'desa' ? 'text-green-700' : 'text-gray-900' }}">
+                            <div
+                                class="font-bold leading-tight flex items-center gap-1.5 {{ $item->kepemilikan === 'desa' ? 'text-green-700' : 'text-gray-900' }}">
                                 @if ($item->kepemilikan === 'desa')
                                     <i class="fa-solid fa-building-flag text-[10px]"></i>
                                 @endif
@@ -74,13 +79,18 @@
                         <td class="p-4 text-gray-600">
                             {{ $item->lokasi_blok }}<br>
                             <span class="text-[10px] text-gray-400">
-                                @if ($item->dusun) Dusun {{ $item->dusun }} @endif
-                                @if ($item->rt), RT {{ $item->rt }} @endif
+                                @if ($item->dusun)
+                                    Dusun {{ $item->dusun }}
+                                @endif
+                                @if ($item->rt)
+                                    , RT {{ $item->rt }}
+                                @endif
                             </span>
                         </td>
 
                         <td class="p-4">
-                            <span class="{{ $lBadge['bg'] }} {{ $lBadge['text'] }} text-[10px] font-bold px-2 py-0.5 rounded border {{ $lBadge['border'] }}">
+                            <span
+                                class="{{ $lBadge['bg'] }} {{ $lBadge['text'] }} text-[10px] font-bold px-2 py-0.5 rounded border {{ $lBadge['border'] }}">
                                 {{ $lBadge['label'] }}
                             </span>
                         </td>
@@ -94,7 +104,7 @@
                                 </button>
 
                                 <form method="POST" action="{{ route('admin.pertanahan.destroy', $item) }}"
-                                      onsubmit="return confirm('Hapus data lahan ini?')">
+                                    onsubmit="return confirm('Hapus data lahan ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -120,12 +130,14 @@
 
     {{-- Pagination --}}
     @if ($lahan->hasPages())
-        <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div
+            class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p class="text-sm text-gray-500 font-medium">
-                Menampilkan <span class="font-bold text-gray-900">{{ $lahan->firstItem() }}-{{ $lahan->lastItem() }}</span>
+                Menampilkan <span
+                    class="font-bold text-gray-900">{{ $lahan->firstItem() }}-{{ $lahan->lastItem() }}</span>
                 dari <span class="font-bold text-gray-900">{{ $lahan->total() }}</span> Bidang Tanah
             </p>
-            {{ $lahan->links('vendor.pagination.tailwind') }}
+            {{ $lahan->links('pagination::tailwind') }}
         </div>
     @endif
 </section>

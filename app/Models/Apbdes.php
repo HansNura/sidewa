@@ -59,20 +59,20 @@ class Apbdes extends Model
     public static function getSummary($tahun)
     {
         $baseQuery = self::where('tahun', $tahun)->where('is_published', true);
-        
+
         $pendapatan = (clone $baseQuery)->where('tipe_anggaran', 'PENDAPATAN')->sum('pagu_anggaran');
         $belanja = (clone $baseQuery)->where('tipe_anggaran', 'BELANJA')->sum('pagu_anggaran');
         $pembiayaan = (clone $baseQuery)->where('tipe_anggaran', 'PEMBIAYAAN')->sum('pagu_anggaran');
-        
-        $pendapatan_realisasi = ApbdesRealisasi::whereHas('apbdes', function($q) use ($tahun) {
+
+        $pendapatan_realisasi = ApbdesRealisasi::whereHas('apbdes', function ($q) use ($tahun) {
             $q->where('tahun', $tahun)->where('is_published', true)->where('tipe_anggaran', 'PENDAPATAN');
         })->sum('nominal');
 
-        $belanja_realisasi = ApbdesRealisasi::whereHas('apbdes', function($q) use ($tahun) {
+        $belanja_realisasi = ApbdesRealisasi::whereHas('apbdes', function ($q) use ($tahun) {
             $q->where('tahun', $tahun)->where('is_published', true)->where('tipe_anggaran', 'BELANJA');
         })->sum('nominal');
-        
-        $pembiayaan_realisasi = ApbdesRealisasi::whereHas('apbdes', function($q) use ($tahun) {
+
+        $pembiayaan_realisasi = ApbdesRealisasi::whereHas('apbdes', function ($q) use ($tahun) {
             $q->where('tahun', $tahun)->where('is_published', true)->where('tipe_anggaran', 'PEMBIAYAAN');
         })->sum('nominal');
 

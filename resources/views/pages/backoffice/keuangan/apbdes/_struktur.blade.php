@@ -70,7 +70,7 @@
                                                 <span class="text-xs font-bold text-gray-800" x-text="formatIDR({{ $kegiatan->pagu_anggaran }})">
                                                     Rp {{ number_format($kegiatan->pagu_anggaran) }}
                                                 </span>
-                                                <button class="text-gray-300 hover:text-amber-500"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                <button type="button" @click="openEditModal({{ json_encode($kegiatan) }})" class="text-gray-300 hover:text-amber-500 cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
                                             </div>
                                         </div>
                                     @endforeach

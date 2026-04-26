@@ -104,13 +104,15 @@
     </div>
 
     {{-- Pagination --}}
-    @if ($penerima->hasPages())
-        <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-sm text-gray-500 font-medium">
-                Menampilkan <span class="font-bold text-gray-900">{{ $penerima->firstItem() }}-{{ $penerima->lastItem() }}</span>
-                dari <span class="font-bold text-gray-900">{{ $penerima->total() }}</span> Penerima
-            </p>
-            {{ $penerima->links('vendor.pagination.tailwind') }}
-        </div>
-    @endif
+    <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-gray-500 font-medium">
+            Menampilkan <span class="font-bold text-gray-900">{{ $penerima->firstItem() ?? 0 }}-{{ $penerima->lastItem() ?? 0 }}</span>
+            dari <span class="font-bold text-gray-900">{{ $penerima->total() }}</span> Penerima
+        </p>
+        @if ($penerima->hasPages())
+            <div class="scale-90 origin-right">
+                {{ $penerima->links() }}
+            </div>
+        @endif
+    </div>
 </section>

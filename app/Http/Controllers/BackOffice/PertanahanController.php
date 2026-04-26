@@ -29,7 +29,7 @@ class PertanahanController extends Controller
             ->filterLegalitas($legalitas)
             ->orderByDesc('created_at');
 
-        $lahan = $query->paginate(15)->withQueryString();
+        $lahan = $query->paginate(5)->withQueryString();
 
         // ─── KPI Statistics ──────────────────────────────────────
         $totalLuas    = Pertanahan::sum('luas');
@@ -50,7 +50,7 @@ class PertanahanController extends Controller
         // ─── GeoJSON for map ─────────────────────────────────────
         $mapData = Pertanahan::whereNotNull('geojson')
             ->get(['id', 'kode_lahan', 'kepemilikan', 'nama_pemilik', 'penduduk_id', 'luas', 'lokasi_blok', 'geojson'])
-            ->map(fn ($p) => [
+            ->map(fn($p) => [
                 'id'           => $p->id,
                 'kode_lahan'   => $p->kode_lahan,
                 'kepemilikan'  => $p->kepemilikan,
@@ -62,6 +62,8 @@ class PertanahanController extends Controller
                 'geojson'      => $p->geojson,
             ]);
 
+        $wilayahTree = \App\Models\Wilayah::tree();
+
         return view('pages.backoffice.pertanahan.index', [
             'lahan'          => $lahan,
             'totalHa'        => $totalHa,
@@ -72,6 +74,7 @@ class PertanahanController extends Controller
             'pctWarga'       => $pctWarga,
             'pctFasum'       => $pctFasum,
             'mapData'        => $mapData,
+            'wilayahTree'    => $wilayahTree,
             'search'         => $search,
             'kepemilikan'    => $kepemilikan,
             'legalitas'      => $legalitas,
@@ -183,14 +186,18 @@ class PertanahanController extends Controller
     public function searchPenduduk(Request $request): JsonResponse
     {
         $q = $request->input('q', '');
-        if (strlen($q) < 2) return response()->json([]);
 
-        $results = Penduduk::where('status', 'hidup')
-            ->where(fn ($query) =>
-                $query->where('nama', 'like', "%{$q}%")
-                      ->orWhere('nik', 'like', "%{$q}%")
-            )
-            ->limit(10)
+        $query = Penduduk::where('status', 'hidup');
+
+        if (!empty($q)) {
+            $query->where(
+                fn($qBuilder) =>
+                $qBuilder->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%")
+            );
+        }
+
+        $results = $query->limit(30)
             ->get(['id', 'nik', 'nama', 'dusun', 'rt', 'rw']);
 
         return response()->json($results);
