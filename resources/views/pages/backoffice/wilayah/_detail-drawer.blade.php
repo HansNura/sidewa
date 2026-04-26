@@ -64,6 +64,79 @@
                 </div>
             </div>
 
+            {{-- Map Preview --}}
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col"
+                x-data="{
+                    drawerMap: null,
+                    featureGroup: null,
+                    initDrawerMap() {
+                        if (this.drawerMap) return;
+                        this.drawerMap = L.map($refs.drawerMapContainer, {
+                            zoomControl: false,
+                            attributionControl: false
+                        }).setView([-7.1726, 108.1963], 14);
+
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                            maxZoom: 19
+                        }).addTo(this.drawerMap);
+
+                        this.featureGroup = L.featureGroup().addTo(this.drawerMap);
+                    },
+                    updateDrawerMap() {
+                        if (!this.detail || !this.detail.descendant_ids) return;
+                        if (!this.drawerMap) this.initDrawerMap();
+
+                        this.featureGroup.clearLayers();
+
+                        let hasLayers = false;
+                        const colors = { dusun: '#2563eb', rw: '#16a34a', rt: '#d97706' };
+                        const fills = { dusun: '#60a5fa', rw: '#4ade80', rt: '#fbbf24' };
+
+                        if (typeof __mapFeatures !== 'undefined') {
+                            __mapFeatures.forEach(f => {
+                                if (this.detail.descendant_ids.includes(f.id) && f.geojson && f.geojson.coordinates) {
+                                    try {
+                                        const isMain = f.id === this.detail.id;
+                                        const layer = L.geoJSON(f.geojson, {
+                                            style: {
+                                                color: colors[f.tipe] || '#666',
+                                                fillColor: fills[f.tipe] || '#999',
+                                                fillOpacity: isMain ? 0.5 : 0.2,
+                                                weight: isMain ? 2.5 : 1.5,
+                                                dashArray: isMain ? '' : '4 4'
+                                            }
+                                        });
+                                        layer.bindTooltip('<b>' + f.label + '</b>');
+                                        this.featureGroup.addLayer(layer);
+                                        hasLayers = true;
+                                    } catch (e) {}
+                                }
+                            });
+                        }
+
+                        if (hasLayers) {
+                            this.drawerMap.fitBounds(this.featureGroup.getBounds(), { padding: [10, 10] });
+                        }
+
+                        setTimeout(() => { if (this.drawerMap) this.drawerMap.invalidateSize(); }, 300);
+                    }
+                }" x-init="$watch('detail', () => {
+                    if (detailDrawerOpen) updateDrawerMap();
+                });
+                $watch('detailDrawerOpen', (open) => {
+                    if (open) {
+                        setTimeout(() => {
+                            if (drawerMap) drawerMap.invalidateSize();
+                            updateDrawerMap();
+                        }, 300);
+                    }
+                });">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                    <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Peta Wilayah</h5>
+                </div>
+                <div x-ref="drawerMapContainer" class="h-48 w-full bg-gray-100 z-10 relative"></div>
+            </div>
+
             {{-- Penduduk Mini List --}}
             <div>
                 <div class="flex justify-between items-center mb-3">

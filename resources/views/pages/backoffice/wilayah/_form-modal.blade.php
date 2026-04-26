@@ -24,24 +24,44 @@
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
 
-            {{-- ═══ Left Floating Panel: Form & Info ═══ --}}
-            <div class="absolute top-4 left-4 w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 flex flex-col overflow-hidden z-[500] max-h-[calc(100%-32px)]">
+            {{-- ═══ Left Floating Panel Toggle & Container ═══ --}}
+            <div x-data="{ showForm: true }" class="absolute top-4 left-4 z-[500] flex flex-col gap-3 max-h-[calc(100%-32px)]">
 
-                {{-- Panel Header --}}
-                <div class="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-5 shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
-                            <i class="fa-solid fa-draw-polygon text-green-400"></i>
+                {{-- Toggle Icon Button (Visible when collapsed) --}}
+                <button x-show="!showForm" @click="showForm = true" x-transition.opacity
+                    class="w-12 h-12 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 shadow-xl border border-gray-700 rounded-2xl flex items-center justify-center cursor-pointer transition-all">
+                    <i class="fa-solid fa-draw-polygon text-green-400 text-xl"></i>
+                </button>
+
+                {{-- Full Panel --}}
+                <div x-show="showForm"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 -translate-x-4"
+                    x-transition:enter-end="opacity-100 translate-x-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-x-0"
+                    x-transition:leave-end="opacity-0 -translate-x-4"
+                    class="w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 flex flex-col overflow-hidden max-h-full">
+
+                    {{-- Panel Header --}}
+                    <div class="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4 shrink-0 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shadow-inner shrink-0">
+                                <i class="fa-solid fa-draw-polygon text-green-400 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-[13px] tracking-wide">Batas Wilayah</h3>
+                                <p class="text-gray-400 text-[10px] mt-0.5 leading-snug">Gambar dan simpan area peta</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-sm">Tambah Batas Wilayah</h3>
-                            <p class="text-gray-400 text-[11px] mt-0.5">Gambar poligon di peta lalu simpan</p>
-                        </div>
+                        <button type="button" @click="showForm = false" title="Tutup Panel"
+                            class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all text-gray-400 hover:text-red-400 shrink-0">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
                     </div>
-                </div>
 
-                {{-- Form Content --}}
-                <div class="p-5 overflow-y-auto custom-scrollbar flex-1">
+                    {{-- Form Content --}}
+                    <div class="p-5 overflow-y-auto custom-scrollbar flex-1">
                     <form id="wilayahForm" method="POST" action="{{ route('admin.wilayah.store') }}" class="space-y-4">
                         @csrf
 
@@ -153,56 +173,57 @@
                         Batal
                     </button>
                 </div>
+                </div>
             </div>
 
             {{-- ═══ Right Floating Tools ═══ --}}
-            <div class="absolute top-4 right-20 flex flex-col gap-3 z-[500]">
+            <div class="absolute top-[72px] right-4 flex flex-col gap-3 z-[500]">
 
                 {{-- Drawing Tools Group --}}
-                <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
+                <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-gray-200 flex flex-col overflow-hidden w-10">
                     {{-- Draw Polygon --}}
                     <button @click="startDraw()" type="button"
-                        class="p-3 border-b border-gray-100 transition-all relative group cursor-pointer"
-                        :class="drawMode === 'draw' ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+                        class="p-2.5 border-b border-gray-100 transition-all relative group cursor-pointer flex justify-center items-center h-10"
+                        :class="drawMode === 'draw' ? 'text-green-600 bg-green-50' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'"
                         title="Draw Polygon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
-                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2 bg-gray-800 text-white text-[11px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg">Draw Polygon</div>
+                        <i class="fa-solid fa-pen-nib text-[15px]"></i>
+                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-3 bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg">Gambar Poligon Baru</div>
                     </button>
                     {{-- Edit Shape --}}
                     <button @click="drawMode === 'edit' ? finishEdit() : startEdit()" type="button"
-                        class="p-3 border-b border-gray-100 transition-all relative group cursor-pointer"
-                        :class="drawMode === 'edit' ? 'text-blue-600 bg-blue-50' : (hasShape ? 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' : 'text-gray-300 cursor-not-allowed')"
+                        class="p-2.5 border-b border-gray-100 transition-all relative group cursor-pointer flex justify-center items-center h-10"
+                        :class="drawMode === 'edit' ? 'text-blue-600 bg-blue-50' : (hasShape ? 'text-gray-500 hover:bg-gray-50 hover:text-gray-800' : 'text-gray-300 cursor-not-allowed')"
                         :disabled="!hasShape"
                         title="Edit Shape">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3"></path><path d="M9 5l3-3 3 3"></path><path d="M19 9l3 3-3 3"></path><path d="M15 19l-3 3-3-3"></path><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
-                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2 bg-gray-800 text-white text-[11px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg" x-text="drawMode === 'edit' ? 'Selesai Edit' : 'Edit Shape'"></div>
+                        <i class="fa-solid fa-draw-polygon text-[15px]"></i>
+                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-3 bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg" x-text="drawMode === 'edit' ? 'Selesai Edit' : 'Edit Titik Poligon'"></div>
                     </button>
                     {{-- Delete Shape --}}
                     <button @click="deleteShape()" type="button"
-                        class="p-3 transition-all relative group cursor-pointer"
+                        class="p-2.5 transition-all relative group cursor-pointer flex justify-center items-center h-10"
                         :class="hasShape ? 'text-red-500 hover:bg-red-50' : 'text-gray-300 cursor-not-allowed'"
                         :disabled="!hasShape"
                         title="Delete">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2 bg-gray-800 text-white text-[11px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg">Hapus Area</div>
+                        <i class="fa-regular fa-trash-can text-[15px]"></i>
+                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-3 bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg">Hapus Poligon</div>
                     </button>
                 </div>
 
                 {{-- Map Controls Group --}}
-                <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
+                <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-gray-200 flex flex-col overflow-hidden w-10">
                     {{-- Layer toggle --}}
-                    <button type="button" class="p-3 text-gray-600 hover:bg-gray-50 border-b border-gray-100 transition cursor-pointer relative group"
+                    <button type="button" class="p-2.5 text-gray-500 hover:bg-gray-50 hover:text-gray-800 border-b border-gray-100 transition cursor-pointer relative group flex justify-center items-center h-10"
                         title="Layers">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline></svg>
-                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2 bg-gray-800 text-white text-[11px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg">Layers</div>
+                        <i class="fa-solid fa-layer-group text-[14px]"></i>
+                        <div class="absolute right-full top-1/2 -translate-y-1/2 mr-3 bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-lg">Pilihan Layer Peta</div>
                     </button>
                     {{-- Zoom In --}}
-                    <button @click="zoomIn()" type="button" class="p-3 text-gray-600 hover:bg-gray-50 border-b border-gray-100 transition cursor-pointer" title="Zoom In">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <button @click="zoomIn()" type="button" class="p-2.5 text-gray-500 hover:bg-gray-50 hover:text-gray-800 border-b border-gray-100 transition cursor-pointer flex justify-center items-center h-10" title="Zoom In">
+                        <i class="fa-solid fa-plus text-[15px]"></i>
                     </button>
                     {{-- Zoom Out --}}
-                    <button @click="zoomOut()" type="button" class="p-3 text-gray-600 hover:bg-gray-50 transition cursor-pointer" title="Zoom Out">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <button @click="zoomOut()" type="button" class="p-2.5 text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition cursor-pointer flex justify-center items-center h-10" title="Zoom Out">
+                        <i class="fa-solid fa-minus text-[15px]"></i>
                     </button>
                 </div>
             </div>
@@ -226,21 +247,21 @@
                 </template>
             </div>
 
-            {{-- ═══ Legend (Bottom Left) ═══ --}}
-            <div class="absolute bottom-4 left-[350px] z-[500] bg-white/95 backdrop-blur-md shadow-lg border border-gray-200 rounded-xl p-3">
-                <h4 class="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Wilayah Existing</h4>
-                <div class="space-y-1">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded opacity-60 border" style="background-color: #60a5fa; border-color: #2563eb"></div>
-                        <span class="text-[10px] text-gray-600">Dusun</span>
+            {{-- ═══ Legend (Top Center) ═══ --}}
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 z-[500] bg-white/95 backdrop-blur-md shadow-md border border-gray-200 rounded-full px-4 py-2 flex items-center gap-4 hidden sm:flex">
+                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider border-r border-gray-200 pr-4">Wilayah Existing</span>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-400 border border-blue-600 opacity-80"></div>
+                        <span class="text-[10px] font-bold text-gray-700">Dusun</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded opacity-60 border" style="background-color: #4ade80; border-color: #16a34a"></div>
-                        <span class="text-[10px] text-gray-600">RW</span>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-400 border border-green-600 opacity-80"></div>
+                        <span class="text-[10px] font-bold text-gray-700">RW</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded opacity-60 border" style="background-color: #fbbf24; border-color: #d97706"></div>
-                        <span class="text-[10px] text-gray-600">RT</span>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-600 opacity-80"></div>
+                        <span class="text-[10px] font-bold text-gray-700">RT</span>
                     </div>
                 </div>
             </div>

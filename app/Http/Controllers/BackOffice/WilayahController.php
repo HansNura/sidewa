@@ -28,6 +28,8 @@ class WilayahController extends Controller
         // Collect GeoJSON features for the map
         $mapFeatures = Wilayah::whereNotNull('geojson')->get()
             ->map(fn (Wilayah $w) => [
+                'id'      => $w->id,
+                'parent_id' => $w->parent_id,
                 'label'   => $w->label(),
                 'tipe'    => $w->tipe,
                 'geojson' => $w->geojson,
@@ -70,6 +72,7 @@ class WilayahController extends Controller
             'kepala_telepon'  => $wilayah->kepala_telepon,
             'populasi'        => $wilayah->populasi(),
             'jumlah_kk'       => $wilayah->jumlahKK(),
+            'descendant_ids'  => $wilayah->descendantIds(),
             'penduduk'        => $pendudukList->map(fn ($p) => [
                 'id'   => $p->id,
                 'nik'  => $p->nik,

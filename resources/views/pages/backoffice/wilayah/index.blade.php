@@ -281,56 +281,118 @@ document.addEventListener('alpine:init', function() {
     });
 });
 
-// ═══ Index Page Map (Wilayah Overview) ═══
-document.addEventListener('DOMContentLoaded', function () {
-    if (typeof L === 'undefined') return;
+// ═══ Alpine Component: Map Overview ═══
+document.addEventListener('alpine:init', function() {
+    Alpine.data('mapOverview', function() {
+        return {
+            map: null,
+            featureGroup: null,
+            filterTipe: ['dusun', 'rw', 'rt'],
+            filterDusun: '',
 
-    var map = L.map('mapWilayah', {
-        zoomControl: false,
-        attributionControl: false
-    }).setView([-7.1726, 108.1963], 14);
+            initMap: function() {
+                var self = this;
+                if (typeof L === 'undefined') return;
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19
-    }).addTo(map);
+                self.map = L.map('mapWilayah', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([-7.1726, 108.1963], 14);
 
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19
+                }).addTo(self.map);
 
-    // Load GeoJSON features from backend
-    var colors = { dusun: '#2563eb', rw: '#16a34a', rt: '#d97706' };
-    var fills  = { dusun: '#60a5fa', rw: '#4ade80', rt: '#fbbf24' };
+                L.control.zoom({ position: 'bottomright' }).addTo(self.map);
+                self.featureGroup = L.featureGroup().addTo(self.map);
 
-    __mapFeatures.forEach(function(f) {
-        if (f.geojson && f.geojson.coordinates) {
-            try {
-                var layer = L.geoJSON(f.geojson, {
-                    style: {
-                        color: colors[f.tipe] || '#666',
-                        fillColor: fills[f.tipe] || '#999',
-                        fillOpacity: 0.35,
-                        weight: 2
+                self.$watch('filterTipe', function() { self.renderMap(); });
+                self.$watch('filterDusun', function() { self.renderMap(); });
+
+                // Render initially after a short delay to ensure container size is correct
+                setTimeout(function() {
+                    self.map.invalidateSize();
+                    self.renderMap();
+                }, 200);
+            },
+
+            getDescendantIds: function(parentId) {
+                var self = this;
+                var ids = [parseInt(parentId)];
+                var children = __mapFeatures.filter(function(f) { return f.parent_id == parentId; }).map(function(f) { return f.id; });
+                children.forEach(function(childId) {
+                    ids = ids.concat(self.getDescendantIds(childId));
+                });
+                return ids;
+            },
+
+            renderMap: function() {
+                var self = this;
+                self.featureGroup.clearLayers();
+
+                var colors = { dusun: '#2563eb', rw: '#16a34a', rt: '#d97706' };
+                var fills  = { dusun: '#60a5fa', rw: '#4ade80', rt: '#fbbf24' };
+
+                var allowedIds = null;
+                if (self.filterDusun) {
+                    allowedIds = self.getDescendantIds(self.filterDusun);
+                }
+
+                var hasFeatures = false;
+
+                __mapFeatures.forEach(function(f) {
+                    // Check Type Filter
+                    if (!self.filterTipe.includes(f.tipe)) return;
+
+                    // Check Dusun Filter
+                    if (allowedIds && !allowedIds.includes(f.id)) return;
+
+                    if (f.geojson && f.geojson.coordinates) {
+                        hasFeatures = true;
+                        try {
+                            var layer = L.geoJSON(f.geojson, {
+                                style: {
+                                    color: colors[f.tipe] || '#666',
+                                    fillColor: fills[f.tipe] || '#999',
+                                    fillOpacity: f.tipe === 'dusun' ? 0.2 : (f.tipe === 'rw' ? 0.3 : 0.4),
+                                    weight: f.tipe === 'dusun' ? 3 : (f.tipe === 'rw' ? 2 : 1.5),
+                                    dashArray: f.tipe === 'dusun' ? '' : (f.tipe === 'rw' ? '4 4' : '2 4')
+                                }
+                            });
+                            
+                            layer.on('click', function() {
+                                if (typeof self.openDetail === 'function') {
+                                    self.openDetail(f.id);
+                                }
+                            });
+                            
+                            layer.bindTooltip('<b>' + f.label + '</b>');
+                            self.featureGroup.addLayer(layer);
+                        } catch(e) {
+                            console.warn('Invalid GeoJSON for', f.label, e);
+                        }
                     }
-                }).addTo(map);
-                layer.bindPopup('<b>' + f.label + '</b>');
-            } catch(e) {
-                console.warn('Invalid GeoJSON for', f.label, e);
+                });
+
+                if (hasFeatures) {
+                    try {
+                        self.map.fitBounds(self.featureGroup.getBounds(), { padding: [20, 20] });
+                    } catch (e) {}
+                }
+
+                // Fallback dummy polygons (only if NO features in DB at all)
+                if (__mapFeatures.length === 0) {
+                    var kalerCoords = [[-7.170, 108.190], [-7.165, 108.198], [-7.172, 108.200], [-7.175, 108.195]];
+                    var kidulCoords = [[-7.175, 108.195], [-7.172, 108.200], [-7.180, 108.205], [-7.185, 108.195]];
+                    var tengahCoords = [[-7.168, 108.183], [-7.165, 108.190], [-7.170, 108.192], [-7.173, 108.186]];
+
+                    L.polygon(kalerCoords, { color: '#2563eb', fillColor: '#60a5fa', fillOpacity: 0.4, weight: 2 }).addTo(self.featureGroup).bindPopup('<b>Dusun Kaler</b>');
+                    L.polygon(kidulCoords, { color: '#16a34a', fillColor: '#4ade80', fillOpacity: 0.4, weight: 2 }).addTo(self.featureGroup).bindPopup('<b>Dusun Kidul</b>');
+                    L.polygon(tengahCoords, { color: '#d97706', fillColor: '#fbbf24', fillOpacity: 0.4, weight: 2 }).addTo(self.featureGroup).bindPopup('<b>Dusun Tengah</b>');
+                }
             }
-        }
+        };
     });
-
-    // Fallback: if no features, show dummy polygons
-    if (__mapFeatures.length === 0) {
-        var kalerCoords = [[-7.170, 108.190], [-7.165, 108.198], [-7.172, 108.200], [-7.175, 108.195]];
-        var kidulCoords = [[-7.175, 108.195], [-7.172, 108.200], [-7.180, 108.205], [-7.185, 108.195]];
-        var tengahCoords = [[-7.168, 108.183], [-7.165, 108.190], [-7.170, 108.192], [-7.173, 108.186]];
-
-        L.polygon(kalerCoords, { color: '#2563eb', fillColor: '#60a5fa', fillOpacity: 0.4, weight: 2 })
-            .addTo(map).bindPopup('<b>Dusun Kaler</b>');
-        L.polygon(kidulCoords, { color: '#16a34a', fillColor: '#4ade80', fillOpacity: 0.4, weight: 2 })
-            .addTo(map).bindPopup('<b>Dusun Kidul</b>');
-        L.polygon(tengahCoords, { color: '#d97706', fillColor: '#fbbf24', fillOpacity: 0.4, weight: 2 })
-            .addTo(map).bindPopup('<b>Dusun Tengah</b>');
-    }
 });
 </script>
 @endpush
