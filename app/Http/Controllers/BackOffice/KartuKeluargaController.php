@@ -68,7 +68,7 @@ class KartuKeluargaController extends Controller
             'wilayah'              => $kartuKeluarga->wilayah(),
             'tanggal_dikeluarkan'  => $kartuKeluarga->tanggal_dikeluarkan?->format('d F Y'),
             'jumlah_anggota'       => $kartuKeluarga->anggota->count(),
-            'anggota'              => $kartuKeluarga->anggota->map(fn (Penduduk $p) => [
+            'anggota'              => $kartuKeluarga->anggota->map(fn(Penduduk $p) => [
                 'id'              => $p->id,
                 'nik'             => $p->nik,
                 'nama'            => $p->nama,
@@ -80,6 +80,8 @@ class KartuKeluargaController extends Controller
             ]),
             'kepala' => $kartuKeluarga->anggota
                 ->firstWhere('status_hubungan', 'Kepala Keluarga')?->nama,
+            'kepala_jk' => $kartuKeluarga->anggota
+                ->firstWhere('status_hubungan', 'Kepala Keluarga')?->jenis_kelamin,
         ]);
     }
 
@@ -212,7 +214,7 @@ class KartuKeluargaController extends Controller
             ->where('status', 'hidup')
             ->where(function ($q) use ($search) {
                 $q->where('nik', 'like', "%{$search}%")
-                  ->orWhere('nama', 'like', "%{$search}%");
+                    ->orWhere('nama', 'like', "%{$search}%");
             })
             ->limit(10)
             ->get(['id', 'nik', 'nama', 'jenis_kelamin']);

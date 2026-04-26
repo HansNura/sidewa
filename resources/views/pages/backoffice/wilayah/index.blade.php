@@ -12,6 +12,9 @@
         position: absolute; left: -13px; top: 15px;
         width: 12px; height: 2px; background-color: #e2e8f0;
     }
+    /* Hide Leaflet Draw default toolbar - we use custom buttons */
+    .leaflet-draw-toolbar { display: none !important; }
+    .leaflet-draw { display: none !important; }
 </style>
 @endpush
 
@@ -94,6 +97,191 @@
 
 @push('scripts')
 <script>
+// Map features data (shared between index map and editor)
+var __mapFeatures = @json($mapFeatures);
+
+// ═══ Alpine Component: Map Editor ═══
+document.addEventListener('alpine:init', function() {
+    Alpine.data('mapEditor', function() {
+        return {
+            map: null,
+            drawnItems: null,
+            currentDrawer: null,
+            isDrawing: false,
+            geojsonOutput: '',
+            drawMode: 'none',
+
+            initMap: function() {
+                var self = this;
+                // If map already exists, just refresh and reset
+                if (self.map) {
+                    self.resetState();
+                    setTimeout(function() { self.map.invalidateSize(); }, 200);
+                    return;
+                }
+
+                self.$nextTick(function() {
+                    var el = document.getElementById('mapEditor');
+                    if (!el || typeof L === 'undefined') return;
+
+                    self.map = L.map('mapEditor', {
+                        zoomControl: false,
+                        attributionControl: false
+                    }).setView([-7.1726, 108.1963], 14);
+
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(self.map);
+
+                    L.control.zoom({ position: 'bottomright' }).addTo(self.map);
+
+                    // Drawn items layer
+                    self.drawnItems = new L.FeatureGroup();
+                    self.map.addLayer(self.drawnItems);
+
+                    // Bind draw:created event ONCE
+                    self.map.on(L.Draw.Event.CREATED, function(e) {
+                        self.drawnItems.clearLayers();
+                        self.drawnItems.addLayer(e.layer);
+                        self.updateGeoJSON();
+                        self.isDrawing = false;
+                        self.drawMode = 'none';
+                    });
+
+                    // Load existing wilayah polygons as reference (dashed)
+                    var colors = { dusun: '#2563eb', rw: '#16a34a', rt: '#d97706' };
+                    var fills  = { dusun: '#60a5fa', rw: '#4ade80', rt: '#fbbf24' };
+
+                    __mapFeatures.forEach(function(f) {
+                        if (f.geojson && f.geojson.coordinates) {
+                            try {
+                                var refLayer = L.geoJSON(f.geojson, {
+                                    style: {
+                                        color: colors[f.tipe] || '#666',
+                                        fillColor: fills[f.tipe] || '#999',
+                                        fillOpacity: 0.2,
+                                        weight: 1.5,
+                                        dashArray: '4 4'
+                                    }
+                                }).addTo(self.map);
+                                refLayer.bindPopup('<b>' + f.label + '</b>');
+                            } catch(err) {
+                                console.warn('Invalid GeoJSON for', f.label, err);
+                            }
+                        }
+                    });
+
+                    // Fix map size after modal animation
+                    setTimeout(function() { self.map.invalidateSize(); }, 300);
+                });
+            },
+
+            resetState: function() {
+                this.cancelDraw();
+                if (this.drawnItems) this.drawnItems.clearLayers();
+                this.geojsonOutput = '';
+                this.isDrawing = false;
+                this.drawMode = 'none';
+                var input = document.getElementById('geojsonInput');
+                if (input) input.value = '';
+                var form = document.getElementById('wilayahForm');
+                if (form) form.reset();
+            },
+
+            startDraw: function() {
+                if (!this.map) return;
+                this.cancelDraw();
+
+                this.drawMode = 'draw';
+                this.isDrawing = true;
+
+                this.currentDrawer = new L.Draw.Polygon(this.map, {
+                    shapeOptions: {
+                        color: '#16a34a',
+                        fillColor: '#4ade80',
+                        fillOpacity: 0.4,
+                        weight: 3
+                    },
+                    showArea: true,
+                    allowIntersection: false,
+                });
+                this.currentDrawer.enable();
+            },
+
+            startEdit: function() {
+                if (!this.map || this.drawnItems.getLayers().length === 0) return;
+                this.cancelDraw();
+
+                this.drawMode = 'edit';
+                this.isDrawing = true;
+
+                this.drawnItems.eachLayer(function(layer) {
+                    if (layer.editing) layer.editing.enable();
+                });
+            },
+
+            finishEdit: function() {
+                this.drawnItems.eachLayer(function(layer) {
+                    if (layer.editing) layer.editing.disable();
+                });
+                this.updateGeoJSON();
+                this.isDrawing = false;
+                this.drawMode = 'none';
+            },
+
+            deleteShape: function() {
+                this.cancelDraw();
+                this.drawnItems.clearLayers();
+                this.geojsonOutput = '';
+                document.getElementById('geojsonInput').value = '';
+            },
+
+            cancelDraw: function() {
+                if (this.currentDrawer) {
+                    this.currentDrawer.disable();
+                    this.currentDrawer = null;
+                }
+                if (this.drawMode === 'edit') {
+                    this.drawnItems.eachLayer(function(layer) {
+                        if (layer.editing) layer.editing.disable();
+                    });
+                }
+                this.isDrawing = false;
+                this.drawMode = 'none';
+            },
+
+            updateGeoJSON: function() {
+                var layers = this.drawnItems.getLayers();
+                if (layers.length === 0) {
+                    this.geojsonOutput = '';
+                    document.getElementById('geojsonInput').value = '';
+                    return;
+                }
+                var gj = layers[0].toGeoJSON().geometry;
+                var str = JSON.stringify(gj);
+                this.geojsonOutput = JSON.stringify(gj, null, 2);
+                document.getElementById('geojsonInput').value = str;
+            },
+
+            zoomIn: function() { if (this.map) this.map.zoomIn(); },
+            zoomOut: function() { if (this.map) this.map.zoomOut(); },
+
+            get hasShape() {
+                return this.drawnItems && this.drawnItems.getLayers().length > 0;
+            },
+            get pointCount() {
+                if (!this.drawnItems) return 0;
+                var layers = this.drawnItems.getLayers();
+                if (layers.length === 0) return 0;
+                var latlngs = layers[0].getLatLngs();
+                return latlngs[0] ? latlngs[0].length : 0;
+            }
+        };
+    });
+});
+
+// ═══ Index Page Map (Wilayah Overview) ═══
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof L === 'undefined') return;
 
@@ -109,11 +297,10 @@ document.addEventListener('DOMContentLoaded', function () {
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     // Load GeoJSON features from backend
-    var features = @json($mapFeatures);
     var colors = { dusun: '#2563eb', rw: '#16a34a', rt: '#d97706' };
     var fills  = { dusun: '#60a5fa', rw: '#4ade80', rt: '#fbbf24' };
 
-    features.forEach(function(f) {
+    __mapFeatures.forEach(function(f) {
         if (f.geojson && f.geojson.coordinates) {
             try {
                 var layer = L.geoJSON(f.geojson, {
@@ -132,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Fallback: if no features, show dummy polygons
-    if (features.length === 0) {
+    if (__mapFeatures.length === 0) {
         var kalerCoords = [[-7.170, 108.190], [-7.165, 108.198], [-7.172, 108.200], [-7.175, 108.195]];
         var kidulCoords = [[-7.175, 108.195], [-7.172, 108.200], [-7.180, 108.205], [-7.185, 108.195]];
         var tengahCoords = [[-7.168, 108.183], [-7.165, 108.190], [-7.170, 108.192], [-7.173, 108.186]];
@@ -149,3 +336,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 
 @endsection
+

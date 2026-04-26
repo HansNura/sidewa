@@ -1,6 +1,6 @@
 {{-- Add KK Form Modal --}}
-<div x-show="addModalOpen" class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6" x-cloak>
-    <div x-show="addModalOpen" x-transition.opacity class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+<div x-show="addModalOpen" class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 !m-0" x-cloak>
+    <div x-show="addModalOpen" x-transition.opacity class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"
          @click="addModalOpen = false"></div>
 
     <div x-show="addModalOpen" x-transition:enter="transition ease-out duration-300"

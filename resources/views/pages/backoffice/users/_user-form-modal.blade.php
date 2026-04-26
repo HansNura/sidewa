@@ -1,20 +1,18 @@
 {{-- User Form Modal (Tambah / Edit) --}}
-<div x-show="modalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" x-cloak>
+<div x-show="modalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 !m-0" x-cloak>
 
     {{-- Backdrop --}}
-    <div x-show="modalOpen" x-transition.opacity
-         class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-         @click="modalOpen = false"></div>
+    <div x-show="modalOpen" x-transition.opacity class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"
+        @click="modalOpen = false"></div>
 
     {{-- Modal Panel --}}
-    <div x-show="modalOpen"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+    <div x-show="modalOpen" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
 
         {{-- Modal Header --}}
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -27,11 +25,12 @@
         </div>
 
         {{-- Modal Body (Form) --}}
-        <form :action="modalMode === 'edit'
-                ? '{{ url('admin/users') }}/' + editUserData.id
-                : '{{ route('admin.users.store') }}'"
-              method="POST"
-              id="userForm">
+        <form
+            :action="modalMode === 'edit'
+                ?
+                '{{ url('admin/users') }}/' + editUserData.id :
+                '{{ route('admin.users.store') }}'"
+            method="POST" id="userForm" class="flex flex-col flex-1 min-h-0">
             @csrf
             <template x-if="modalMode === 'edit'">
                 <input type="hidden" name="_method" value="PUT">
@@ -44,11 +43,10 @@
                     <label for="name" class="text-sm font-bold text-gray-700">
                         Nama Lengkap <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="name" name="name"
-                           x-model="formData.name"
-                           placeholder="Masukkan nama..."
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
-                           required>
+                    <input type="text" id="name" name="name" x-model="formData.name"
+                        placeholder="Masukkan nama..."
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                        required>
                     @error('name')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
@@ -59,11 +57,10 @@
                     <label for="email" class="text-sm font-bold text-gray-700">
                         Email Utama <span class="text-red-500">*</span>
                     </label>
-                    <input type="email" id="email" name="email"
-                           x-model="formData.email"
-                           placeholder="email@contoh.com"
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
-                           required>
+                    <input type="email" id="email" name="email" x-model="formData.email"
+                        placeholder="email@contoh.com"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                        required>
                     @error('email')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
@@ -72,11 +69,9 @@
                 {{-- NIK --}}
                 <div class="space-y-1">
                     <label for="nik" class="text-sm font-bold text-gray-700">No. Identitas (NIK)</label>
-                    <input type="text" id="nik" name="nik"
-                           x-model="formData.nik"
-                           placeholder="16 digit NIK"
-                           maxlength="16"
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all">
+                    <input type="text" id="nik" name="nik" x-model="formData.nik"
+                        placeholder="16 digit NIK" maxlength="16"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all">
                     @error('nik')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
@@ -89,16 +84,16 @@
                             Role Sistem <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
-                            <select id="role" name="role"
-                                    x-model="formData.role"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm appearance-none focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer"
-                                    required>
+                            <select id="role" name="role" x-model="formData.role"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm appearance-none focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer"
+                                required>
                                 <option value="">Pilih Role...</option>
                                 @foreach ($roles as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
                                 @endforeach
                             </select>
-                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                            <i
+                                class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                         </div>
                         @error('role')
                             <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
@@ -108,13 +103,13 @@
                     <div class="space-y-1">
                         <label for="is_active" class="text-sm font-bold text-gray-700">Status Akun</label>
                         <div class="relative">
-                            <select id="is_active" name="is_active"
-                                    x-model="formData.is_active"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm appearance-none focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer">
+                            <select id="is_active" name="is_active" x-model="formData.is_active"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm appearance-none focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer">
                                 <option value="1">Aktif</option>
                                 <option value="0">Nonaktif / Suspend</option>
                             </select>
-                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                            <i
+                                class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                         </div>
                     </div>
                 </div>
@@ -127,13 +122,11 @@
                             <span class="text-red-500" x-show="modalMode === 'create'">*</span>
                         </label>
                         <div class="relative">
-                            <input :type="showPassword ? 'text' : 'password'"
-                                   id="password" name="password"
-                                   placeholder="Minimal 8 karakter"
-                                   :required="modalMode === 'create'"
-                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all pr-10">
+                            <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
+                                placeholder="Minimal 8 karakter" :required="modalMode === 'create'"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all pr-10">
                             <button type="button" @click="showPassword = !showPassword"
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600">
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600">
                                 <i :class="showPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'"></i>
                             </button>
                         </div>

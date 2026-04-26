@@ -1,5 +1,5 @@
 {{-- User Detail Drawer (Slide in from right) --}}
-<div x-show="drawerOpen" class="fixed inset-0 z-[100] flex justify-end" x-cloak>
+<div x-show="drawerOpen" class="fixed inset-0 z-[100] flex justify-end !m-0" x-cloak>
 
     {{-- Backdrop --}}
     <div x-show="drawerOpen" x-transition.opacity

@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "concurrently -c \"#93c5fd,#fdba74\" \"php artisan serve --host=127.0.0.1 --port=8000\" \"vite\" --names=\"server,vite\""
+        "dev": "concurrently -c \"#93c5fd,#fdba74\" \"php artisan serve --host=127.0.0.1 --port=8000\" \"vite\" --names=\"server,vite\"",
+        "dev:network": "cross-env NETWORK_MODE=true concurrently -c \"#93c5fd,#fdba74\" \"php artisan serve --host=0.0.0.0 --port=8000\" \"vite\" --names=\"server,vite\""
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",
@@ -19,5 +20,8 @@
         "@rollup/rollup-linux-x64-gnu": "4.9.5",
         "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
         "lightningcss-linux-x64-gnu": "^1.29.1"
+    },
+    "devDependencies": {
+        "cross-env": "^10.1.0"
     }
 }
